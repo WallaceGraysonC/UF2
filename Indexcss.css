@@ -1,0 +1,35 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 2;   /* Unordered list code for Nav bar */
+    overflow: hidden;
+    background-color: #333;
+
+}
+
+
+li {
+    float: right;
+}
+
+li a {        /* Code for Nav bar */
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+body{
+	
+	background-color: darkgray;
+	
+}
+
+.footer {
+	
+	position:fixed;
+	left: 0;
+	bottom: 0;
+	background-color: darkgray;
+}
