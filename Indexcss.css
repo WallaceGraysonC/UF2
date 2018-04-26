@@ -4,21 +4,24 @@ ul {
     padding: 0;
     overflow: hidden;
     background-color: #333;
-	font-family: Copperplate Gothic Bold;
+	font-family: Rockwell;
 }
 
 li {
     float: left;
 }
 
+
+
 li a {
     display: block;
     color: white;
     text-align: center;
-    padding: 14px 16px;
+    padding: 15px 20px;
     text-decoration: none;
-	font-family: Copperplate Gothic Bold;
+	font-family: Rockwell;
 }
+
 
 .navbar {
   overflow: hidden;
@@ -26,6 +29,8 @@ li a {
   position: fixed;
   bottom: 0;
   width: 100%;
+  left: 0;
+  position: fixed;
 }
 
 .navbar a {
@@ -68,7 +73,7 @@ aside  {
 
 ul.mainmenu > li {
 	float: left;
-	width: 20%;
+	width: 25%;
 }
 
 ul.submenu {
@@ -83,17 +88,23 @@ ul.submenu {
     background-color: #333;
     color: white;
     text-align: center;
+    font-family: Aparajita;
 }
  
  
  
 .body {
 	
-	
-background-color: darkgray;
-min-width: 2vw;
+	background-image: url()
+background-color: lightgray;
+min-width: 0vw;
  min-height:100%;
 font-size: 100%;
 
 }
 
+
+h2 {
+	
+	background-color: ;
+}
