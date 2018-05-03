@@ -12,6 +12,12 @@ li {
 }
 
 
+img {
+	float: center;
+}
+
+
+
 
 li a {
     display: block;
@@ -93,18 +99,50 @@ ul.submenu {
  
  
  
-.body {
-	
-	background-image: url()
-background-color: lightgray;
-min-width: 0vw;
- min-height:100%;
-font-size: 100%;
+body {
+	background-color: lightgray;
+  float: right;
+  text-align: right;
+ 
+}
 
+h1 {
+
+	background-color: darkgray;
 }
 
 
 h2 {
 	
-	background-color: ;
+	text-align: center;
+    float: center;
+	font-size: 22px;
+
+}
+
+
+
+/* footer code */
+h4 {
+	letter-spacing: 2;
+	text-align: center;
+	font-family: Rockwell;
+	font-size: 14px;
+	
+	
+}
+/* text */
+p {
+	background-position: 20px;
+	text-align: left;
+    float: left;
+	font-size: 19px;
+    
+   
+}
+
+
+img {
+	
+float: none;
 }
