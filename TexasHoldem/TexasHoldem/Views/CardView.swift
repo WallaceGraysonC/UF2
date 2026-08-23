@@ -32,14 +32,7 @@ struct CardView: View {
             .shadow(radius: 1.5)
     }
 
-    private var cardBackColor: Color {
-        switch cardBackID {
-        case "cardback.crimson": return .red
-        case "cardback.midnight": return .indigo
-        case "cardback.gold": return .yellow
-        default: return .blue
-        }
-    }
+    private var cardBackColor: Color { CardBackPalette.color(for: cardBackID) }
 }
 
 #Preview {

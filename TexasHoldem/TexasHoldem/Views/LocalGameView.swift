@@ -4,19 +4,30 @@ import SwiftUI
 struct LocalGameView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var engine: PokerEngine
     private let humanID: String
     private let buyIn: Int
+    private let resumedFromSave: Bool
     @State private var hasSettled = false
+    @State private var showHandGuide = false
 
     init(botCount: Int = 4, buyIn: Int = 2000) {
-        let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false)
-        let bots = (1...botCount).map { i in
-            Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true)
+        if let saved = GamePersistence.loadLocalGame() {
+            _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
+            self.humanID = saved.humanID
+            self.buyIn = saved.buyIn
+            self.resumedFromSave = true
+        } else {
+            let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false)
+            let bots = (1...botCount).map { i in
+                Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true)
+            }
+            _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
+            self.humanID = human.id
+            self.buyIn = buyIn
+            self.resumedFromSave = false
         }
-        _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
-        self.humanID = human.id
-        self.buyIn = buyIn
     }
 
     var body: some View {
@@ -38,11 +49,18 @@ struct LocalGameView: View {
                         )
                     }
                 }
-                .frame(width: geo.size.width * 0.92, height: geo.size.height * 0.62)
-                .position(x: geo.size.width / 2, y: geo.size.height * 0.4)
+                .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.72)
+                .position(x: geo.size.width / 2, y: geo.size.height * 0.44)
 
                 VStack {
                     header
+                    if let handText = engine.handDescription(for: humanID) {
+                        Text(handText)
+                            .font(.subheadline.bold())
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .background(Capsule().fill(Color.yellow))
+                    }
                     Spacer()
                     if !engine.lastActionDescription.isEmpty {
                         Text(engine.lastActionDescription)
@@ -57,10 +75,17 @@ struct LocalGameView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            bankroll.applyDelta(-buyIn)
-            if !engine.isHandInProgress { engine.startNextHand() }
+            if !resumedFromSave {
+                bankroll.applyDelta(-buyIn)
+                engine.startNextHand()
+            } else {
+                runBotTurnIfNeeded()
+            }
         }
-        .onDisappear { settleIfNeeded() }
+        .onDisappear { saveProgress() }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase != .active { saveProgress() }
+        }
         .onChange(of: engine.activePlayerIndex) { _ in runBotTurnIfNeeded() }
         .onChange(of: engine.round) { _ in runBotTurnIfNeeded() }
     }
@@ -68,7 +93,7 @@ struct LocalGameView: View {
     private var header: some View {
         HStack {
             Button {
-                settleIfNeeded()
+                saveProgress()
                 dismiss()
             } label: {
                 Image(systemName: "chevron.left").foregroundColor(.white)
@@ -78,9 +103,13 @@ struct LocalGameView: View {
                 .foregroundColor(.white)
                 .font(.headline)
             Spacer()
-            Color.clear.frame(width: 20)
+            Button { showHandGuide = true } label: {
+                Image(systemName: "questionmark.circle")
+                    .foregroundColor(.white)
+            }
         }
         .padding()
+        .sheet(isPresented: $showHandGuide) { HandRankingsGuideView() }
     }
 
     @ViewBuilder
@@ -95,12 +124,22 @@ struct LocalGameView: View {
                     }
                 }
                 if human.chips > 0 {
-                    Button {
-                        engine.startNextHand()
-                    } label: {
-                        Text("Next Hand").frame(maxWidth: .infinity)
+                    HStack(spacing: 12) {
+                        Button {
+                            engine.startNextHand()
+                        } label: {
+                            Text("Next Hand").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button {
+                            cashOutAndLeave()
+                        } label: {
+                            Text("Cash Out").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.white)
                     }
-                    .buttonStyle(.borderedProminent)
                     .padding(.horizontal, 40)
                 } else {
                     Button {
@@ -138,14 +177,29 @@ struct LocalGameView: View {
         engine.startNextHand()
     }
 
-    /// Reflects whatever chips are left in front of the player back into
-    /// their persistent bankroll when they leave the table.
-    private func settleIfNeeded() {
-        guard !hasSettled else { return }
+    /// Cashes the player's stack back into their persistent bankroll and
+    /// clears the saved table -- use this for a deliberate "I'm done" exit,
+    /// as opposed to `saveProgress()` which just pauses the hand.
+    private func cashOutAndLeave() {
+        guard !hasSettled else { dismiss(); return }
         hasSettled = true
         if let human = engine.players.first(where: { $0.id == humanID }) {
             bankroll.applyDelta(human.chips)
         }
+        GamePersistence.clearLocalGame()
+        dismiss()
+    }
+
+    /// Saves the table exactly as it stands so the player can back out (or
+    /// have the app backgrounded/killed) and resume the same hand later.
+    /// Chips already bought in stay "at the table" until a Cash Out.
+    private func saveProgress() {
+        guard !hasSettled else { return }
+        guard let human = engine.players.first(where: { $0.id == humanID }), human.chips > 0 || engine.isHandInProgress else {
+            GamePersistence.clearLocalGame()
+            return
+        }
+        GamePersistence.save(PersistedLocalGame(engine: engine.makeSnapshotForPersistence(), humanID: humanID, buyIn: buyIn))
     }
 
     private func runBotTurnIfNeeded() {

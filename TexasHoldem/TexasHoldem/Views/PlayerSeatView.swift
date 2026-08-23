@@ -7,10 +7,10 @@ struct PlayerSeatView: View {
     let revealCards: Bool
 
     var body: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: -14) {
-                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, width: 34)
-                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, width: 34)
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, width: 54)
+                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, width: 54)
             }
             .opacity(player.isFolded ? 0.35 : 1)
 

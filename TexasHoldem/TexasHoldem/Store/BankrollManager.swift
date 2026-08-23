@@ -4,29 +4,43 @@ import Combine
 /// Manages the player's virtual chip balance and owned/equipped cosmetics.
 /// Chips have no real-world value, cannot be purchased with real money, and
 /// cannot be cashed out -- they only exist to keep score and unlock cosmetics.
+///
+/// State is written to both `UserDefaults` (instant local read/write) and
+/// `NSUbiquitousKeyValueStore` (Apple's free iCloud key-value sync), so the
+/// same bankroll and cosmetics follow the player to their other devices as
+/// long as they're signed into iCloud and the app's iCloud capability is
+/// enabled in Xcode. This needs no server of our own.
 final class BankrollManager: ObservableObject {
     static let shared = BankrollManager()
 
     static let startingChips = 10_000
 
     @Published private(set) var chips: Int {
-        didSet { UserDefaults.standard.set(chips, forKey: Keys.chips) }
+        didSet { write(chips, forKey: Keys.chips) }
     }
     @Published private(set) var ownedCosmeticIDs: Set<String> {
-        didSet { UserDefaults.standard.set(Array(ownedCosmeticIDs), forKey: Keys.owned) }
+        didSet { write(Array(ownedCosmeticIDs), forKey: Keys.owned) }
     }
     @Published var equippedCardBack: String {
-        didSet { UserDefaults.standard.set(equippedCardBack, forKey: Keys.equippedCardBack) }
+        didSet { write(equippedCardBack, forKey: Keys.equippedCardBack) }
     }
     @Published var equippedFelt: String {
-        didSet { UserDefaults.standard.set(equippedFelt, forKey: Keys.equippedFelt) }
+        didSet { write(equippedFelt, forKey: Keys.equippedFelt) }
     }
     @Published var equippedChips: String {
-        didSet { UserDefaults.standard.set(equippedChips, forKey: Keys.equippedChips) }
+        didSet { write(equippedChips, forKey: Keys.equippedChips) }
     }
     @Published var equippedAvatar: String {
-        didSet { UserDefaults.standard.set(equippedAvatar, forKey: Keys.equippedAvatar) }
+        didSet { write(equippedAvatar, forKey: Keys.equippedAvatar) }
     }
+
+    /// True once `NSUbiquitousKeyValueStore` has synced at least once,
+    /// meaning the device is signed into iCloud and this app's iCloud
+    /// key-value entitlement is set up.
+    @Published private(set) var isCloudAvailable = false
+
+    private let defaults = UserDefaults.standard
+    private let cloud = NSUbiquitousKeyValueStore.default
 
     private enum Keys {
         static let chips = "bankroll.chips"
@@ -38,7 +52,6 @@ final class BankrollManager: ObservableObject {
     }
 
     private init() {
-        let defaults = UserDefaults.standard
         if defaults.object(forKey: Keys.chips) == nil {
             chips = Self.startingChips
         } else {
@@ -49,6 +62,38 @@ final class BankrollManager: ObservableObject {
         equippedFelt = defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt
         equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
         equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(cloudDidChangeExternally),
+            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud
+        )
+        cloud.synchronize()
+        pullFromCloudIfNewer()
+    }
+
+    private func write<T>(_ value: T, forKey key: String) where T: Any {
+        defaults.set(value, forKey: key)
+        cloud.set(value, forKey: key)
+    }
+
+    /// On launch, if iCloud already has a value (e.g. this bankroll was set
+    /// up on another device first), prefer it over a fresh local default.
+    private func pullFromCloudIfNewer() {
+        guard cloud.object(forKey: Keys.chips) != nil else { return }
+        isCloudAvailable = true
+        chips = Int(cloud.longLong(forKey: Keys.chips))
+        ownedCosmeticIDs = Set(cloud.array(forKey: Keys.owned) as? [String] ?? [])
+        equippedCardBack = cloud.string(forKey: Keys.equippedCardBack) ?? equippedCardBack
+        equippedFelt = cloud.string(forKey: Keys.equippedFelt) ?? equippedFelt
+        equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
+        equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
+    }
+
+    @objc private func cloudDidChangeExternally(_ notification: Notification) {
+        isCloudAvailable = true
+        DispatchQueue.main.async { [weak self] in
+            self?.pullFromCloudIfNewer()
+        }
     }
 
     func owns(_ cosmetic: Cosmetic) -> Bool {

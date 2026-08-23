@@ -17,42 +17,61 @@ struct TableFeltView<Content: View>: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 140)
-                .fill(feltColor)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 140)
-                        .stroke(Color.black.opacity(0.4), lineWidth: 10)
+            // Outer wooden rail
+            RoundedRectangle(cornerRadius: 160)
+                .fill(
+                    LinearGradient(colors: [Color(red: 0.30, green: 0.18, blue: 0.09),
+                                             Color(red: 0.18, green: 0.10, blue: 0.05)],
+                                   startPoint: .top, endPoint: .bottom)
                 )
 
-            VStack(spacing: 12) {
-                Text("Pot: $\(pot)")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12).padding(.vertical, 4)
-                    .background(Capsule().fill(Color.black.opacity(0.4)))
+            // Felt surface, inset from the rail
+            RoundedRectangle(cornerRadius: 150)
+                .fill(
+                    RadialGradient(colors: [feltColor.opacity(0.85), feltColor],
+                                   center: .center, startRadius: 10, endRadius: 420)
+                )
+                .padding(14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 138)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 2)
+                        .padding(14)
+                )
+                .overlay(
+                    // Faint suit watermark for texture
+                    Image(systemName: "suit.spade.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 90)
+                        .foregroundColor(.white.opacity(0.05))
+                )
+                .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
 
-                HStack(spacing: 6) {
+            VStack(spacing: 16) {
+                Text("Pot: $\(pot)")
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16).padding(.vertical, 6)
+                    .background(Capsule().fill(Color.black.opacity(0.45)))
+                    .overlay(Capsule().stroke(Color.yellow.opacity(0.4), lineWidth: 1))
+
+                HStack(spacing: 10) {
                     ForEach(0..<5, id: \.self) { i in
                         if i < communityCards.count {
-                            CardView(card: communityCards[i], width: 44)
+                            CardView(card: communityCards[i], width: 68)
+                                .transition(.scale.combined(with: .opacity))
                         } else {
-                            CardView(card: nil, faceDown: true, width: 44)
-                                .opacity(0.25)
+                            CardView(card: nil, faceDown: true, width: 68)
+                                .opacity(0.2)
                         }
                     }
                 }
+                .animation(.spring(response: 0.4, dampingFraction: 0.75), value: communityCards.count)
             }
 
             content
         }
     }
 
-    private var feltColor: Color {
-        switch feltID {
-        case "felt.royalBlue": return Color(red: 0.10, green: 0.22, blue: 0.55)
-        case "felt.charcoal": return Color(red: 0.18, green: 0.18, blue: 0.2)
-        case "felt.sunset": return Color(red: 0.55, green: 0.22, blue: 0.15)
-        default: return Color(red: 0.05, green: 0.4, blue: 0.22)
-        }
-    }
+    private var feltColor: Color { FeltPalette.color(for: feltID) }
 }

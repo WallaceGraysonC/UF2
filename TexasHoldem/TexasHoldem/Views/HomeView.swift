@@ -41,7 +41,10 @@ struct HomeView: View {
 
                     VStack(spacing: 14) {
                         NavigationLink(value: Destination.local) {
-                            MenuButtonLabel(title: "Play vs Bots", icon: "cpu")
+                            MenuButtonLabel(
+                                title: GamePersistence.hasSavedLocalGame ? "Resume Game" : "Play vs Bots",
+                                icon: GamePersistence.hasSavedLocalGame ? "arrow.clockwise" : "cpu"
+                            )
                         }
 
                         Button {

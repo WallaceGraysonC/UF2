@@ -5,6 +5,7 @@ import SwiftUI
 /// anywhere in this screen.
 struct StoreView: View {
     @EnvironmentObject var bankroll: BankrollManager
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedKind: CosmeticKind = .cardBack
 
     var body: some View {
@@ -30,6 +31,9 @@ struct StoreView: View {
             }
             .navigationTitle("Store")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Close") { dismiss() }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Label("\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
                         .foregroundColor(.yellow)
@@ -99,19 +103,15 @@ private struct CosmeticCard: View {
         }
     }
 
-    private var feltColor: Color {
-        switch item.id {
-        case "felt.royalBlue": return Color(red: 0.10, green: 0.22, blue: 0.55)
-        case "felt.charcoal": return Color(red: 0.18, green: 0.18, blue: 0.2)
-        case "felt.sunset": return Color(red: 0.55, green: 0.22, blue: 0.15)
-        default: return Color(red: 0.05, green: 0.4, blue: 0.22)
-        }
-    }
+    private var feltColor: Color { FeltPalette.color(for: item.id) }
 
     private var chipColor: Color {
         switch item.id {
         case "chips.neon": return .green
         case "chips.marble": return .gray
+        case "chips.jade": return Color(red: 0.0, green: 0.6, blue: 0.4)
+        case "chips.sapphire": return Color(red: 0.1, green: 0.3, blue: 0.9)
+        case "chips.diamond": return .white
         default: return .red
         }
     }
@@ -120,6 +120,10 @@ private struct CosmeticCard: View {
         switch item.id {
         case "avatar.shark": return "fish.fill"
         case "avatar.robot": return "faceid"
+        case "avatar.fox": return "pawprint.fill"
+        case "avatar.wizard": return "wand.and.stars"
+        case "avatar.astronaut": return "moon.stars.fill"
+        case "avatar.dragon": return "flame.fill"
         case "avatar.crown": return "crown.fill"
         default: return "person.circle.fill"
         }

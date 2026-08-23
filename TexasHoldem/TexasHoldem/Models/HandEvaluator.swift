@@ -1,6 +1,6 @@
 import Foundation
 
-enum HandCategory: Int, Comparable {
+enum HandCategory: Int, Comparable, Codable {
     case highCard = 0
     case pair
     case twoPair
@@ -31,7 +31,7 @@ enum HandCategory: Int, Comparable {
 /// Ranks a 5-card hand. `tiebreakers` is ordered most-significant first,
 /// e.g. for a full house [tripsRank, pairRank]; for high card, the five
 /// ranks in descending order.
-struct HandRank: Comparable {
+struct HandRank: Comparable, Codable {
     let category: HandCategory
     let tiebreakers: [Int]
 

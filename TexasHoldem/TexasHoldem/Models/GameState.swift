@@ -13,13 +13,13 @@ enum PlayerAction: Codable, Equatable {
     case allIn
 }
 
-struct PotShare: Identifiable {
+struct PotShare: Identifiable, Codable {
     var id: Int
     var amount: Int
     var eligiblePlayerIDs: Set<String>
 }
 
-struct ShowdownResult: Identifiable {
+struct ShowdownResult: Identifiable, Codable {
     var id = UUID()
     var playerID: String
     var playerName: String
@@ -42,4 +42,15 @@ struct GameState: Codable {
     var bigBlind: Int
     var handNumber: Int
     var lastActionDescription: String
+}
+
+extension GameState {
+    /// Best current hand description for `playerID`, mirroring
+    /// `PokerEngine.handDescription(for:)` for use on a synced snapshot.
+    func handDescription(for playerID: String) -> String? {
+        guard let player = players.first(where: { $0.id == playerID }), player.holeCards.count == 2 else { return nil }
+        let allCards = player.holeCards + communityCards
+        guard allCards.count >= 5 else { return nil }
+        return HandEvaluator.bestHand(from: allCards).category.displayName
+    }
 }

@@ -15,6 +15,7 @@ struct OnlineGameView: View {
     @StateObject private var multiplayer: MultiplayerMatch
     private let localID: String
     @State private var hasSettled = false
+    @State private var showHandGuide = false
 
     init(match: GKMatch) {
         self.match = match
@@ -54,14 +55,21 @@ struct OnlineGameView: View {
                             )
                         }
                     }
-                    .frame(width: geo.size.width * 0.92, height: geo.size.height * 0.62)
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.4)
+                    .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.72)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.44)
                 } else {
                     ProgressView("Setting up table...").tint(.white).foregroundColor(.white)
                 }
 
                 VStack {
                     header
+                    if let handText = multiplayer.latestState?.handDescription(for: localID) {
+                        Text(handText)
+                            .font(.subheadline.bold())
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .background(Capsule().fill(Color.yellow))
+                    }
                     Spacer()
                     if let state = multiplayer.latestState, !state.lastActionDescription.isEmpty {
                         Text(state.lastActionDescription)
@@ -94,9 +102,13 @@ struct OnlineGameView: View {
             Spacer()
             Text("Friends Table").foregroundColor(.white).font(.headline)
             Spacer()
-            Color.clear.frame(width: 20)
+            Button { showHandGuide = true } label: {
+                Image(systemName: "questionmark.circle")
+                    .foregroundColor(.white)
+            }
         }
         .padding()
+        .sheet(isPresented: $showHandGuide) { HandRankingsGuideView() }
     }
 
     @ViewBuilder

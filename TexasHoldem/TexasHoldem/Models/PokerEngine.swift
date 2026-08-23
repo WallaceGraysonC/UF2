@@ -34,6 +34,25 @@ final class PokerEngine: ObservableObject {
         self.dealerIndex = dealerIndex
     }
 
+    /// Rebuilds an engine exactly where a previous session left off --
+    /// including cards already dealt and cards still left in the deck --
+    /// so a player can back out of a hand and pick it back up later.
+    convenience init(resuming snapshot: EngineSnapshot) {
+        self.init(players: snapshot.players, smallBlind: snapshot.smallBlind, bigBlind: snapshot.bigBlind, dealerIndex: snapshot.dealerIndex)
+        communityCards = snapshot.communityCards
+        round = snapshot.round
+        activePlayerIndex = snapshot.activePlayerIndex
+        currentBet = snapshot.currentBet
+        minRaise = snapshot.minRaise
+        handNumber = snapshot.handNumber
+        lastActionDescription = snapshot.lastActionDescription
+        showdownResults = snapshot.showdownResults
+        isHandInProgress = snapshot.isHandInProgress
+        deck = Deck(cards: snapshot.deckRemaining)
+        pots = snapshot.pots
+        playersActedThisRound = Set(snapshot.playersActedThisRound)
+    }
+
     // MARK: - Hand lifecycle
 
     func startNextHand() {
@@ -312,11 +331,37 @@ final class PokerEngine: ObservableObject {
         dealerIndex = (dealerIndex + 1) % players.count
     }
 
+    /// Best current hand description for `playerID`, e.g. "Two Pair", based
+    /// on their hole cards plus whatever community cards are showing. Used
+    /// to teach the player what they're holding as the board comes out.
+    /// Returns nil before enough cards are dealt to form a 5-card hand.
+    func handDescription(for playerID: String) -> String? {
+        guard let player = players.first(where: { $0.id == playerID }), player.holeCards.count == 2 else { return nil }
+        let allCards = player.holeCards + communityCards
+        guard allCards.count >= 5 else { return nil }
+        return HandEvaluator.bestHand(from: allCards).category.displayName
+    }
+
     /// Tops up a player's stack outside of a hand, e.g. a rebuy funded from
     /// the persistent bankroll after busting out.
     func addChips(_ amount: Int, to playerID: String) {
         guard let idx = players.firstIndex(where: { $0.id == playerID }) else { return }
         players[idx].chips += amount
+    }
+
+    /// A full snapshot suitable for saving to disk and resuming later --
+    /// unlike `snapshot(for:)`, this keeps every hole card since it never
+    /// leaves the device.
+    func makeSnapshotForPersistence() -> EngineSnapshot {
+        EngineSnapshot(
+            players: players, communityCards: communityCards, round: round,
+            dealerIndex: dealerIndex, activePlayerIndex: activePlayerIndex,
+            currentBet: currentBet, minRaise: minRaise, handNumber: handNumber,
+            lastActionDescription: lastActionDescription, showdownResults: showdownResults,
+            isHandInProgress: isHandInProgress, deckRemaining: deck.cards, pots: pots,
+            playersActedThisRound: Array(playersActedThisRound),
+            smallBlind: smallBlind, bigBlind: bigBlind
+        )
     }
 
     // MARK: - Snapshot for networking

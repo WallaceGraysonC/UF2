@@ -10,6 +10,12 @@ struct Deck {
         cards.shuffle()
     }
 
+    /// Rebuilds a deck from a specific set of remaining cards, e.g. when
+    /// restoring a saved in-progress hand. No reshuffling.
+    init(cards: [Card]) {
+        self.cards = cards
+    }
+
     mutating func deal() -> Card? {
         cards.isEmpty ? nil : cards.removeLast()
     }
