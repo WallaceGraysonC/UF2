@@ -97,17 +97,23 @@ project file blind. To add it:
 1. **File > New > Target… > watchOS > Watch App**, and when prompted, make
    it a companion to the `TexasHoldem` iOS target. Give the target a name
    like "TexasHoldem Watch App".
-2. Delete the placeholder `ContentView.swift`/App file Xcode generates for
-   the new target, and drag in the three files from `TexasHoldemWatch/`
-   (add them to the new watch target, not the iOS one).
-3. In the File Inspector, give the new watch target **Target Membership**
+2. **Delete** (Move to Trash, not just remove from target) the placeholder
+   `ContentView.swift` and `<TargetName>App.swift` files Xcode generates
+   for the new target. This step gets missed easily and is the #1 cause of
+   the watch app showing Xcode's default "Hello, World!" screen instead of
+   ours -- if those placeholder files are still in the target, Swift is
+   still compiling and running *them*, not `TexasHoldemWatchApp.swift`.
+3. Drag in the three `.swift` files from `TexasHoldemWatch/` (add them to
+   the new watch target only, not the iOS one), and the `Assets.xcassets`
+   folder from the same directory (it already has the app icon set up).
+4. In the File Inspector, give the new watch target **Target Membership**
    on these existing iOS files too (they have no UIKit/GameKit dependency,
    so they build cleanly for watchOS as-is): `Card.swift`, `Deck.swift`,
    `HandEvaluator.swift`, `Player.swift`, `GameState.swift`,
    `PokerEngine.swift`, `EngineSnapshot.swift`, `BotAI.swift`,
    `Cosmetic.swift`, `CosmeticPalettes.swift`, `BankrollManager.swift`,
    `GamePersistence.swift`.
-4. If you enabled iCloud sync (step 3 above) and want the watch and phone
+5. If you enabled iCloud sync (step 3 above) and want the watch and phone
    to share one bankroll, give the watch target the same **iCloud > Key-value
    storage** capability with the *same* container identifier as the iOS
    target.
@@ -115,3 +121,27 @@ project file blind. To add it:
 The watch app is deliberately minimal: your two hole cards, the five
 community cards, a live hand-type badge, your chip stack, and
 Fold / Check-or-Call / Bet-or-Raise / All In buttons against bot opponents.
+
+### Troubleshooting a blank icon or "Hello, World!" on the watch
+
+Both symptoms trace back to the same handful of things:
+
+- **Blank/generic icon on the Watch Home Screen** -- almost always means no
+  `AppIcon` image is set for that target. The `Assets.xcassets` folder in
+  `TexasHoldemWatch/` includes a ready-made 1024x1024 `AppIcon-1024.png`;
+  make sure that whole folder (not just individual files inside it) got
+  added to the new watch target, and check **Signing & Capabilities** for
+  a code-signing error on the watch target specifically (a failed sign
+  can also leave a blank/stuck icon after install).
+- **Shows "Hello, World!" instead of the real app** -- the placeholder
+  template files are still present/compiling (see step 2 above). Search
+  the watch target's file list for anything with `@main` other than
+  `TexasHoldemWatchApp.swift` and delete it.
+- **Build fails / won't run at all** -- almost always a missing Target
+  Membership checkbox on one of the shared files listed in step 4. Xcode's
+  error will name the missing type (e.g. "Cannot find 'PokerEngine' in
+  scope"), which tells you exactly which file's membership to fix.
+- **Confirm the companion link** -- under the watch target's build
+  settings, `WKCompanionAppBundleIdentifier` should read
+  `com.wallacegrayson.texasholdem` (the iOS app's bundle ID). If it's
+  blank or wrong, watchOS won't treat it as this app's companion.
