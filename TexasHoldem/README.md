@@ -1,4 +1,4 @@
-# Texas Hold'em (iOS)
+# Pocket Aces
 
 A SwiftUI Texas Hold'em poker game for iOS.
 

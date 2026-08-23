@@ -9,7 +9,7 @@ struct WatchHomeView: View {
             VStack(spacing: 10) {
                 Image(systemName: "suit.spade.fill")
                     .font(.title)
-                Text("Texas Hold'em")
+                Text("Pocket Aces")
                     .font(.headline)
                 Text("$\(bankroll.chips)")
                     .font(.subheadline.bold())

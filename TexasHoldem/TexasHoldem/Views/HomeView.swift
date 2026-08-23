@@ -18,26 +18,28 @@ struct HomeView: View {
                                 startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
 
-                VStack(spacing: 28) {
+                VStack(spacing: 32) {
                     Spacer()
 
-                    VStack(spacing: 6) {
-                        Image(systemName: "suit.spade.fill")
-                            .font(.system(size: 56))
+                    VStack(spacing: 10) {
+                        PocketAcesMark()
+                            .frame(height: 64)
+                            .padding(.bottom, 4)
+                        Text("Pocket Aces")
+                            .font(.system(size: 38, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
-                        Text("Texas Hold'em")
-                            .font(.largeTitle.bold())
-                            .foregroundColor(.white)
+                            .tracking(0.5)
                         Text("No ads. No pop-ups. No purchases.")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.white.opacity(0.55))
                     }
 
                     Label("$\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
                         .font(.title2.bold())
                         .foregroundColor(.yellow)
-                        .padding(.horizontal, 20).padding(.vertical, 8)
+                        .padding(.horizontal, 22).padding(.vertical, 9)
                         .background(Capsule().fill(Color.white.opacity(0.08)))
+                        .overlay(Capsule().stroke(Color.yellow.opacity(0.25), lineWidth: 1))
 
                     VStack(spacing: 14) {
                         NavigationLink(value: Destination.local) {
@@ -114,14 +116,53 @@ private struct MenuButtonLabel: View {
     let icon: String
 
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-            Text(title).bold()
+        HStack(spacing: 14) {
+            ZStack {
+                Circle().fill(Color.yellow.opacity(0.15))
+                Image(systemName: icon)
+                    .foregroundColor(.yellow)
+            }
+            .frame(width: 34, height: 34)
+
+            Text(title).font(.body.bold())
             Spacer()
-            Image(systemName: "chevron.right").font(.caption)
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.4))
         }
         .foregroundColor(.white)
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.1)))
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+    }
+}
+
+/// Two overlapping ace cards -- the app's logo mark on the home screen.
+private struct PocketAcesMark: View {
+    var body: some View {
+        ZStack {
+            aceCard(suit: "♠", rotation: -10, xOffset: -16)
+            aceCard(suit: "♥", rotation: 10, xOffset: 16)
+        }
+    }
+
+    private func aceCard(suit: String, rotation: Double, xOffset: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color.white)
+            .frame(width: 46, height: 64)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8).stroke(Color.black.opacity(0.15), lineWidth: 1)
+            )
+            .overlay(
+                VStack(spacing: 2) {
+                    Text("A").font(.system(size: 18, weight: .bold, design: .rounded))
+                    Text(suit).font(.system(size: 18))
+                }
+                .foregroundColor(suit == "♥" ? .red : .black)
+            )
+            .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 3)
+            .rotationEffect(.degrees(rotation))
+            .offset(x: xOffset)
     }
 }
