@@ -45,8 +45,11 @@ struct BettingControlsView: View {
                     onAction(currentBet == 0 ? .bet(Int(raiseAmount)) : .raise(Int(raiseAmount)))
                 } label: {
                     Label(currentBet == 0 ? "Bet" : "Raise", systemImage: "arrow.up.circle")
+                        .padding(.horizontal, 4)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(PATheme.gold)
+                .foregroundStyle(PATheme.ink)
                 .disabled(player.chips == 0)
 
                 Button {
@@ -60,7 +63,14 @@ struct BettingControlsView: View {
             .font(.footnote.bold())
         }
         .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(PATheme.gold.opacity(0.25), lineWidth: 1)
+        )
         .padding(.horizontal)
     }
 }

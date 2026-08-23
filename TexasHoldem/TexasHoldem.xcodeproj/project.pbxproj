@@ -36,6 +36,7 @@
 		6F08DAC2137F4C9FB5518018 /* GamePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FD0EAFAF9941C78114214B /* GamePersistence.swift */; };
 		11018C75B7054CFAB1790A41 /* HandRankingsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */; };
 		20BA26A63EA64006AC4F0A75 /* CosmeticPalettes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */; };
+		B465E83382BB4F7DA14720AB /* PATheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F52557ED72347C68000B399 /* PATheme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,6 +72,7 @@
 		07FD0EAFAF9941C78114214B /* GamePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePersistence.swift; sourceTree = "<group>"; };
 		4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandRankingsGuideView.swift; sourceTree = "<group>"; };
 		B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmeticPalettes.swift; sourceTree = "<group>"; };
+		0F52557ED72347C68000B399 /* PATheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PATheme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +167,7 @@
 				D6265606A0F94900A769AAC4 /* SettingsView.swift */,
 				C4E6F19B5B2D40649A8E6FD9 /* HomeView.swift */,
 				4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */,
+				0F52557ED72347C68000B399 /* PATheme.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				6F08DAC2137F4C9FB5518018 /* GamePersistence.swift in Sources */,
 				11018C75B7054CFAB1790A41 /* HandRankingsGuideView.swift in Sources */,
 				20BA26A63EA64006AC4F0A75 /* CosmeticPalettes.swift in Sources */,
+				B465E83382BB4F7DA14720AB /* PATheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

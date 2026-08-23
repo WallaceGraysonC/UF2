@@ -17,25 +17,31 @@ struct TableFeltView<Content: View>: View {
 
     var body: some View {
         ZStack {
-            // Outer wooden rail
+            // Outer wooden rail, with a gold piping seam where it meets the felt
             RoundedRectangle(cornerRadius: 160)
                 .fill(
-                    LinearGradient(colors: [Color(red: 0.30, green: 0.18, blue: 0.09),
-                                             Color(red: 0.18, green: 0.10, blue: 0.05)],
+                    LinearGradient(colors: [Color(red: 0.32, green: 0.19, blue: 0.09),
+                                             Color(red: 0.17, green: 0.10, blue: 0.05)],
                                    startPoint: .top, endPoint: .bottom)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 148)
+                        .strokeBorder(PATheme.goldMaterial, lineWidth: 3)
+                        .padding(10)
+                        .opacity(0.55)
                 )
 
             // Felt surface, inset from the rail
             RoundedRectangle(cornerRadius: 150)
                 .fill(
-                    RadialGradient(colors: [feltColor.opacity(0.85), feltColor],
-                                   center: .center, startRadius: 10, endRadius: 420)
+                    RadialGradient(colors: [feltColor.opacity(0.9), feltColor, PATheme.feltDeeper.opacity(0.4)],
+                                   center: UnitPoint(x: 0.4, y: 0.35), startRadius: 10, endRadius: 460)
                 )
-                .padding(14)
+                .padding(16)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 138)
-                        .stroke(Color.white.opacity(0.18), lineWidth: 2)
-                        .padding(14)
+                    RoundedRectangle(cornerRadius: 136)
+                        .stroke(Color.white.opacity(0.16), lineWidth: 1.5)
+                        .padding(16)
                 )
                 .overlay(
                     // Faint suit watermark for texture
@@ -45,15 +51,16 @@ struct TableFeltView<Content: View>: View {
                         .frame(width: 90)
                         .foregroundColor(.white.opacity(0.05))
                 )
-                .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                .shadow(color: .black.opacity(0.55), radius: 22, x: 0, y: 12)
 
             VStack(spacing: 16) {
                 Text("Pot: $\(pot)")
                     .font(.title3.bold())
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16).padding(.vertical, 6)
-                    .background(Capsule().fill(Color.black.opacity(0.45)))
-                    .overlay(Capsule().stroke(Color.yellow.opacity(0.4), lineWidth: 1))
+                    .foregroundColor(PATheme.ink)
+                    .padding(.horizontal, 18).padding(.vertical, 7)
+                    .background(Capsule().fill(PATheme.goldMaterial))
+                    .overlay(Capsule().stroke(PATheme.goldBright.opacity(0.6), lineWidth: 1))
+                    .materialShadow(radius: 6, y: 3)
 
                 HStack(spacing: 10) {
                     ForEach(0..<5, id: \.self) { i in

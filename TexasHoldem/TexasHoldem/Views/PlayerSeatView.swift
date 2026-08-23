@@ -18,10 +18,11 @@ struct PlayerSeatView: View {
                 HStack(spacing: 4) {
                     if isDealer {
                         Text("D")
-                            .font(.caption2.bold())
+                            .font(.system(size: 10, weight: .bold, design: .serif))
                             .padding(4)
-                            .background(Circle().fill(Color.white))
-                            .foregroundColor(.black)
+                            .background(Circle().fill(PATheme.goldMaterial))
+                            .foregroundColor(PATheme.ink)
+                            .materialShadow(radius: 2, y: 1)
                     }
                     Text(player.name)
                         .font(.caption.bold())
@@ -29,7 +30,7 @@ struct PlayerSeatView: View {
                 }
                 Text("$\(player.chips)")
                     .font(.caption2)
-                    .foregroundColor(.yellow)
+                    .foregroundColor(PATheme.goldBright)
                 if player.currentBet > 0 {
                     Text("bet \(player.currentBet)")
                         .font(.caption2)
@@ -41,15 +42,19 @@ struct PlayerSeatView: View {
                     Text("All In").font(.caption2).foregroundColor(.orange)
                 }
             }
-            .padding(6)
+            .padding(.horizontal, 8).padding(.vertical, 6)
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black.opacity(0.55))
+                RoundedRectangle(cornerRadius: 9)
+                    .fill(
+                        LinearGradient(colors: [PATheme.feltDeep.opacity(0.92), PATheme.feltDeeper.opacity(0.92)],
+                                       startPoint: .top, endPoint: .bottom)
+                    )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isActive ? Color.yellow : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 9)
+                    .stroke(isActive ? PATheme.goldBright : Color.white.opacity(0.08), lineWidth: isActive ? 2 : 1)
             )
+            .materialShadow(radius: 4, y: 2)
         }
     }
 }

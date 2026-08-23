@@ -13,7 +13,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Current Chips")
                         Spacer()
-                        Text("$\(bankroll.chips)").bold().foregroundColor(.yellow)
+                        Text("$\(bankroll.chips)").bold().foregroundColor(PATheme.goldBright)
                     }
                     Button("Reset Bankroll to $\(BankrollManager.startingChips)") {
                         showResetConfirm = true
@@ -51,6 +51,7 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .tint(PATheme.gold)
             .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

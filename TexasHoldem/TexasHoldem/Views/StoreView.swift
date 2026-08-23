@@ -29,6 +29,7 @@ struct StoreView: View {
                     .padding()
                 }
             }
+            .tint(PATheme.gold)
             .navigationTitle("Store")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -36,7 +37,7 @@ struct StoreView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Label("\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
-                        .foregroundColor(.yellow)
+                        .foregroundColor(PATheme.goldBright)
                 }
             }
         }
@@ -70,6 +71,7 @@ private struct CosmeticCard: View {
             } else if owned {
                 Button("Equip") { bankroll.equip(item) }
                     .buttonStyle(.bordered)
+                    .tint(PATheme.goldBright)
             } else {
                 Button {
                     bankroll.purchase(item)
@@ -77,11 +79,24 @@ private struct CosmeticCard: View {
                     Label("\(item.price)", systemImage: "dollarsign.circle")
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(PATheme.gold)
+                .foregroundStyle(PATheme.ink)
                 .disabled(bankroll.chips < item.price)
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color(.secondarySystemBackground)))
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(colors: [PATheme.feltGlow.opacity(0.5), PATheme.feltDeeper],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(equipped ? PATheme.goldBright.opacity(0.6) : Color.white.opacity(0.08), lineWidth: equipped ? 1.5 : 1)
+        )
+        .materialShadow(radius: 5, y: 3)
     }
 
     @ViewBuilder

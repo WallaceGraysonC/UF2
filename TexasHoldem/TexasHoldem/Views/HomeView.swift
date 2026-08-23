@@ -14,8 +14,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                LinearGradient(colors: [.black, Color(red: 0.05, green: 0.2, blue: 0.12)],
-                                startPoint: .top, endPoint: .bottom)
+                PATheme.feltBackground
                     .ignoresSafeArea()
 
                 VStack(spacing: 32) {
@@ -23,8 +22,8 @@ struct HomeView: View {
 
                     VStack(spacing: 10) {
                         PocketAcesMark()
-                            .frame(height: 64)
-                            .padding(.bottom, 4)
+                            .frame(height: 82)
+                            .padding(.bottom, 8)
                         Text("Pocket Aces")
                             .font(.system(size: 38, weight: .heavy, design: .rounded))
                             .foregroundColor(.white)
@@ -36,10 +35,10 @@ struct HomeView: View {
 
                     Label("$\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
                         .font(.title2.bold())
-                        .foregroundColor(.yellow)
+                        .foregroundColor(PATheme.goldBright)
                         .padding(.horizontal, 22).padding(.vertical, 9)
-                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                        .overlay(Capsule().stroke(Color.yellow.opacity(0.25), lineWidth: 1))
+                        .background(Capsule().fill(Color.white.opacity(0.06)))
+                        .overlay(Capsule().stroke(PATheme.gold.opacity(0.35), lineWidth: 1))
 
                     VStack(spacing: 14) {
                         NavigationLink(value: Destination.local) {
@@ -118,9 +117,9 @@ private struct MenuButtonLabel: View {
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
-                Circle().fill(Color.yellow.opacity(0.15))
+                Circle().fill(PATheme.goldMaterial.opacity(0.22))
                 Image(systemName: icon)
-                    .foregroundColor(.yellow)
+                    .foregroundColor(PATheme.goldBright)
             }
             .frame(width: 34, height: 34)
 
@@ -132,37 +131,76 @@ private struct MenuButtonLabel: View {
         }
         .foregroundColor(.white)
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.08)))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.08), lineWidth: 1))
-        .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(colors: [Color.white.opacity(0.1), Color.white.opacity(0.04)],
+                                   startPoint: .top, endPoint: .bottom)
+                )
+        )
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .materialShadow(radius: 6, y: 3)
     }
 }
 
-/// Two overlapping ace cards -- the app's logo mark on the home screen.
+/// Two aces tucked into a gold pocket -- the app's logo mark. Gradient card
+/// stock and pocket leather, a foreshortened tilt, and cast shadows so it
+/// reads as an actual object sitting on the screen rather than a flat glyph.
 private struct PocketAcesMark: View {
     var body: some View {
         ZStack {
-            aceCard(suit: "♠", rotation: -10, xOffset: -16)
-            aceCard(suit: "♥", rotation: 10, xOffset: 16)
+            aceCard(suit: "♠", ink: PATheme.ink, rotation: -15, xOffset: -15)
+            aceCard(suit: "♥", ink: PATheme.crimsonDeep, rotation: 15, xOffset: 15)
+            pocket
         }
     }
 
-    private func aceCard(suit: String, rotation: Double, xOffset: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(Color.white)
-            .frame(width: 46, height: 64)
+    private var pocket: some View {
+        UnevenRoundedRectangle(topLeadingRadius: 22, bottomLeadingRadius: 5,
+                                bottomTrailingRadius: 5, topTrailingRadius: 22, style: .continuous)
+            .fill(PATheme.goldMaterial)
+            .frame(width: 96, height: 44)
+            .overlay(alignment: .top) {
+                // Rim highlight -- a fold in the leather/foil catching light
+                Capsule()
+                    .fill(PATheme.goldBright.opacity(0.65))
+                    .frame(width: 60, height: 1.6)
+                    .offset(y: 3)
+            }
             .overlay(
-                RoundedRectangle(cornerRadius: 8).stroke(Color.black.opacity(0.15), lineWidth: 1)
+                UnevenRoundedRectangle(topLeadingRadius: 22, bottomLeadingRadius: 5,
+                                        bottomTrailingRadius: 5, topTrailingRadius: 22, style: .continuous)
+                    .stroke(PATheme.goldDeep.opacity(0.7), lineWidth: 1)
             )
-            .overlay(
-                VStack(spacing: 2) {
-                    Text("A").font(.system(size: 18, weight: .bold, design: .rounded))
-                    Text(suit).font(.system(size: 18))
+            .materialShadow(radius: 8, y: 5)
+            .offset(y: 16)
+    }
+
+    private func aceCard(suit: String, ink: Color, rotation: Double, xOffset: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 7, style: .continuous)
+            .fill(PATheme.cardMaterial)
+            .frame(width: 42, height: 60)
+            .overlay(alignment: .topLeading) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("A").font(.system(size: 14, weight: .bold, design: .serif))
+                    Text(suit).font(.system(size: 14))
                 }
-                .foregroundColor(suit == "♥" ? .red : .black)
+                .foregroundColor(ink)
+                .padding(.leading, 6).padding(.top, 5)
+            }
+            .overlay(alignment: .top) {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.white.opacity(0.32))
+                    .frame(width: 30, height: 5)
+                    .offset(y: 5)
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .stroke(Color.black.opacity(0.14), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.35), radius: 4, x: 0, y: 3)
+            .materialShadow(radius: 5, y: 3)
+            .scaleEffect(x: 1, y: 0.95)
             .rotationEffect(.degrees(rotation))
-            .offset(x: xOffset)
+            .offset(x: xOffset, y: -7)
     }
 }
