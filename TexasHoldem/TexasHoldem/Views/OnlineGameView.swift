@@ -40,7 +40,7 @@ struct OnlineGameView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let state = multiplayer.latestState {
-                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt) {
+                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt) { feltSize in
                         ForEach(Array(state.players.enumerated()), id: \.element.id) { index, player in
                             let offset = SeatLayout.offsets(count: state.players.count)[index]
                             PlayerSeatView(
@@ -50,13 +50,13 @@ struct OnlineGameView: View {
                                 revealCards: player.id == localID || state.round == .showdown
                             )
                             .position(
-                                x: geo.size.width / 2 + offset.x * geo.size.width * 0.38,
-                                y: geo.size.height * 0.42 + offset.y * geo.size.height * 0.34
+                                x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
+                                y: feltSize.height / 2 + offset.y * feltSize.height * 0.46
                             )
                         }
                     }
-                    .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.72)
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.44)
+                    .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.80)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.45)
                 } else {
                     ProgressView("Setting up table...").tint(.white).foregroundColor(.white)
                 }
@@ -64,11 +64,7 @@ struct OnlineGameView: View {
                 VStack {
                     header
                     if let handText = multiplayer.latestState?.handDescription(for: localID) {
-                        Text(handText)
-                            .font(.subheadline.bold())
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 14).padding(.vertical, 6)
-                            .background(Capsule().fill(Color.yellow))
+                        HandTypeBadge(text: handText)
                     }
                     Spacer()
                     if let state = multiplayer.latestState, !state.lastActionDescription.isEmpty {

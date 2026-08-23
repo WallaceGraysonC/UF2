@@ -11,6 +11,8 @@ struct BettingControlsView: View {
 
     private var toCall: Int { max(0, currentBet - player.currentBet) }
     private var minTarget: Int { currentBet == 0 ? bigBlind : currentBet + minRaise }
+    // Always >= minTarget, so this ClosedRange can never invert.
+    private var maxTarget: Int { max(minTarget, player.chips + player.currentBet) }
 
     var body: some View {
         VStack(spacing: 10) {
@@ -20,8 +22,14 @@ struct BettingControlsView: View {
                     .foregroundColor(.white.opacity(0.8))
                 Spacer()
             }
-            Slider(value: $raiseAmount, in: Double(minTarget)...Double(max(minTarget, player.chips + player.currentBet)), step: 1)
+            Slider(value: $raiseAmount, in: Double(minTarget)...Double(maxTarget), step: 1)
                 .onAppear { raiseAmount = Double(minTarget) }
+                // player.chips/currentBet/minRaise change after every action, which
+                // can move this range on a re-render of the *same* slider instance --
+                // onAppear alone won't refire, so re-clamp explicitly or the slider's
+                // stored value can end up outside its own range and crash.
+                .onChange(of: minTarget) { _ in clampRaiseAmount() }
+                .onChange(of: maxTarget) { _ in clampRaiseAmount() }
 
             HStack(spacing: 10) {
                 Button(role: .destructive) { onAction(.fold) } label: {
@@ -72,5 +80,9 @@ struct BettingControlsView: View {
                 .stroke(PATheme.gold.opacity(0.25), lineWidth: 1)
         )
         .padding(.horizontal)
+    }
+
+    private func clampRaiseAmount() {
+        raiseAmount = Double(min(max(Int(raiseAmount), minTarget), maxTarget))
     }
 }

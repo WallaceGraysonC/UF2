@@ -1,7 +1,10 @@
 import SwiftUI
 
 /// Tappable reference card showing every poker hand ranking, best to worst,
-/// with a quick example. Meant to help new players learn what beats what.
+/// with a quick example. Presented as a translucent glass panel over the
+/// table -- rendered with `.presentationBackground(.thinMaterial)` so the
+/// felt and cards blur through behind it -- rather than an opaque system
+/// sheet, to match the rest of the app's "special" material look.
 struct HandRankingsGuideView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -25,35 +28,72 @@ struct HandRankingsGuideView: View {
     ]
 
     var body: some View {
-        NavigationView {
+        VStack(spacing: 0) {
+            header
+
             ScrollView {
-                VStack(spacing: 14) {
+                VStack(spacing: 12) {
                     ForEach(entries) { entry in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(entry.category.displayName).font(.headline)
-                                Text(entry.blurb).font(.caption).foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            HStack(spacing: -10) {
-                                ForEach(entry.example) { card in
-                                    CardView(card: card, width: 32)
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+                        row(for: entry)
                     }
                 }
-                .padding()
+                .padding(20)
             }
-            .navigationTitle("Hand Rankings")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") { dismiss() }
+        }
+        .background(Color.clear)
+        .presentationBackground(.thinMaterial)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var header: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Hand Rankings")
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                Text("Best to worst")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            Spacer()
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.footnote.bold())
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(Circle().fill(Color.white.opacity(0.12)))
+            }
+        }
+        .padding(20)
+    }
+
+    private func row(for entry: Entry) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.category.displayName)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(entry.blurb)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.65))
+            }
+            Spacer()
+            HStack(spacing: -12) {
+                ForEach(entry.example) { card in
+                    CardView(card: card, width: 32)
                 }
             }
         }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(PATheme.gold.opacity(0.28), lineWidth: 1)
+        )
     }
 
     private static func cards(_ codes: String...) -> [Card] {

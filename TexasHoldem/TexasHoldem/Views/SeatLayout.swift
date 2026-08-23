@@ -10,7 +10,10 @@ enum SeatLayout {
         for i in 0..<count {
             let angle = (Double(i) / Double(count)) * 2 * .pi + .pi / 2
             let x = cos(angle)
-            let y = sin(angle) * 0.62
+            // Less vertical squash than a true ellipse-from-circle would give,
+            // so top/bottom seats sit near the rail instead of crowding the
+            // community cards in the middle.
+            let y = sin(angle) * 0.88
             points.append(CGPoint(x: x, y: y))
         }
         return points

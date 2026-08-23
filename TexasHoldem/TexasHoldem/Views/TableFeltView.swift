@@ -1,21 +1,24 @@
 import SwiftUI
 
 /// Shared felt background + community card row, used by both the local
-/// (bot) table and the online multiplayer table.
+/// (bot) table and the online multiplayer table. Seat content is built from
+/// the felt's *own* measured size (not the outer screen), so seat spacing
+/// stays correct regardless of how big the caller sizes the table.
 struct TableFeltView<Content: View>: View {
     let communityCards: [Card]
     let pot: Int
     let feltID: String
-    let content: Content
+    let content: (CGSize) -> Content
 
-    init(communityCards: [Card], pot: Int, feltID: String, @ViewBuilder content: () -> Content) {
+    init(communityCards: [Card], pot: Int, feltID: String, @ViewBuilder content: @escaping (CGSize) -> Content) {
         self.communityCards = communityCards
         self.pot = pot
         self.feltID = feltID
-        self.content = content()
+        self.content = content
     }
 
     var body: some View {
+        GeometryReader { geo in
         ZStack {
             // Outer wooden rail, with a gold piping seam where it meets the felt
             RoundedRectangle(cornerRadius: 160)
@@ -76,7 +79,8 @@ struct TableFeltView<Content: View>: View {
                 .animation(.spring(response: 0.4, dampingFraction: 0.75), value: communityCards.count)
             }
 
-            content
+            content(geo.size)
+        }
         }
     }
 
