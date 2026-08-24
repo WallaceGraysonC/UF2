@@ -56,7 +56,7 @@ struct TableFeltView<Content: View>: View {
                 )
                 .shadow(color: .black.opacity(0.55), radius: 22, x: 0, y: 12)
 
-            VStack(spacing: 16) {
+            VStack(spacing: 12) {
                 Text("Pot: $\(pot)")
                     .font(.title3.bold())
                     .foregroundColor(PATheme.ink)
@@ -65,19 +65,23 @@ struct TableFeltView<Content: View>: View {
                     .overlay(Capsule().stroke(PATheme.goldBright.opacity(0.6), lineWidth: 1))
                     .materialShadow(radius: 6, y: 3)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 7) {
                     ForEach(0..<5, id: \.self) { i in
                         if i < communityCards.count {
-                            CardView(card: communityCards[i], width: 68)
+                            CardView(card: communityCards[i], width: 50)
                                 .transition(.scale.combined(with: .opacity))
                         } else {
-                            CardView(card: nil, faceDown: true, width: 68)
+                            CardView(card: nil, faceDown: true, width: 50)
                                 .opacity(0.2)
                         }
                     }
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.75), value: communityCards.count)
             }
+            // Sit a bit above dead-center -- most seats (including the human's,
+            // dead-bottom) cluster in the lower half of the oval, so shifting the
+            // board up gives them more clearance instead of splitting it evenly.
+            .position(x: geo.size.width / 2, y: geo.size.height * 0.40)
 
             content(geo.size)
         }

@@ -45,7 +45,7 @@ struct LocalGameView: View {
                         )
                         .position(
                             x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
-                            y: feltSize.height / 2 + offset.y * feltSize.height * 0.46
+                            y: feltSize.height / 2 + offset.y * feltSize.height * 0.44
                         )
                     }
                 }
@@ -100,8 +100,12 @@ struct LocalGameView: View {
                 .font(.headline)
             Spacer()
             Button { showHandGuide = true } label: {
-                Image(systemName: "questionmark.circle")
-                    .foregroundColor(.white)
+                Label("Hands", systemImage: "questionmark.circle.fill")
+                    .font(.caption.bold())
+                    .foregroundColor(PATheme.goldBright)
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .background(Capsule().fill(.ultraThinMaterial))
+                    .overlay(Capsule().stroke(PATheme.gold.opacity(0.5), lineWidth: 1))
             }
         }
         .padding()

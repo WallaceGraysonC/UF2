@@ -8,9 +8,9 @@ struct PlayerSeatView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            HStack(spacing: 6) {
-                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, width: 54)
-                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, width: 54)
+            HStack(spacing: 4) {
+                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, width: 46)
+                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, width: 46)
             }
             .opacity(player.isFolded ? 0.35 : 1)
 

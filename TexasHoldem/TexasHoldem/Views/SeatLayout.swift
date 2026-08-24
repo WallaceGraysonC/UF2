@@ -13,7 +13,7 @@ enum SeatLayout {
             // Less vertical squash than a true ellipse-from-circle would give,
             // so top/bottom seats sit near the rail instead of crowding the
             // community cards in the middle.
-            let y = sin(angle) * 0.88
+            let y = sin(angle) * 0.90
             points.append(CGPoint(x: x, y: y))
         }
         return points
