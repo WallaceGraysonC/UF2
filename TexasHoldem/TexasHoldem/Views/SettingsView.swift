@@ -15,10 +15,19 @@ struct SettingsView: View {
                         Spacer()
                         Text("$\(bankroll.chips)").bold().foregroundColor(PATheme.goldBright)
                     }
-                    Button("Reset Bankroll to $\(BankrollManager.startingChips)") {
+                    HStack {
+                        Text("Best Ever")
+                        Spacer()
+                        Text("$\(bankroll.highestChips)").foregroundColor(.secondary)
+                    }
+                    Button("Get $\(BankrollManager.bankrollTopUpAmount) Top-Up") {
                         showResetConfirm = true
                     }
-                    .foregroundColor(.red)
+                    .disabled(!bankroll.canTopUpBankroll)
+                    .foregroundColor(bankroll.canTopUpBankroll ? .red : .secondary)
+                    Text(topUpHint)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
 
                 Section("Game Center") {
@@ -58,12 +67,23 @@ struct SettingsView: View {
                     Button("Close") { dismiss() }
                 }
             }
-            .alert("Reset Bankroll?", isPresented: $showResetConfirm) {
+            .alert("Get a Bankroll Top-Up?", isPresented: $showResetConfirm) {
                 Button("Cancel", role: .cancel) {}
-                Button("Reset", role: .destructive) { bankroll.resetBankroll() }
+                Button("Top Up", role: .destructive) { bankroll.topUpBankroll() }
             } message: {
-                Text("This sets your chip balance back to $\(BankrollManager.startingChips). Your owned cosmetics are kept.")
+                Text("Adds $\(BankrollManager.bankrollTopUpAmount) to your chip balance. Your owned cosmetics are kept.")
             }
         }
+    }
+
+    private var topUpHint: String {
+        if bankroll.canTopUpBankroll {
+            return "Available now, since you're under $\(BankrollManager.bankrollTopUpThreshold). This is a small emergency top-up, not a full reset -- win chips at the table to afford the pricier cosmetics."
+        }
+        if bankroll.topUpCooldownRemaining > 0 {
+            let hours = Int(bankroll.topUpCooldownRemaining / 3600) + 1
+            return "Only available when you're under $\(BankrollManager.bankrollTopUpThreshold), and again in about \(hours)h."
+        }
+        return "Only available when you're under $\(BankrollManager.bankrollTopUpThreshold) -- you're not stuck yet."
     }
 }

@@ -11,7 +11,7 @@ struct WatchGameView: View {
     private let resumedFromSave: Bool
     @State private var hasSettled = false
 
-    init(botCount: Int = 3, buyIn: Int = 2000) {
+    init(botCount: Int = 3, buyIn: Int = 500) {
         if let saved = GamePersistence.loadLocalGame() {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
             humanID = saved.humanID

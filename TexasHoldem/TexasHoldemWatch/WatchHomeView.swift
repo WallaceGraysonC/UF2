@@ -23,8 +23,8 @@ struct WatchHomeView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
-                if bankroll.chips <= 0 {
-                    Button("Reset Chips") { bankroll.resetBankroll() }
+                if bankroll.canTopUpBankroll {
+                    Button("Get $\(BankrollManager.bankrollTopUpAmount)") { bankroll.topUpBankroll() }
                         .font(.caption2)
                 }
             }

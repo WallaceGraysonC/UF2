@@ -67,9 +67,9 @@ struct HomeView: View {
 
                     Spacer()
 
-                    if bankroll.chips <= 0 {
-                        Button("Out of chips? Reset bankroll") {
-                            bankroll.resetBankroll()
+                    if bankroll.canTopUpBankroll {
+                        Button("Low on chips? Get $\(BankrollManager.bankrollTopUpAmount)") {
+                            bankroll.topUpBankroll()
                         }
                         .font(.footnote)
                         .foregroundColor(.white.opacity(0.7))

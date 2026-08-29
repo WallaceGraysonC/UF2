@@ -8,28 +8,27 @@ struct TableFeltView<Content: View>: View {
     let communityCards: [Card]
     let pot: Int
     let feltID: String
+    let railID: String
     let content: (CGSize) -> Content
 
-    init(communityCards: [Card], pot: Int, feltID: String, @ViewBuilder content: @escaping (CGSize) -> Content) {
+    init(communityCards: [Card], pot: Int, feltID: String, railID: String = CosmeticCatalog.defaultRail, @ViewBuilder content: @escaping (CGSize) -> Content) {
         self.communityCards = communityCards
         self.pot = pot
         self.feltID = feltID
+        self.railID = railID
         self.content = content
     }
 
     var body: some View {
         GeometryReader { geo in
         ZStack {
-            // Outer wooden rail, with a gold piping seam where it meets the felt
+            // Outer rail, with a seam where it meets the felt -- both
+            // customizable via the Table Rail cosmetic slot.
             RoundedRectangle(cornerRadius: 160)
-                .fill(
-                    LinearGradient(colors: [Color(red: 0.32, green: 0.19, blue: 0.09),
-                                             Color(red: 0.17, green: 0.10, blue: 0.05)],
-                                   startPoint: .top, endPoint: .bottom)
-                )
+                .fill(RailPalette.gradient(for: railID))
                 .overlay(
                     RoundedRectangle(cornerRadius: 148)
-                        .strokeBorder(PATheme.goldMaterial, lineWidth: 3)
+                        .strokeBorder(RailPalette.seamColor(for: railID), lineWidth: 3)
                         .padding(10)
                         .opacity(0.55)
                 )

@@ -8,12 +8,17 @@ A SwiftUI Texas Hold'em poker game for iOS.
   matchmaker — invite friends or auto-match, no server to run or pay for.
 - **Play solo** any time against a handful of simple bot opponents.
 - **Virtual currency only.** Chips ("$") have no real-world value, can't be
-  bought with real money, and can't be cashed out. You start with $10,000,
-  and if you ever bust out you can reset your bankroll back to $10,000 for
-  free from Settings (or the "Out of chips?" prompt on the home screen).
-- **Cosmetics store.** Spend chips on card backs, table felt colors, chip
-  designs, and avatars — 8 card backs, 7 felts, 6 chip sets, 8 avatars.
-  Everything ever purchased stays owned even after a bankroll reset.
+  bought with real money, and can't be cashed out. You start with $1,000,
+  and if you ever drop under $200 you can claim a $500 top-up from Settings
+  (or the home screen prompt) once every 8 hours — a safety net against
+  busting out, not a free reset, so it can't be farmed to unlock the store.
+- **Cosmetics store.** Spend chips on card backs, table felt, table rails,
+  chip designs, and avatars — 8 card backs, 7 felts, 7 rails, 6 chip sets,
+  8 avatars. Pricier items also require having reached a lifetime chip peak
+  (`BankrollManager.highestChips`) at $1,500/$3,000/$5,000 tiers — money
+  actually won at the table, since the starting balance and every top-up
+  are capped low and can't push that peak up on their own. Everything ever
+  purchased stays owned even after a top-up.
 - **Hand-type coaching.** As community cards come out, a badge at the top of
   the table shows the best hand you currently have (e.g. "Two Pair"). Tap the
   **?** button any time for a reference card of every hand ranking, best to

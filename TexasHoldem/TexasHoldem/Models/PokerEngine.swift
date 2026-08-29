@@ -26,7 +26,7 @@ final class PokerEngine: ObservableObject {
 
     var potTotal: Int { pots.reduce(0) { $0 + $1.amount } + players.reduce(0) { $0 + $1.currentBet } }
 
-    init(players: [Player], smallBlind: Int = 25, bigBlind: Int = 50, dealerIndex: Int = 0) {
+    init(players: [Player], smallBlind: Int = 10, bigBlind: Int = 20, dealerIndex: Int = 0) {
         self.players = players
         self.smallBlind = smallBlind
         self.bigBlind = bigBlind

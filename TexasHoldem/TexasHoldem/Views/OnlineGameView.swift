@@ -10,7 +10,7 @@ struct OnlineGameView: View {
     @Environment(\.dismiss) private var dismiss
 
     let match: GKMatch
-    private static let buyIn = 2000
+    private static let buyIn = 500
 
     @StateObject private var multiplayer: MultiplayerMatch
     private let localID: String
@@ -40,7 +40,7 @@ struct OnlineGameView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let state = multiplayer.latestState {
-                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt) { feltSize in
+                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail) { feltSize in
                         // The local player's own seat is drawn separately below,
                         // layered above the button panel -- everyone else stays in the oval.
                         ForEach(Array(state.players.enumerated()), id: \.element.id) { index, player in

@@ -2,7 +2,9 @@ import SwiftUI
 
 /// Cosmetics shop. Every item is purchased with the free virtual chip
 /// currency earned at the table -- there is no real-money purchase path
-/// anywhere in this screen.
+/// anywhere in this screen. Pricier items also require having reached a
+/// certain lifetime chip peak (won at the table, not just topped up) --
+/// see `BankrollManager.isUnlocked(_:)`.
 struct StoreView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @Environment(\.dismiss) private var dismiss
@@ -12,8 +14,9 @@ struct StoreView: View {
         NavigationView {
             VStack {
                 Picker("Category", selection: $selectedKind) {
-                    Text("Card Backs").tag(CosmeticKind.cardBack)
-                    Text("Table Felt").tag(CosmeticKind.tableFelt)
+                    Text("Cards").tag(CosmeticKind.cardBack)
+                    Text("Felt").tag(CosmeticKind.tableFelt)
+                    Text("Rail").tag(CosmeticKind.tableRail)
                     Text("Chips").tag(CosmeticKind.chipSet)
                     Text("Avatars").tag(CosmeticKind.avatar)
                 }
@@ -49,10 +52,12 @@ private struct CosmeticCard: View {
     let item: Cosmetic
 
     var owned: Bool { bankroll.owns(item) }
+    var unlocked: Bool { bankroll.isUnlocked(item) }
     var equipped: Bool {
         switch item.kind {
         case .cardBack: return bankroll.equippedCardBack == item.id
         case .tableFelt: return bankroll.equippedFelt == item.id
+        case .tableRail: return bankroll.equippedRail == item.id
         case .chipSet: return bankroll.equippedChips == item.id
         case .avatar: return bankroll.equippedAvatar == item.id
         }
@@ -62,6 +67,7 @@ private struct CosmeticCard: View {
         VStack(spacing: 10) {
             swatch
                 .frame(height: 70)
+                .opacity(unlocked ? 1 : 0.4)
             Text(item.name).font(.subheadline.bold())
 
             if equipped {
@@ -72,6 +78,16 @@ private struct CosmeticCard: View {
                 Button("Equip") { bankroll.equip(item) }
                     .buttonStyle(.bordered)
                     .tint(PATheme.goldBright)
+            } else if !unlocked {
+                VStack(spacing: 3) {
+                    Label("\(item.price)", systemImage: "lock.fill")
+                        .font(.footnote.bold())
+                        .foregroundColor(.secondary)
+                    Text("Reach $\(item.unlockRequirement) to unlock")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             } else {
                 Button {
                     bankroll.purchase(item)
@@ -106,6 +122,14 @@ private struct CosmeticCard: View {
             CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
         case .tableFelt:
             RoundedRectangle(cornerRadius: 10).fill(feltColor)
+        case .tableRail:
+            RoundedRectangle(cornerRadius: 10)
+                .fill(RailPalette.gradient(for: item.id))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
+                        .padding(4)
+                )
         case .chipSet:
             HStack(spacing: -8) {
                 Circle().fill(chipColor).frame(width: 30, height: 30)

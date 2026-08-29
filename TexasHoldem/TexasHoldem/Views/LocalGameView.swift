@@ -12,7 +12,7 @@ struct LocalGameView: View {
     @State private var hasSettled = false
     @State private var showHandGuide = false
 
-    init(botCount: Int = 4, buyIn: Int = 2000) {
+    init(botCount: Int = 4, buyIn: Int = 500) {
         if let saved = GamePersistence.loadLocalGame() {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
             self.humanID = saved.humanID
@@ -34,7 +34,7 @@ struct LocalGameView: View {
         GeometryReader { geo in
             ZStack {
                 Color.black.ignoresSafeArea()
-                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt) { feltSize in
+                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail) { feltSize in
                     // The human's own seat is drawn separately below, layered
                     // above the button panel -- everyone else stays in the oval.
                     ForEach(Array(engine.players.enumerated()), id: \.element.id) { index, player in

@@ -13,10 +13,32 @@ import Combine
 final class BankrollManager: ObservableObject {
     static let shared = BankrollManager()
 
-    static let startingChips = 10_000
+    static let startingChips = 1000
+    /// A "top-up" (not a full reset) available only when the player is
+    /// nearly broke, with a cooldown -- deliberately smaller and slower
+    /// than actually winning chips at the table, so it's a safety net
+    /// against busting out rather than a free way to buy every cosmetic.
+    static let bankrollTopUpAmount = 500
+    static let bankrollTopUpThreshold = 200
+    static let bankrollTopUpCooldown: TimeInterval = 60 * 60 * 8 // 8 hours
 
     @Published private(set) var chips: Int {
-        didSet { write(chips, forKey: Keys.chips) }
+        didSet {
+            write(chips, forKey: Keys.chips)
+            if chips > highestChips { highestChips = chips }
+        }
+    }
+    /// The most chips this player has ever held. Only grows when `chips`
+    /// exceeds its previous peak, which -- since the starting balance and
+    /// every top-up are fixed, small amounts -- can only climb meaningfully
+    /// through actual winnings at the table. Used to gate pricier cosmetics
+    /// behind money actually won rather than money currently on hand, so
+    /// resetting/topping up the bankroll can't be farmed to unlock everything.
+    @Published private(set) var highestChips: Int {
+        didSet { write(highestChips, forKey: Keys.highestChips) }
+    }
+    @Published private(set) var lastTopUpAt: Date? {
+        didSet { write(lastTopUpAt?.timeIntervalSince1970 ?? -1, forKey: Keys.lastTopUpAt) }
     }
     @Published private(set) var ownedCosmeticIDs: Set<String> {
         didSet { write(Array(ownedCosmeticIDs), forKey: Keys.owned) }
@@ -26,6 +48,9 @@ final class BankrollManager: ObservableObject {
     }
     @Published var equippedFelt: String {
         didSet { write(equippedFelt, forKey: Keys.equippedFelt) }
+    }
+    @Published var equippedRail: String {
+        didSet { write(equippedRail, forKey: Keys.equippedRail) }
     }
     @Published var equippedChips: String {
         didSet { write(equippedChips, forKey: Keys.equippedChips) }
@@ -44,9 +69,12 @@ final class BankrollManager: ObservableObject {
 
     private enum Keys {
         static let chips = "bankroll.chips"
+        static let highestChips = "bankroll.highestChips"
+        static let lastTopUpAt = "bankroll.lastTopUpAt"
         static let owned = "bankroll.owned"
         static let equippedCardBack = "bankroll.equippedCardBack"
         static let equippedFelt = "bankroll.equippedFelt"
+        static let equippedRail = "bankroll.equippedRail"
         static let equippedChips = "bankroll.equippedChips"
         static let equippedAvatar = "bankroll.equippedAvatar"
     }
@@ -57,9 +85,14 @@ final class BankrollManager: ObservableObject {
         } else {
             chips = defaults.integer(forKey: Keys.chips)
         }
+        let savedPeak = defaults.integer(forKey: Keys.highestChips)
+        highestChips = max(savedPeak, chips, Self.startingChips)
+        let savedTopUp = defaults.double(forKey: Keys.lastTopUpAt)
+        lastTopUpAt = savedTopUp > 0 ? Date(timeIntervalSince1970: savedTopUp) : nil
         ownedCosmeticIDs = Set(defaults.stringArray(forKey: Keys.owned) ?? [])
         equippedCardBack = defaults.string(forKey: Keys.equippedCardBack) ?? CosmeticCatalog.defaultCardBack
         equippedFelt = defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt
+        equippedRail = defaults.string(forKey: Keys.equippedRail) ?? CosmeticCatalog.defaultRail
         equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
         equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
 
@@ -82,9 +115,13 @@ final class BankrollManager: ObservableObject {
         guard cloud.object(forKey: Keys.chips) != nil else { return }
         isCloudAvailable = true
         chips = Int(cloud.longLong(forKey: Keys.chips))
+        highestChips = max(highestChips, Int(cloud.longLong(forKey: Keys.highestChips)))
+        let cloudTopUp = cloud.double(forKey: Keys.lastTopUpAt)
+        if cloudTopUp > 0 { lastTopUpAt = Date(timeIntervalSince1970: cloudTopUp) }
         ownedCosmeticIDs = Set(cloud.array(forKey: Keys.owned) as? [String] ?? [])
         equippedCardBack = cloud.string(forKey: Keys.equippedCardBack) ?? equippedCardBack
         equippedFelt = cloud.string(forKey: Keys.equippedFelt) ?? equippedFelt
+        equippedRail = cloud.string(forKey: Keys.equippedRail) ?? equippedRail
         equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
         equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
     }
@@ -100,9 +137,15 @@ final class BankrollManager: ObservableObject {
         cosmetic.price == 0 || ownedCosmeticIDs.contains(cosmetic.id)
     }
 
+    /// Whether this item's lifetime-peak gate is met, independent of
+    /// whether the player can currently afford its price.
+    func isUnlocked(_ cosmetic: Cosmetic) -> Bool {
+        highestChips >= cosmetic.unlockRequirement
+    }
+
     @discardableResult
     func purchase(_ cosmetic: Cosmetic) -> Bool {
-        guard !owns(cosmetic), chips >= cosmetic.price else { return false }
+        guard !owns(cosmetic), isUnlocked(cosmetic), chips >= cosmetic.price else { return false }
         chips -= cosmetic.price
         ownedCosmeticIDs.insert(cosmetic.id)
         return true
@@ -113,13 +156,17 @@ final class BankrollManager: ObservableObject {
         switch cosmetic.kind {
         case .cardBack: equippedCardBack = cosmetic.id
         case .tableFelt: equippedFelt = cosmetic.id
+        case .tableRail: equippedRail = cosmetic.id
         case .chipSet: equippedChips = cosmetic.id
         case .avatar: equippedAvatar = cosmetic.id
         }
     }
 
     /// Settle winnings/losses from a completed table session into the
-    /// persistent bankroll (used after a hosted/local game ends).
+    /// persistent bankroll (used after a hosted/local game ends). This is
+    /// the only path through which `highestChips` can climb in practice,
+    /// since it's the only place real winnings (as opposed to the fixed
+    /// starting balance or a top-up) get added.
     func applyDelta(_ delta: Int) {
         chips = max(0, chips + delta)
     }
@@ -128,9 +175,27 @@ final class BankrollManager: ObservableObject {
         chips = max(0, amount)
     }
 
-    /// "Restart" -- resets the bankroll back to the starting amount, e.g.
-    /// after busting out, with no strings attached.
-    func resetBankroll() {
-        chips = Self.startingChips
+    /// Whether a bankroll top-up can be used right now: the player has to
+    /// actually be low on chips, and enough time has to have passed since
+    /// the last one.
+    var canTopUpBankroll: Bool {
+        chips < Self.bankrollTopUpThreshold && topUpCooldownRemaining <= 0
+    }
+
+    /// Seconds remaining before another top-up is allowed, 0 if available now.
+    var topUpCooldownRemaining: TimeInterval {
+        guard let lastTopUpAt else { return 0 }
+        return max(0, Self.bankrollTopUpCooldown - Date().timeIntervalSince(lastTopUpAt))
+    }
+
+    /// Adds a small emergency top-up when the player is nearly broke, with
+    /// a cooldown -- deliberately not a full reset, so it can't be spammed
+    /// to fund every cosmetic in the store. Returns whether it was applied.
+    @discardableResult
+    func topUpBankroll() -> Bool {
+        guard canTopUpBankroll else { return false }
+        chips += Self.bankrollTopUpAmount
+        lastTopUpAt = Date()
+        return true
     }
 }
