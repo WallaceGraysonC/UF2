@@ -13,16 +13,25 @@ struct StoreView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Picker("Category", selection: $selectedKind) {
-                    Text("Cards").tag(CosmeticKind.cardBack)
-                    Text("Felt").tag(CosmeticKind.tableFelt)
-                    Text("Rail").tag(CosmeticKind.tableRail)
-                    Text("Room").tag(CosmeticKind.tableBackdrop)
-                    Text("Chips").tag(CosmeticKind.chipSet)
-                    Text("Avatars").tag(CosmeticKind.avatar)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(CosmeticKind.allCases, id: \.self) { kind in
+                            Button {
+                                selectedKind = kind
+                            } label: {
+                                Text(kind.displayName)
+                                    .font(.subheadline.bold())
+                                    .padding(.horizontal, 14).padding(.vertical, 8)
+                                    .background(
+                                        Capsule().fill(selectedKind == kind ? AnyShapeStyle(PATheme.goldMaterial) : AnyShapeStyle(Color.white.opacity(0.08)))
+                                    )
+                                    .foregroundColor(selectedKind == kind ? PATheme.ink : .white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-                .pickerStyle(.segmented)
-                .padding()
+                .padding(.vertical, 8)
 
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 16)], spacing: 16) {
@@ -57,11 +66,13 @@ private struct CosmeticCard: View {
     var equipped: Bool {
         switch item.kind {
         case .cardBack: return bankroll.equippedCardBack == item.id
+        case .cardFace: return bankroll.equippedCardFace == item.id
         case .tableFelt: return bankroll.equippedFelt == item.id
         case .tableRail: return bankroll.equippedRail == item.id
         case .tableBackdrop: return bankroll.equippedBackdrop == item.id
         case .chipSet: return bankroll.equippedChips == item.id
         case .avatar: return bankroll.equippedAvatar == item.id
+        case .avatarFrame: return bankroll.equippedAvatarFrame == item.id
         }
     }
 
@@ -122,6 +133,8 @@ private struct CosmeticCard: View {
         switch item.kind {
         case .cardBack:
             CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
+        case .cardFace:
+            CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
         case .tableFelt:
             RoundedRectangle(cornerRadius: 10).fill(feltColor)
         case .tableRail:
@@ -144,6 +157,15 @@ private struct CosmeticCard: View {
             Image(systemName: AvatarPalette.symbol(for: item.id))
                 .font(.system(size: 34))
                 .foregroundColor(.white)
+        case .avatarFrame:
+            ZStack {
+                Circle().fill(Color.black.opacity(0.35))
+                Image(systemName: "person.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 48, height: 48)
+            .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
         }
     }
 

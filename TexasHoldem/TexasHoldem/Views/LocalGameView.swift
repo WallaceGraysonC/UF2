@@ -21,10 +21,13 @@ struct LocalGameView: View {
         } else {
             let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false,
                                 cardBackID: BankrollManager.shared.equippedCardBack,
-                                avatarID: BankrollManager.shared.equippedAvatar)
+                                cardFaceID: BankrollManager.shared.equippedCardFace,
+                                avatarID: BankrollManager.shared.equippedAvatar,
+                                avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
             let bots = (1...botCount).map { i in
                 Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
                        cardBackID: BankrollManager.shared.equippedCardBack,
+                       cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())
             }
             _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
@@ -38,7 +41,7 @@ struct LocalGameView: View {
         GeometryReader { geo in
             ZStack {
                 BackdropPalette.gradient(for: bankroll.equippedBackdrop).ignoresSafeArea()
-                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack) { feltSize in
+                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack, cardFaceID: bankroll.equippedCardFace) { feltSize in
                     // The human's own seat is drawn separately below, layered
                     // above the button panel -- everyone else stays in the oval.
                     ForEach(Array(engine.players.enumerated()), id: \.element.id) { index, player in

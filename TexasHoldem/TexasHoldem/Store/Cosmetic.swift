@@ -1,7 +1,20 @@
 import Foundation
 
 enum CosmeticKind: String, Codable, CaseIterable {
-    case cardBack, tableFelt, tableRail, tableBackdrop, chipSet, avatar
+    case cardBack, cardFace, tableFelt, tableRail, tableBackdrop, chipSet, avatar, avatarFrame
+
+    var displayName: String {
+        switch self {
+        case .cardBack: return "Card Backs"
+        case .cardFace: return "Card Faces"
+        case .tableFelt: return "Felt"
+        case .tableRail: return "Rail"
+        case .tableBackdrop: return "Room"
+        case .chipSet: return "Chips"
+        case .avatar: return "Avatars"
+        case .avatarFrame: return "Frames"
+        }
+    }
 }
 
 struct Cosmetic: Identifiable, Codable, Hashable {
@@ -23,7 +36,9 @@ struct Cosmetic: Identifiable, Codable, Hashable {
 /// in-app virtual currency only -- there is no real-money purchase path.
 enum CosmeticCatalog {
     static let defaultCardBack = "cardback.classicBlue"
+    static let defaultCardFace = "face.classic"
     static let defaultAvatar = "avatar.default"
+    static let defaultAvatarFrame = "frame.none"
     static let defaultFelt = "felt.classicGreen"
     static let defaultRail = "rail.classicOak"
     static let defaultBackdrop = "backdrop.midnight"
@@ -39,6 +54,12 @@ enum CosmeticCatalog {
         Cosmetic(id: "cardback.copper", kind: .cardBack, name: "Copper", price: 1500, unlockRequirement: 1500, assetName: "cardback.copper"),
         Cosmetic(id: "cardback.gold", kind: .cardBack, name: "Gold Foil", price: 2600, unlockRequirement: 3000, assetName: "cardback.gold"),
         Cosmetic(id: "cardback.holographic", kind: .cardBack, name: "Holographic", price: 4500, unlockRequirement: 5000, assetName: "cardback.holographic"),
+
+        // MARK: Card face (the rank/suit style on the front of every card)
+        Cosmetic(id: "face.classic", kind: .cardFace, name: "Classic Serif", price: 0, unlockRequirement: 0, assetName: "face.classic"),
+        Cosmetic(id: "face.modern", kind: .cardFace, name: "Modern Sans", price: 700, unlockRequirement: 0, assetName: "face.modern"),
+        Cosmetic(id: "face.rounded", kind: .cardFace, name: "Rounded", price: 700, unlockRequirement: 0, assetName: "face.rounded"),
+        Cosmetic(id: "face.blockBold", kind: .cardFace, name: "Block Bold", price: 1200, unlockRequirement: 1500, assetName: "face.blockBold"),
 
         // MARK: Table felt
         Cosmetic(id: "felt.classicGreen", kind: .tableFelt, name: "Classic Green", price: 0, unlockRequirement: 0, assetName: "felt.classicGreen"),
@@ -84,6 +105,14 @@ enum CosmeticCatalog {
         Cosmetic(id: "avatar.astronaut", kind: .avatar, name: "Astronaut", price: 1500, unlockRequirement: 1500, assetName: "avatar.astronaut"),
         Cosmetic(id: "avatar.dragon", kind: .avatar, name: "Dragon", price: 2600, unlockRequirement: 3000, assetName: "avatar.dragon"),
         Cosmetic(id: "avatar.crown", kind: .avatar, name: "High Roller", price: 3600, unlockRequirement: 5000, assetName: "avatar.crown"),
+
+        // MARK: Avatar frames (the ring around your avatar icon at the table)
+        Cosmetic(id: "frame.none", kind: .avatarFrame, name: "No Frame", price: 0, unlockRequirement: 0, assetName: "frame.none"),
+        Cosmetic(id: "frame.silver", kind: .avatarFrame, name: "Silver Ring", price: 600, unlockRequirement: 0, assetName: "frame.silver"),
+        Cosmetic(id: "frame.gold", kind: .avatarFrame, name: "Gold Ring", price: 1000, unlockRequirement: 0, assetName: "frame.gold"),
+        Cosmetic(id: "frame.sapphire", kind: .avatarFrame, name: "Sapphire Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.sapphire"),
+        Cosmetic(id: "frame.crimson", kind: .avatarFrame, name: "Crimson Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.crimson"),
+        Cosmetic(id: "frame.royal", kind: .avatarFrame, name: "Royal Ring", price: 2400, unlockRequirement: 3000, assetName: "frame.royal"),
     ]
 
     static func items(of kind: CosmeticKind) -> [Cosmetic] {

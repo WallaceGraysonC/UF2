@@ -115,3 +115,36 @@ enum AvatarPalette {
         }
     }
 }
+
+/// The decorative ring drawn around a player's avatar icon at the table --
+/// a separate cosmetic slot from the avatar itself, so any avatar can be
+/// framed. "No Frame" renders as fully transparent, i.e. no ring at all.
+enum AvatarFramePalette {
+    static func stroke(for id: String) -> some ShapeStyle {
+        switch id {
+        case "frame.silver": return AnyShapeStyle(LinearGradient(colors: [Color(white: 0.9), Color(white: 0.6)], startPoint: .top, endPoint: .bottom))
+        case "frame.gold": return AnyShapeStyle(PATheme.goldMaterial)
+        case "frame.sapphire": return AnyShapeStyle(LinearGradient(colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.1, green: 0.2, blue: 0.6)], startPoint: .top, endPoint: .bottom))
+        case "frame.crimson": return AnyShapeStyle(LinearGradient(colors: [Color(red: 1.0, green: 0.4, blue: 0.45), Color(red: 0.5, green: 0.05, blue: 0.1)], startPoint: .top, endPoint: .bottom))
+        case "frame.royal": return AnyShapeStyle(LinearGradient(colors: [PATheme.goldBright, Color(red: 0.35, green: 0.1, blue: 0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        default: return AnyShapeStyle(Color.clear) // frame.none
+        }
+    }
+}
+
+/// Font design + weight for the rank/suit text on the *front* of every
+/// card -- a separate cosmetic slot from the card back.
+enum CardFacePalette {
+    static func design(for id: String) -> Font.Design {
+        switch id {
+        case "face.modern": return .default
+        case "face.rounded": return .rounded
+        case "face.blockBold": return .monospaced
+        default: return .serif // face.classic
+        }
+    }
+
+    static func weight(for id: String) -> Font.Weight {
+        id == "face.blockBold" ? .heavy : .bold
+    }
+}

@@ -30,7 +30,9 @@ struct OnlineGameView: View {
         if isHost {
             var players = [Player(id: localID, name: GKLocalPlayer.local.displayName, chips: Self.buyIn,
                                    cardBackID: BankrollManager.shared.equippedCardBack,
-                                   avatarID: BankrollManager.shared.equippedAvatar)]
+                                   cardFaceID: BankrollManager.shared.equippedCardFace,
+                                   avatarID: BankrollManager.shared.equippedAvatar,
+                                   avatarFrameID: BankrollManager.shared.equippedAvatarFrame)]
             players += match.players.map { Player(id: $0.gamePlayerID, name: $0.displayName, chips: Self.buyIn) }
             engine = PokerEngine(players: players)
         }
@@ -42,7 +44,7 @@ struct OnlineGameView: View {
             ZStack {
                 BackdropPalette.gradient(for: bankroll.equippedBackdrop).ignoresSafeArea()
                 if let state = multiplayer.latestState {
-                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack) { feltSize in
+                    TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack, cardFaceID: bankroll.equippedCardFace) { feltSize in
                         // The local player's own seat is drawn separately below,
                         // layered above the button panel -- everyone else stays in the oval.
                         ForEach(Array(state.players.enumerated()), id: \.element.id) { index, player in

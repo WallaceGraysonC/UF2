@@ -12,7 +12,9 @@ struct Player: Identifiable, Codable, Hashable {
     var isBot: Bool = false
     var hasActedThisRound: Bool = false
     var cardBackID: String = CosmeticCatalog.defaultCardBack
+    var cardFaceID: String = CosmeticCatalog.defaultCardFace
     var avatarID: String = CosmeticCatalog.defaultAvatar
+    var avatarFrameID: String = CosmeticCatalog.defaultAvatarFrame
 
     var isEliminated: Bool { chips <= 0 && !isAllIn }
 

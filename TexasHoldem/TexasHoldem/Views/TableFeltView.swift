@@ -10,15 +10,18 @@ struct TableFeltView<Content: View>: View {
     let feltID: String
     let railID: String
     let cardBackID: String
+    let cardFaceID: String
     let content: (CGSize) -> Content
 
     init(communityCards: [Card], pot: Int, feltID: String, railID: String = CosmeticCatalog.defaultRail,
-         cardBackID: String = CosmeticCatalog.defaultCardBack, @ViewBuilder content: @escaping (CGSize) -> Content) {
+         cardBackID: String = CosmeticCatalog.defaultCardBack, cardFaceID: String = CosmeticCatalog.defaultCardFace,
+         @ViewBuilder content: @escaping (CGSize) -> Content) {
         self.communityCards = communityCards
         self.pot = pot
         self.feltID = feltID
         self.railID = railID
         self.cardBackID = cardBackID
+        self.cardFaceID = cardFaceID
         self.content = content
     }
 
@@ -70,7 +73,7 @@ struct TableFeltView<Content: View>: View {
                 HStack(spacing: 7) {
                     ForEach(0..<5, id: \.self) { i in
                         if i < communityCards.count {
-                            CardView(card: communityCards[i], width: 50)
+                            CardView(card: communityCards[i], cardFaceID: cardFaceID, width: 50)
                                 .transition(.scale.combined(with: .opacity))
                         } else {
                             CardView(card: nil, faceDown: true, cardBackID: cardBackID, width: 50)

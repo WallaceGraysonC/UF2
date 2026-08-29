@@ -9,8 +9,8 @@ struct PlayerSeatView: View {
     var body: some View {
         VStack(spacing: 6) {
             HStack(spacing: 4) {
-                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, width: 46)
-                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, width: 46)
+                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: 46)
+                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: 46)
             }
             .opacity(player.isFolded ? 0.35 : 1)
 
@@ -24,9 +24,14 @@ struct PlayerSeatView: View {
                             .foregroundColor(PATheme.ink)
                             .materialShadow(radius: 2, y: 1)
                     }
-                    Image(systemName: AvatarPalette.symbol(for: player.avatarID))
-                        .font(.system(size: 9))
-                        .foregroundColor(PATheme.goldBright)
+                    ZStack {
+                        Circle().fill(Color.black.opacity(0.35))
+                        Image(systemName: AvatarPalette.symbol(for: player.avatarID))
+                            .font(.system(size: 8))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 15, height: 15)
+                    .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: player.avatarFrameID), lineWidth: 1.5))
                     Text(player.name)
                         .font(.caption.bold())
                         .lineLimit(1)

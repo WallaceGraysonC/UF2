@@ -43,6 +43,9 @@ final class BankrollManager: ObservableObject {
     @Published var equippedCardBack: String {
         didSet { write(equippedCardBack, forKey: Keys.equippedCardBack) }
     }
+    @Published var equippedCardFace: String {
+        didSet { write(equippedCardFace, forKey: Keys.equippedCardFace) }
+    }
     @Published var equippedFelt: String {
         didSet { write(equippedFelt, forKey: Keys.equippedFelt) }
     }
@@ -57,6 +60,9 @@ final class BankrollManager: ObservableObject {
     }
     @Published var equippedAvatar: String {
         didSet { write(equippedAvatar, forKey: Keys.equippedAvatar) }
+    }
+    @Published var equippedAvatarFrame: String {
+        didSet { write(equippedAvatarFrame, forKey: Keys.equippedAvatarFrame) }
     }
 
     /// True once `NSUbiquitousKeyValueStore` has synced at least once,
@@ -73,11 +79,13 @@ final class BankrollManager: ObservableObject {
         static let lastTopUpAt = "bankroll.lastTopUpAt"
         static let owned = "bankroll.owned"
         static let equippedCardBack = "bankroll.equippedCardBack"
+        static let equippedCardFace = "bankroll.equippedCardFace"
         static let equippedFelt = "bankroll.equippedFelt"
         static let equippedRail = "bankroll.equippedRail"
         static let equippedBackdrop = "bankroll.equippedBackdrop"
         static let equippedChips = "bankroll.equippedChips"
         static let equippedAvatar = "bankroll.equippedAvatar"
+        static let equippedAvatarFrame = "bankroll.equippedAvatarFrame"
     }
 
     private init() {
@@ -92,11 +100,13 @@ final class BankrollManager: ObservableObject {
         lastTopUpAt = savedTopUp > 0 ? Date(timeIntervalSince1970: savedTopUp) : nil
         ownedCosmeticIDs = Set(defaults.stringArray(forKey: Keys.owned) ?? [])
         equippedCardBack = defaults.string(forKey: Keys.equippedCardBack) ?? CosmeticCatalog.defaultCardBack
+        equippedCardFace = defaults.string(forKey: Keys.equippedCardFace) ?? CosmeticCatalog.defaultCardFace
         equippedFelt = defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt
         equippedRail = defaults.string(forKey: Keys.equippedRail) ?? CosmeticCatalog.defaultRail
         equippedBackdrop = defaults.string(forKey: Keys.equippedBackdrop) ?? CosmeticCatalog.defaultBackdrop
         equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
         equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
+        equippedAvatarFrame = defaults.string(forKey: Keys.equippedAvatarFrame) ?? CosmeticCatalog.defaultAvatarFrame
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(cloudDidChangeExternally),
@@ -122,11 +132,13 @@ final class BankrollManager: ObservableObject {
         if cloudTopUp > 0 { lastTopUpAt = Date(timeIntervalSince1970: cloudTopUp) }
         ownedCosmeticIDs = Set(cloud.array(forKey: Keys.owned) as? [String] ?? [])
         equippedCardBack = cloud.string(forKey: Keys.equippedCardBack) ?? equippedCardBack
+        equippedCardFace = cloud.string(forKey: Keys.equippedCardFace) ?? equippedCardFace
         equippedFelt = cloud.string(forKey: Keys.equippedFelt) ?? equippedFelt
         equippedRail = cloud.string(forKey: Keys.equippedRail) ?? equippedRail
         equippedBackdrop = cloud.string(forKey: Keys.equippedBackdrop) ?? equippedBackdrop
         equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
         equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
+        equippedAvatarFrame = cloud.string(forKey: Keys.equippedAvatarFrame) ?? equippedAvatarFrame
     }
 
     @objc private func cloudDidChangeExternally(_ notification: Notification) {
@@ -158,11 +170,13 @@ final class BankrollManager: ObservableObject {
         guard owns(cosmetic) else { return }
         switch cosmetic.kind {
         case .cardBack: equippedCardBack = cosmetic.id
+        case .cardFace: equippedCardFace = cosmetic.id
         case .tableFelt: equippedFelt = cosmetic.id
         case .tableRail: equippedRail = cosmetic.id
         case .tableBackdrop: equippedBackdrop = cosmetic.id
         case .chipSet: equippedChips = cosmetic.id
         case .avatar: equippedAvatar = cosmetic.id
+        case .avatarFrame: equippedAvatarFrame = cosmetic.id
         }
     }
 

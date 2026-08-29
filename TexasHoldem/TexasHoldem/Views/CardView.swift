@@ -4,6 +4,7 @@ struct CardView: View {
     let card: Card?
     var faceDown: Bool = false
     var cardBackID: String = CosmeticCatalog.defaultCardBack
+    var cardFaceID: String = CosmeticCatalog.defaultCardFace
     var width: CGFloat = 52
 
     var body: some View {
@@ -27,9 +28,9 @@ struct CardView: View {
                 if !faceDown, let card {
                     VStack(spacing: 2) {
                         Text(card.rank.label)
-                            .font(.system(size: width * 0.34, weight: .bold, design: .serif))
+                            .font(.system(size: width * 0.34, weight: CardFacePalette.weight(for: cardFaceID), design: CardFacePalette.design(for: cardFaceID)))
                         Text(card.suit.symbol)
-                            .font(.system(size: width * 0.34))
+                            .font(.system(size: width * 0.34, design: CardFacePalette.design(for: cardFaceID)))
                     }
                     .foregroundColor(card.suit.isRed ? PATheme.crimsonDeep : PATheme.ink)
                 } else {
