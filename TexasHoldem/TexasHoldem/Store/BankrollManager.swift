@@ -37,6 +37,13 @@ final class BankrollManager: ObservableObject {
     @Published private(set) var lastTopUpAt: Date? {
         didSet { write(lastTopUpAt?.timeIntervalSince1970 ?? -1, forKey: Keys.lastTopUpAt) }
     }
+    /// Lifetime experience points, earned by playing hands (not by chip
+    /// count) -- used purely to gate game modes like VIP High Stakes behind
+    /// time-invested rather than money, so it can't be bought or farmed via
+    /// bankroll top-ups.
+    @Published private(set) var xp: Int {
+        didSet { write(xp, forKey: Keys.xp) }
+    }
     @Published private(set) var ownedCosmeticIDs: Set<String> {
         didSet { write(Array(ownedCosmeticIDs), forKey: Keys.owned) }
     }
@@ -86,6 +93,7 @@ final class BankrollManager: ObservableObject {
         static let equippedChips = "bankroll.equippedChips"
         static let equippedAvatar = "bankroll.equippedAvatar"
         static let equippedAvatarFrame = "bankroll.equippedAvatarFrame"
+        static let xp = "bankroll.xp"
     }
 
     private init() {
@@ -107,6 +115,7 @@ final class BankrollManager: ObservableObject {
         equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
         equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
         equippedAvatarFrame = defaults.string(forKey: Keys.equippedAvatarFrame) ?? CosmeticCatalog.defaultAvatarFrame
+        xp = defaults.integer(forKey: Keys.xp)
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(cloudDidChangeExternally),
@@ -139,6 +148,7 @@ final class BankrollManager: ObservableObject {
         equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
         equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
         equippedAvatarFrame = cloud.string(forKey: Keys.equippedAvatarFrame) ?? equippedAvatarFrame
+        xp = max(xp, Int(cloud.longLong(forKey: Keys.xp)))
     }
 
     @objc private func cloudDidChangeExternally(_ notification: Notification) {
@@ -226,5 +236,39 @@ final class BankrollManager: ObservableObject {
         trackPeak()
         lastTopUpAt = Date()
         return true
+    }
+
+    // MARK: - Experience / Levels
+
+    /// The level required to play VIP High Stakes -- reached purely by
+    /// playing hands over time, not by spending or winning chips.
+    static let vipUnlockLevel = 5
+
+    /// Triangular XP curve: level 1 costs 0, and each subsequent level
+    /// costs 300 more XP than the last (level 2 = 300, level 3 = 900, ...).
+    private static func totalXP(forLevel level: Int) -> Int {
+        let n = level - 1
+        return 300 * n * (n + 1) / 2
+    }
+
+    var level: Int {
+        var lvl = 1
+        while Self.totalXP(forLevel: lvl + 1) <= xp { lvl += 1 }
+        return lvl
+    }
+
+    /// XP earned so far within the current level, and how much the current
+    /// level requires in total -- for progress bars.
+    var xpProgress: (current: Int, needed: Int) {
+        let base = Self.totalXP(forLevel: level)
+        let next = Self.totalXP(forLevel: level + 1)
+        return (xp - base, next - base)
+    }
+
+    var isVIPUnlocked: Bool { level >= Self.vipUnlockLevel }
+
+    func addXP(_ amount: Int) {
+        guard amount > 0 else { return }
+        xp += amount
     }
 }

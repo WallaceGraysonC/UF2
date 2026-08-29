@@ -16,9 +16,13 @@ final class PokerEngine: ObservableObject {
     @Published private(set) var lastActionDescription: String = ""
     @Published private(set) var showdownResults: [ShowdownResult] = []
     @Published private(set) var isHandInProgress: Bool = false
+    /// IDs of players who have busted out, in the order they were
+    /// eliminated (first eliminated = first in the array). Used by
+    /// tournament modes (Sit & Go) to award finishing placements.
+    @Published private(set) var eliminationOrder: [String] = []
 
-    let smallBlind: Int
-    let bigBlind: Int
+    private(set) var smallBlind: Int
+    private(set) var bigBlind: Int
 
     private var deck = Deck()
     private var pots: [PotShare] = []
@@ -55,7 +59,17 @@ final class PokerEngine: ObservableObject {
 
     // MARK: - Hand lifecycle
 
+    /// Raises the blinds for a tournament's next level (Sit & Go). Has no
+    /// effect on the current hand in progress -- takes effect at the next
+    /// `startNextHand()`.
+    func setBlinds(small: Int, big: Int) {
+        smallBlind = small
+        bigBlind = big
+    }
+
     func startNextHand() {
+        let bustedOut = players.filter { $0.chips <= 0 }.map { $0.id }
+        eliminationOrder.append(contentsOf: bustedOut)
         players.removeAll { $0.chips <= 0 }
         guard players.count >= 2 else {
             lastActionDescription = "Not enough players with chips to continue."

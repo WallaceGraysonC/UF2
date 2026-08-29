@@ -11,6 +11,21 @@ struct HomeView: View {
     @State private var activeMatch: GKMatch?
     @State private var path = NavigationPath()
 
+    @State private var showCustomTable = false
+    @State private var showDailyChallenge = false
+    @State private var showSitGo = false
+    @State private var showVIP = false
+    @State private var showVIPLockedAlert = false
+
+    private static let sitGoTournament = LocalGameView.TournamentConfig(
+        blindLevels: [(10, 20), (15, 30), (25, 50), (50, 100), (75, 150), (100, 200)],
+        handsPerLevel: 8
+    )
+    private static let vipTournament = LocalGameView.TournamentConfig(
+        blindLevels: [(100, 200), (150, 300), (250, 500), (500, 1000)],
+        handsPerLevel: 10
+    )
+
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
@@ -65,6 +80,34 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 32)
 
+                    VStack(spacing: 10) {
+                        Text("OTHER GAME MODES")
+                            .font(.caption2.bold())
+                            .tracking(1.2)
+                            .foregroundColor(.white.opacity(0.4))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button { showCustomTable = true } label: {
+                            MenuButtonLabel(title: "Custom Table Setup", icon: "slider.horizontal.3")
+                        }
+                        Button { showSitGo = true } label: {
+                            MenuButtonLabel(title: "Sit & Go", icon: "trophy.fill")
+                        }
+                        Button { showDailyChallenge = true } label: {
+                            MenuButtonLabel(title: "Daily Challenge", icon: "calendar.badge.clock")
+                        }
+                        Button {
+                            if bankroll.isVIPUnlocked { showVIP = true } else { showVIPLockedAlert = true }
+                        } label: {
+                            MenuButtonLabel(
+                                title: "VIP High Stakes",
+                                icon: bankroll.isVIPUnlocked ? "crown.fill" : "lock.fill",
+                                dimmed: !bankroll.isVIPUnlocked
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 32)
+
                     Spacer()
 
                     if bankroll.canTopUpBankroll {
@@ -89,6 +132,21 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showStore) { StoreView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
+            .sheet(isPresented: $showDailyChallenge) { DailyChallengeView() }
+            .fullScreenCover(isPresented: $showCustomTable) { CustomTableSetupView() }
+            .fullScreenCover(isPresented: $showSitGo) {
+                LocalGameView(botCount: 5, buyIn: 500, smallBlind: 10, bigBlind: 20,
+                              enableResume: false, tableTitle: "Sit & Go", tournament: Self.sitGoTournament)
+            }
+            .fullScreenCover(isPresented: $showVIP) {
+                LocalGameView(botCount: 5, buyIn: 5000, smallBlind: 100, bigBlind: 200,
+                              enableResume: false, tableTitle: "VIP High Stakes", tournament: Self.vipTournament)
+            }
+            .alert("VIP High Stakes Locked", isPresented: $showVIPLockedAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Reach Level \(BankrollManager.vipUnlockLevel) to unlock VIP High Stakes. You're Level \(bankroll.level) — keep playing hands to earn XP.")
+            }
             .fullScreenCover(isPresented: $showMatchmaking) {
                 MatchmakingView(
                     onMatchFound: { match in
@@ -113,6 +171,7 @@ private enum Destination: Hashable {
 private struct MenuButtonLabel: View {
     let title: String
     let icon: String
+    var dimmed: Bool = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -140,6 +199,7 @@ private struct MenuButtonLabel: View {
         )
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
         .materialShadow(radius: 6, y: 3)
+        .opacity(dimmed ? 0.55 : 1)
     }
 }
 

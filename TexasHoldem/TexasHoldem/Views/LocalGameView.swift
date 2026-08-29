@@ -9,11 +9,27 @@ struct LocalGameView: View {
     private let humanID: String
     private let buyIn: Int
     private let resumedFromSave: Bool
+    private let enableResume: Bool
+    private let tableTitle: String
+    /// When set, this is a Sit & Go: no rebuys, blinds escalate over time,
+    /// and busting/winning ends the session with a placement screen instead
+    /// of returning to the felt.
+    private let tournament: TournamentConfig?
     @State private var hasSettled = false
     @State private var showHandGuide = false
 
-    init(botCount: Int = 4, buyIn: Int = 500) {
-        if let saved = GamePersistence.loadLocalGame() {
+    struct TournamentConfig {
+        let blindLevels: [(small: Int, big: Int)]
+        let handsPerLevel: Int
+    }
+
+    init(botCount: Int = 4, buyIn: Int = 500, smallBlind: Int = 10, bigBlind: Int = 20,
+         enableResume: Bool = true, tableTitle: String = "Practice Table",
+         tournament: TournamentConfig? = nil) {
+        self.enableResume = enableResume
+        self.tableTitle = tableTitle
+        self.tournament = tournament
+        if enableResume, let saved = GamePersistence.loadLocalGame() {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
             self.humanID = saved.humanID
             self.buyIn = saved.buyIn
@@ -30,7 +46,7 @@ struct LocalGameView: View {
                        cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())
             }
-            _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
+            _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots, smallBlind: smallBlind, bigBlind: bigBlind))
             self.humanID = human.id
             self.buyIn = buyIn
             self.resumedFromSave = false
@@ -122,6 +138,9 @@ struct LocalGameView: View {
         }
         .onChange(of: engine.activePlayerIndex) { _ in runBotTurnIfNeeded() }
         .onChange(of: engine.round) { _ in runBotTurnIfNeeded() }
+        .onChange(of: engine.isHandInProgress) { inProgress in
+            if !inProgress { handleHandEnd() }
+        }
     }
 
     private var header: some View {
@@ -133,7 +152,7 @@ struct LocalGameView: View {
                 Image(systemName: "chevron.left").foregroundColor(.white)
             }
             Spacer()
-            Text("Practice Table")
+            Text(tableTitle)
                 .foregroundColor(.white)
                 .font(.headline)
             Spacer()
@@ -153,6 +172,9 @@ struct LocalGameView: View {
     @ViewBuilder
     private var footer: some View {
         if let human = engine.players.first(where: { $0.id == humanID }), !engine.isHandInProgress {
+            if let tournament {
+                tournamentFooter(human: human, tournament: tournament)
+            } else {
             VStack(spacing: 10) {
                 if !engine.showdownResults.isEmpty {
                     ForEach(engine.showdownResults) { result in
@@ -196,6 +218,7 @@ struct LocalGameView: View {
                 }
             }
             .padding(.bottom, 20)
+            }
         } else if let human = engine.players.first(where: { $0.id == humanID }), human.id == engine.currentPlayer()?.id {
             BettingControlsView(
                 player: human,
@@ -205,6 +228,89 @@ struct LocalGameView: View {
                 onAction: { engine.apply($0, by: humanID) }
             )
             .padding(.bottom, 12)
+        }
+    }
+
+    @ViewBuilder
+    private func tournamentFooter(human: Player, tournament: TournamentConfig) -> some View {
+        VStack(spacing: 10) {
+            if !engine.showdownResults.isEmpty {
+                ForEach(engine.showdownResults) { result in
+                    Text("\(result.playerName) wins $\(result.amountWon) — \(result.hand.category.displayName)")
+                        .font(.footnote.bold())
+                        .foregroundColor(.yellow)
+                }
+            }
+            if human.chips <= 0 {
+                let placement = engine.players.filter { $0.chips > 0 }.count + 1
+                Text("Eliminated — you placed #\(placement)")
+                    .font(.headline.bold())
+                    .foregroundColor(.white)
+                Button("Done") {
+                    finishTournament(placement: placement)
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, 40)
+            } else if engine.players.count == 1 {
+                Text("You won the tournament!")
+                    .font(.headline.bold())
+                    .foregroundColor(PATheme.goldBright)
+                Button("Collect Winnings") {
+                    finishTournament(placement: 1)
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, 40)
+            } else {
+                Button("Next Hand") { engine.startNextHand() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 40)
+            }
+        }
+        .padding(.bottom, 20)
+    }
+
+    /// Settles a finished Sit & Go: the winner's whole stack converts back
+    /// into the persistent bankroll (the buy-ins from every bot at the
+    /// table), everyone else just keeps the XP for how far they got.
+    private func finishTournament(placement: Int) {
+        guard !hasSettled else { return }
+        hasSettled = true
+        if placement == 1, let human = engine.players.first(where: { $0.id == humanID }) {
+            bankroll.applyDelta(human.chips)
+            bankroll.addXP(300)
+        } else {
+            bankroll.addXP(max(50, 300 / placement))
+        }
+        GamePersistence.clearLocalGame()
+    }
+
+    /// Bumps the blinds to the next tournament level based on hands played
+    /// so far, if one is configured.
+    private func applyBlindEscalation(_ tournament: TournamentConfig) {
+        guard tournament.handsPerLevel > 0, !tournament.blindLevels.isEmpty else { return }
+        let levelIndex = min(engine.handNumber / tournament.handsPerLevel, tournament.blindLevels.count - 1)
+        let level = tournament.blindLevels[levelIndex]
+        if level.small != engine.smallBlind || level.big != engine.bigBlind {
+            engine.setBlinds(small: level.small, big: level.big)
+        }
+    }
+
+    /// Fires once per completed hand: feeds the XP and Daily Challenge
+    /// systems, and escalates tournament blinds if applicable.
+    private func handleHandEnd() {
+        guard engine.handNumber > 0 else { return }
+        DailyChallengeManager.shared.recordHandPlayed()
+        bankroll.addXP(10)
+        if let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
+            DailyChallengeManager.shared.recordHandWon()
+            DailyChallengeManager.shared.recordPotWon(amount: result.amountWon)
+            DailyChallengeManager.shared.recordShowdownWin(category: result.hand.category)
+            bankroll.addXP(20)
+        }
+        if let tournament {
+            applyBlindEscalation(tournament)
         }
     }
 
@@ -224,15 +330,17 @@ struct LocalGameView: View {
         if let human = engine.players.first(where: { $0.id == humanID }) {
             bankroll.applyDelta(human.chips)
         }
-        GamePersistence.clearLocalGame()
+        if enableResume { GamePersistence.clearLocalGame() }
         dismiss()
     }
 
     /// Saves the table exactly as it stands so the player can back out (or
     /// have the app backgrounded/killed) and resume the same hand later.
-    /// Chips already bought in stay "at the table" until a Cash Out.
+    /// Chips already bought in stay "at the table" until a Cash Out. Only
+    /// the classic "Play vs Bots" table participates in resume, so the
+    /// other game modes never collide with its single save slot.
     private func saveProgress() {
-        guard !hasSettled else { return }
+        guard enableResume, !hasSettled else { return }
         guard let human = engine.players.first(where: { $0.id == humanID }), human.chips > 0 || engine.isHandInProgress else {
             GamePersistence.clearLocalGame()
             return

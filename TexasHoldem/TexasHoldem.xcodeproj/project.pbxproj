@@ -18,6 +18,9 @@
 		57F55B9D9FA94AB0B8E1D4E4 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */; };
 		BDF890D5EADB448EA46B9C07 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */; };
 		F54BB3364F7342FA8128DEBC /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
+		54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */; };
+		6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D970069100F94956BFF5129C /* CustomTableSetupView.swift */; };
+		DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */; };
 		93DF289C11AE4D66A360DBCA /* BankrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878052A3CB984E92943F12F0 /* BankrollManager.swift */; };
 		A6EE0A5C79524B1B955A9630 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D06747AF18A4010A158D74F /* CardView.swift */; };
 		F804B7C2589744859C9C28A6 /* PlayerSeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502F570797864A4EB74F5663 /* PlayerSeatView.swift */; };
@@ -52,6 +55,9 @@
 		AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMatch.swift; sourceTree = "<group>"; };
 		CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
+		53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
+		D970069100F94956BFF5129C /* CustomTableSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableSetupView.swift; sourceTree = "<group>"; };
+		92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeView.swift; sourceTree = "<group>"; };
 		878052A3CB984E92943F12F0 /* BankrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankrollManager.swift; sourceTree = "<group>"; };
 		8D06747AF18A4010A158D74F /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 		502F570797864A4EB74F5663 /* PlayerSeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSeatView.swift; sourceTree = "<group>"; };
@@ -150,6 +156,7 @@
 				CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */,
 				878052A3CB984E92943F12F0 /* BankrollManager.swift */,
 				B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */,
+				53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -171,6 +178,8 @@
 				4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */,
 				0F52557ED72347C68000B399 /* PATheme.swift */,
 				7DA906DE75764AE59CD2F15C /* HandTypeBadge.swift */,
+				D970069100F94956BFF5129C /* CustomTableSetupView.swift */,
+				92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -282,6 +291,9 @@
 				20BA26A63EA64006AC4F0A75 /* CosmeticPalettes.swift in Sources */,
 				B465E83382BB4F7DA14720AB /* PATheme.swift in Sources */,
 				8175C0635F6047769968C35B /* HandTypeBadge.swift in Sources */,
+				54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */,
+				6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */,
+				DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
