@@ -49,6 +49,9 @@ final class BankrollManager: ObservableObject {
     @Published var equippedRail: String {
         didSet { write(equippedRail, forKey: Keys.equippedRail) }
     }
+    @Published var equippedBackdrop: String {
+        didSet { write(equippedBackdrop, forKey: Keys.equippedBackdrop) }
+    }
     @Published var equippedChips: String {
         didSet { write(equippedChips, forKey: Keys.equippedChips) }
     }
@@ -72,6 +75,7 @@ final class BankrollManager: ObservableObject {
         static let equippedCardBack = "bankroll.equippedCardBack"
         static let equippedFelt = "bankroll.equippedFelt"
         static let equippedRail = "bankroll.equippedRail"
+        static let equippedBackdrop = "bankroll.equippedBackdrop"
         static let equippedChips = "bankroll.equippedChips"
         static let equippedAvatar = "bankroll.equippedAvatar"
     }
@@ -90,6 +94,7 @@ final class BankrollManager: ObservableObject {
         equippedCardBack = defaults.string(forKey: Keys.equippedCardBack) ?? CosmeticCatalog.defaultCardBack
         equippedFelt = defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt
         equippedRail = defaults.string(forKey: Keys.equippedRail) ?? CosmeticCatalog.defaultRail
+        equippedBackdrop = defaults.string(forKey: Keys.equippedBackdrop) ?? CosmeticCatalog.defaultBackdrop
         equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
         equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
 
@@ -119,6 +124,7 @@ final class BankrollManager: ObservableObject {
         equippedCardBack = cloud.string(forKey: Keys.equippedCardBack) ?? equippedCardBack
         equippedFelt = cloud.string(forKey: Keys.equippedFelt) ?? equippedFelt
         equippedRail = cloud.string(forKey: Keys.equippedRail) ?? equippedRail
+        equippedBackdrop = cloud.string(forKey: Keys.equippedBackdrop) ?? equippedBackdrop
         equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
         equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
     }
@@ -154,6 +160,7 @@ final class BankrollManager: ObservableObject {
         case .cardBack: equippedCardBack = cosmetic.id
         case .tableFelt: equippedFelt = cosmetic.id
         case .tableRail: equippedRail = cosmetic.id
+        case .tableBackdrop: equippedBackdrop = cosmetic.id
         case .chipSet: equippedChips = cosmetic.id
         case .avatar: equippedAvatar = cosmetic.id
         }

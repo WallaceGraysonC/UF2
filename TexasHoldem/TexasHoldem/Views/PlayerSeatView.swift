@@ -24,6 +24,9 @@ struct PlayerSeatView: View {
                             .foregroundColor(PATheme.ink)
                             .materialShadow(radius: 2, y: 1)
                     }
+                    Image(systemName: AvatarPalette.symbol(for: player.avatarID))
+                        .font(.system(size: 9))
+                        .foregroundColor(PATheme.goldBright)
                     Text(player.name)
                         .font(.caption.bold())
                         .lineLimit(1)

@@ -1,7 +1,7 @@
 import Foundation
 
 enum CosmeticKind: String, Codable, CaseIterable {
-    case cardBack, tableFelt, tableRail, chipSet, avatar
+    case cardBack, tableFelt, tableRail, tableBackdrop, chipSet, avatar
 }
 
 struct Cosmetic: Identifiable, Codable, Hashable {
@@ -26,6 +26,7 @@ enum CosmeticCatalog {
     static let defaultAvatar = "avatar.default"
     static let defaultFelt = "felt.classicGreen"
     static let defaultRail = "rail.classicOak"
+    static let defaultBackdrop = "backdrop.midnight"
     static let defaultChips = "chips.classic"
 
     static let all: [Cosmetic] = [
@@ -56,6 +57,15 @@ enum CosmeticCatalog {
         Cosmetic(id: "rail.roseGold", kind: .tableRail, name: "Rose Gold", price: 2000, unlockRequirement: 1500, assetName: "rail.roseGold"),
         Cosmetic(id: "rail.carbonFiber", kind: .tableRail, name: "Carbon Fiber", price: 2800, unlockRequirement: 3000, assetName: "rail.carbonFiber"),
         Cosmetic(id: "rail.platinum", kind: .tableRail, name: "Platinum", price: 4200, unlockRequirement: 5000, assetName: "rail.platinum"),
+
+        // MARK: Table backdrop (the room/scene behind the table itself)
+        Cosmetic(id: "backdrop.midnight", kind: .tableBackdrop, name: "Midnight", price: 0, unlockRequirement: 0, assetName: "backdrop.midnight"),
+        Cosmetic(id: "backdrop.casinoFloor", kind: .tableBackdrop, name: "Casino Floor", price: 700, unlockRequirement: 0, assetName: "backdrop.casinoFloor"),
+        Cosmetic(id: "backdrop.velvetLounge", kind: .tableBackdrop, name: "Velvet Lounge", price: 900, unlockRequirement: 0, assetName: "backdrop.velvetLounge"),
+        Cosmetic(id: "backdrop.sunsetLounge", kind: .tableBackdrop, name: "Sunset Lounge", price: 1100, unlockRequirement: 0, assetName: "backdrop.sunsetLounge"),
+        Cosmetic(id: "backdrop.emeraldRoom", kind: .tableBackdrop, name: "Emerald Room", price: 1100, unlockRequirement: 0, assetName: "backdrop.emeraldRoom"),
+        Cosmetic(id: "backdrop.neonNights", kind: .tableBackdrop, name: "Neon Nights", price: 2000, unlockRequirement: 1500, assetName: "backdrop.neonNights"),
+        Cosmetic(id: "backdrop.royalGold", kind: .tableBackdrop, name: "Royal Gold", price: 3000, unlockRequirement: 3000, assetName: "backdrop.royalGold"),
 
         // MARK: Chip sets
         Cosmetic(id: "chips.classic", kind: .chipSet, name: "Classic Chips", price: 0, unlockRequirement: 0, assetName: "chips.classic"),

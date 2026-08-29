@@ -9,13 +9,16 @@ struct TableFeltView<Content: View>: View {
     let pot: Int
     let feltID: String
     let railID: String
+    let cardBackID: String
     let content: (CGSize) -> Content
 
-    init(communityCards: [Card], pot: Int, feltID: String, railID: String = CosmeticCatalog.defaultRail, @ViewBuilder content: @escaping (CGSize) -> Content) {
+    init(communityCards: [Card], pot: Int, feltID: String, railID: String = CosmeticCatalog.defaultRail,
+         cardBackID: String = CosmeticCatalog.defaultCardBack, @ViewBuilder content: @escaping (CGSize) -> Content) {
         self.communityCards = communityCards
         self.pot = pot
         self.feltID = feltID
         self.railID = railID
+        self.cardBackID = cardBackID
         self.content = content
     }
 
@@ -70,7 +73,7 @@ struct TableFeltView<Content: View>: View {
                             CardView(card: communityCards[i], width: 50)
                                 .transition(.scale.combined(with: .opacity))
                         } else {
-                            CardView(card: nil, faceDown: true, width: 50)
+                            CardView(card: nil, faceDown: true, cardBackID: cardBackID, width: 50)
                                 .opacity(0.2)
                         }
                     }

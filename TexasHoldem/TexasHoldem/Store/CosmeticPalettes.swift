@@ -68,3 +68,50 @@ enum RailPalette {
         }
     }
 }
+
+/// The room/scene rendered behind the table itself -- a separate cosmetic
+/// slot from the felt and rail, so the whole screen (not just the table)
+/// can be restyled.
+enum BackdropPalette {
+    static func gradient(for id: String) -> RadialGradient {
+        let (glow, deep) = colors(for: id)
+        return RadialGradient(colors: [glow, deep, .black],
+                               center: UnitPoint(x: 0.5, y: 0.32), startRadius: 10, endRadius: 700)
+    }
+
+    private static func colors(for id: String) -> (Color, Color) {
+        switch id {
+        case "backdrop.casinoFloor":
+            return (Color(red: 0.35, green: 0.22, blue: 0.08), Color(red: 0.14, green: 0.09, blue: 0.03))
+        case "backdrop.velvetLounge":
+            return (Color(red: 0.28, green: 0.08, blue: 0.32), Color(red: 0.12, green: 0.03, blue: 0.15))
+        case "backdrop.sunsetLounge":
+            return (Color(red: 0.45, green: 0.18, blue: 0.12), Color(red: 0.18, green: 0.07, blue: 0.05))
+        case "backdrop.emeraldRoom":
+            return (Color(red: 0.06, green: 0.30, blue: 0.20), Color(red: 0.02, green: 0.12, blue: 0.08))
+        case "backdrop.neonNights":
+            return (Color(red: 0.05, green: 0.32, blue: 0.38), Color(red: 0.24, green: 0.05, blue: 0.30))
+        case "backdrop.royalGold":
+            return (Color(red: 0.38, green: 0.30, blue: 0.09), Color(red: 0.15, green: 0.12, blue: 0.03))
+        default: // backdrop.midnight
+            return (Color(red: 0.11, green: 0.11, blue: 0.12), Color(red: 0.03, green: 0.03, blue: 0.04))
+        }
+    }
+}
+
+/// SF Symbol used to represent an avatar cosmetic, shared between the store
+/// swatches and the small icon shown next to a player's name at the table.
+enum AvatarPalette {
+    static func symbol(for id: String) -> String {
+        switch id {
+        case "avatar.shark": return "fish.fill"
+        case "avatar.robot": return "faceid"
+        case "avatar.fox": return "pawprint.fill"
+        case "avatar.wizard": return "wand.and.stars"
+        case "avatar.astronaut": return "moon.stars.fill"
+        case "avatar.dragon": return "flame.fill"
+        case "avatar.crown": return "crown.fill"
+        default: return "person.circle.fill"
+        }
+    }
+}

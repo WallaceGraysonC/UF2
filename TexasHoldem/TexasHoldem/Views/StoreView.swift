@@ -17,6 +17,7 @@ struct StoreView: View {
                     Text("Cards").tag(CosmeticKind.cardBack)
                     Text("Felt").tag(CosmeticKind.tableFelt)
                     Text("Rail").tag(CosmeticKind.tableRail)
+                    Text("Room").tag(CosmeticKind.tableBackdrop)
                     Text("Chips").tag(CosmeticKind.chipSet)
                     Text("Avatars").tag(CosmeticKind.avatar)
                 }
@@ -58,6 +59,7 @@ private struct CosmeticCard: View {
         case .cardBack: return bankroll.equippedCardBack == item.id
         case .tableFelt: return bankroll.equippedFelt == item.id
         case .tableRail: return bankroll.equippedRail == item.id
+        case .tableBackdrop: return bankroll.equippedBackdrop == item.id
         case .chipSet: return bankroll.equippedChips == item.id
         case .avatar: return bankroll.equippedAvatar == item.id
         }
@@ -130,13 +132,16 @@ private struct CosmeticCard: View {
                         .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
                         .padding(4)
                 )
+        case .tableBackdrop:
+            RoundedRectangle(cornerRadius: 10)
+                .fill(BackdropPalette.gradient(for: item.id))
         case .chipSet:
             HStack(spacing: -8) {
                 Circle().fill(chipColor).frame(width: 30, height: 30)
                 Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
             }
         case .avatar:
-            Image(systemName: avatarSymbol)
+            Image(systemName: AvatarPalette.symbol(for: item.id))
                 .font(.system(size: 34))
                 .foregroundColor(.white)
         }
@@ -152,19 +157,6 @@ private struct CosmeticCard: View {
         case "chips.sapphire": return Color(red: 0.1, green: 0.3, blue: 0.9)
         case "chips.diamond": return .white
         default: return .red
-        }
-    }
-
-    private var avatarSymbol: String {
-        switch item.id {
-        case "avatar.shark": return "fish.fill"
-        case "avatar.robot": return "faceid"
-        case "avatar.fox": return "pawprint.fill"
-        case "avatar.wizard": return "wand.and.stars"
-        case "avatar.astronaut": return "moon.stars.fill"
-        case "avatar.dragon": return "flame.fill"
-        case "avatar.crown": return "crown.fill"
-        default: return "person.circle.fill"
         }
     }
 }

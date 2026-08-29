@@ -19,9 +19,13 @@ struct LocalGameView: View {
             self.buyIn = saved.buyIn
             self.resumedFromSave = true
         } else {
-            let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false)
+            let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false,
+                                cardBackID: BankrollManager.shared.equippedCardBack,
+                                avatarID: BankrollManager.shared.equippedAvatar)
             let bots = (1...botCount).map { i in
-                Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true)
+                Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
+                       cardBackID: BankrollManager.shared.equippedCardBack,
+                       avatarID: BotNames.randomAvatar())
             }
             _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
             self.humanID = human.id
@@ -33,8 +37,8 @@ struct LocalGameView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.black.ignoresSafeArea()
-                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail) { feltSize in
+                BackdropPalette.gradient(for: bankroll.equippedBackdrop).ignoresSafeArea()
+                TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack) { feltSize in
                     // The human's own seat is drawn separately below, layered
                     // above the button panel -- everyone else stays in the oval.
                     ForEach(Array(engine.players.enumerated()), id: \.element.id) { index, player in
@@ -245,5 +249,7 @@ struct LocalGameView: View {
 
 enum BotNames {
     static let pool = ["Ace", "Riverboat Rae", "Chip", "Duke", "Sable", "Maverick", "Ivy", "Blaze"]
+    private static let avatarPool = ["avatar.shark", "avatar.robot", "avatar.fox", "avatar.wizard", "avatar.astronaut", "avatar.dragon"]
     static func random() -> String { pool.randomElement() ?? "Bot" }
+    static func randomAvatar() -> String { avatarPool.randomElement() ?? CosmeticCatalog.defaultAvatar }
 }
