@@ -35,18 +35,22 @@ struct LocalGameView: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt) { feltSize in
+                    // The human's own seat is drawn separately below, layered
+                    // above the button panel -- everyone else stays in the oval.
                     ForEach(Array(engine.players.enumerated()), id: \.element.id) { index, player in
-                        let offset = SeatLayout.offsets(count: engine.players.count)[index]
-                        PlayerSeatView(
-                            player: player,
-                            isActive: engine.activePlayerIndex == index,
-                            isDealer: engine.dealerIndex == index,
-                            revealCards: player.id == humanID || engine.round == .showdown
-                        )
-                        .position(
-                            x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
-                            y: feltSize.height / 2 + offset.y * feltSize.height * 0.44
-                        )
+                        if player.id != humanID {
+                            let offset = SeatLayout.offsets(count: engine.players.count)[index]
+                            PlayerSeatView(
+                                player: player,
+                                isActive: engine.activePlayerIndex == index,
+                                isDealer: engine.dealerIndex == index,
+                                revealCards: engine.round == .showdown
+                            )
+                            .position(
+                                x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
+                                y: feltSize.height / 2 + offset.y * feltSize.height * 0.44
+                            )
+                        }
                     }
                 }
                 .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.80)
@@ -54,26 +58,45 @@ struct LocalGameView: View {
 
                 VStack {
                     header
-                    if let handText = engine.handDescription(for: humanID) {
-                        HandTypeBadge(text: handText)
-                    }
                     Spacer()
-                    if !engine.lastActionDescription.isEmpty {
-                        HStack {
-                            Text(engine.lastActionDescription)
-                                .font(.footnote)
-                                .foregroundColor(.white.opacity(0.9))
-                                .multilineTextAlignment(.leading)
-                                .lineLimit(2)
-                                .padding(.horizontal, 12).padding(.vertical, 6)
-                                .background(Capsule().fill(.ultraThinMaterial))
-                                .frame(maxWidth: 190, alignment: .leading)
+                    if !engine.lastActionDescription.isEmpty || engine.handDescription(for: humanID) != nil {
+                        HStack(alignment: .top) {
+                            if !engine.lastActionDescription.isEmpty {
+                                Text(engine.lastActionDescription)
+                                    .font(.footnote)
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(2)
+                                    .padding(.horizontal, 12).padding(.vertical, 6)
+                                    .background(Capsule().fill(.ultraThinMaterial))
+                                    .frame(maxWidth: 190, alignment: .leading)
+                            }
                             Spacer()
+                            if let handText = engine.handDescription(for: humanID) {
+                                HandTypeBadge(text: handText)
+                            }
                         }
-                        .padding(.leading)
+                        .padding(.horizontal)
                         .padding(.bottom, 4)
                     }
                     footer
+                }
+
+                // Hero seat: drawn last so it layers in front of the button
+                // panel below it, overlapping its top edge slightly.
+                if let human = engine.players.first(where: { $0.id == humanID }),
+                   let humanIndex = engine.players.firstIndex(where: { $0.id == humanID }) {
+                    PlayerSeatView(
+                        player: human,
+                        isActive: engine.activePlayerIndex == humanIndex,
+                        isDealer: engine.dealerIndex == humanIndex,
+                        revealCards: true
+                    )
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 128)
+                    // Purely visual -- never intercept taps meant for the
+                    // buttons underneath it where it overlaps them.
+                    .allowsHitTesting(false)
                 }
             }
         }

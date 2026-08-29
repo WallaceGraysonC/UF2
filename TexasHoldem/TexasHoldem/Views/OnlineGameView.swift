@@ -41,18 +41,22 @@ struct OnlineGameView: View {
                 Color.black.ignoresSafeArea()
                 if let state = multiplayer.latestState {
                     TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt) { feltSize in
+                        // The local player's own seat is drawn separately below,
+                        // layered above the button panel -- everyone else stays in the oval.
                         ForEach(Array(state.players.enumerated()), id: \.element.id) { index, player in
-                            let offset = SeatLayout.offsets(count: state.players.count)[index]
-                            PlayerSeatView(
-                                player: player,
-                                isActive: state.activePlayerIndex == index,
-                                isDealer: state.dealerIndex == index,
-                                revealCards: player.id == localID || state.round == .showdown
-                            )
-                            .position(
-                                x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
-                                y: feltSize.height / 2 + offset.y * feltSize.height * 0.44
-                            )
+                            if player.id != localID {
+                                let offset = SeatLayout.offsets(count: state.players.count)[index]
+                                PlayerSeatView(
+                                    player: player,
+                                    isActive: state.activePlayerIndex == index,
+                                    isDealer: state.dealerIndex == index,
+                                    revealCards: state.round == .showdown
+                                )
+                                .position(
+                                    x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,
+                                    y: feltSize.height / 2 + offset.y * feltSize.height * 0.44
+                                )
+                            }
                         }
                     }
                     .frame(width: geo.size.width * 0.98, height: geo.size.height * 0.80)
@@ -63,26 +67,47 @@ struct OnlineGameView: View {
 
                 VStack {
                     header
-                    if let handText = multiplayer.latestState?.handDescription(for: localID) {
-                        HandTypeBadge(text: handText)
-                    }
                     Spacer()
-                    if let state = multiplayer.latestState, !state.lastActionDescription.isEmpty {
-                        HStack {
-                            Text(state.lastActionDescription)
-                                .font(.footnote)
-                                .foregroundColor(.white.opacity(0.9))
-                                .multilineTextAlignment(.leading)
-                                .lineLimit(2)
-                                .padding(.horizontal, 12).padding(.vertical, 6)
-                                .background(Capsule().fill(.ultraThinMaterial))
-                                .frame(maxWidth: 190, alignment: .leading)
+                    if let state = multiplayer.latestState,
+                       !state.lastActionDescription.isEmpty || state.handDescription(for: localID) != nil {
+                        HStack(alignment: .top) {
+                            if !state.lastActionDescription.isEmpty {
+                                Text(state.lastActionDescription)
+                                    .font(.footnote)
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(2)
+                                    .padding(.horizontal, 12).padding(.vertical, 6)
+                                    .background(Capsule().fill(.ultraThinMaterial))
+                                    .frame(maxWidth: 190, alignment: .leading)
+                            }
                             Spacer()
+                            if let handText = state.handDescription(for: localID) {
+                                HandTypeBadge(text: handText)
+                            }
                         }
-                        .padding(.leading)
+                        .padding(.horizontal)
                         .padding(.bottom, 4)
                     }
                     footer
+                }
+
+                // Hero seat: drawn last so it layers in front of the button
+                // panel below it, overlapping its top edge slightly.
+                if let state = multiplayer.latestState,
+                   let me = state.players.first(where: { $0.id == localID }),
+                   let myIndex = state.players.firstIndex(where: { $0.id == localID }) {
+                    PlayerSeatView(
+                        player: me,
+                        isActive: state.activePlayerIndex == myIndex,
+                        isDealer: state.dealerIndex == myIndex,
+                        revealCards: true
+                    )
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 128)
+                    // Purely visual -- never intercept taps meant for the
+                    // buttons underneath it where it overlaps them.
+                    .allowsHitTesting(false)
                 }
             }
         }
