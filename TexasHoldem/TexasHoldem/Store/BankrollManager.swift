@@ -23,10 +23,7 @@ final class BankrollManager: ObservableObject {
     static let bankrollTopUpCooldown: TimeInterval = 60 * 60 * 8 // 8 hours
 
     @Published private(set) var chips: Int {
-        didSet {
-            write(chips, forKey: Keys.chips)
-            if chips > highestChips { highestChips = chips }
-        }
+        didSet { write(chips, forKey: Keys.chips) }
     }
     /// The most chips this player has ever held. Only grows when `chips`
     /// exceeds its previous peak, which -- since the starting balance and
@@ -169,10 +166,20 @@ final class BankrollManager: ObservableObject {
     /// starting balance or a top-up) get added.
     func applyDelta(_ delta: Int) {
         chips = max(0, chips + delta)
+        trackPeak()
     }
 
     func setChips(_ amount: Int) {
         chips = max(0, amount)
+        trackPeak()
+    }
+
+    /// Bumps `highestChips` if `chips` just exceeded its previous peak.
+    /// Called explicitly at every runtime mutation point rather than from
+    /// a `didSet` on `chips`, since that would read `highestChips` before
+    /// it's initialized when `chips` gets its first value in `init`.
+    private func trackPeak() {
+        if chips > highestChips { highestChips = chips }
     }
 
     /// Whether a bankroll top-up can be used right now: the player has to
@@ -195,6 +202,7 @@ final class BankrollManager: ObservableObject {
     func topUpBankroll() -> Bool {
         guard canTopUpBankroll else { return false }
         chips += Self.bankrollTopUpAmount
+        trackPeak()
         lastTopUpAt = Date()
         return true
     }
