@@ -31,20 +31,29 @@ struct BettingControlsView: View {
                 .onChange(of: minTarget) { _ in clampRaiseAmount() }
                 .onChange(of: maxTarget) { _ in clampRaiseAmount() }
 
-            HStack(spacing: 10) {
+            HStack(spacing: 6) {
                 Button(role: .destructive) { onAction(.fold) } label: {
                     Label("Fold", systemImage: "hand.raised.slash")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
 
                 if toCall == 0 {
                     Button { onAction(.check) } label: {
                         Label("Check", systemImage: "checkmark")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                 } else {
                     Button { onAction(.call) } label: {
                         Label("Call \(toCall)", systemImage: "arrow.turn.down.right")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                 }
@@ -53,7 +62,9 @@ struct BettingControlsView: View {
                     onAction(currentBet == 0 ? .bet(Int(raiseAmount)) : .raise(Int(raiseAmount)))
                 } label: {
                     Label(currentBet == 0 ? "Bet" : "Raise", systemImage: "arrow.up.circle")
-                        .padding(.horizontal, 4)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(PATheme.gold)
@@ -64,6 +75,9 @@ struct BettingControlsView: View {
                     onAction(.allIn)
                 } label: {
                     Text("All In")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .tint(.red)

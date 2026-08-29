@@ -59,11 +59,19 @@ struct LocalGameView: View {
                     }
                     Spacer()
                     if !engine.lastActionDescription.isEmpty {
-                        Text(engine.lastActionDescription)
-                            .font(.footnote)
-                            .foregroundColor(.white.opacity(0.85))
-                            .padding(.horizontal)
-                            .multilineTextAlignment(.center)
+                        HStack {
+                            Text(engine.lastActionDescription)
+                                .font(.footnote)
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(Capsule().fill(.ultraThinMaterial))
+                                .frame(maxWidth: 190, alignment: .leading)
+                            Spacer()
+                        }
+                        .padding(.leading)
+                        .padding(.bottom, 4)
                     }
                     footer
                 }
