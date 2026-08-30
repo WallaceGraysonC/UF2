@@ -18,6 +18,7 @@
 		57F55B9D9FA94AB0B8E1D4E4 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */; };
 		BDF890D5EADB448EA46B9C07 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */; };
 		F54BB3364F7342FA8128DEBC /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
+		29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */; };
 		54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */; };
 		6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D970069100F94956BFF5129C /* CustomTableSetupView.swift */; };
 		DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */; };
@@ -55,6 +56,7 @@
 		AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMatch.swift; sourceTree = "<group>"; };
 		CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
+		BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCosmeticStore.swift; sourceTree = "<group>"; };
 		53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
 		D970069100F94956BFF5129C /* CustomTableSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableSetupView.swift; sourceTree = "<group>"; };
 		92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeView.swift; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				878052A3CB984E92943F12F0 /* BankrollManager.swift */,
 				B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */,
 				53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */,
+				BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -294,6 +297,7 @@
 				54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */,
 				6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */,
 				DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */,
+				29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

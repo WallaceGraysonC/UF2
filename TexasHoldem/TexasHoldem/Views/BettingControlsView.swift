@@ -16,7 +16,6 @@ struct BettingControlsView: View {
     private var minTarget: Int { currentBet == 0 ? bigBlind : currentBet + minRaise }
     // Always >= minTarget, so this ClosedRange can never invert.
     private var maxTarget: Int { max(minTarget, player.chips + player.currentBet) }
-    private var chipColor: Color { ChipPalette.color(for: bankroll.equippedChips) }
 
     var body: some View {
         VStack(spacing: 10) {
@@ -38,7 +37,7 @@ struct BettingControlsView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(Self.chipDenominations, id: \.self) { amount in
-                        ChipTokenButton(amount: amount, color: chipColor, isMaxedOut: raiseAmount >= Double(maxTarget)) {
+                        ChipTokenButton(amount: amount, chipSetID: bankroll.equippedChips, isMaxedOut: raiseAmount >= Double(maxTarget)) {
                             raiseAmount = min(raiseAmount + Double(amount), Double(maxTarget))
                         }
                     }
@@ -127,7 +126,7 @@ struct BettingControlsView: View {
 /// styled with whatever chip set the player has equipped from the Store.
 private struct ChipTokenButton: View {
     let amount: Int
-    let color: Color
+    let chipSetID: String
     let isMaxedOut: Bool
     let action: () -> Void
 
@@ -135,12 +134,19 @@ private struct ChipTokenButton: View {
         amount >= 1000 ? "\(amount / 1000)K" : "\(amount)"
     }
 
+    private var fill: AnyShapeStyle {
+        let color = ChipPalette.color(for: chipSetID)
+        return CustomCosmeticFill.style(
+            for: chipSetID, kind: .chipSet,
+            fallback: AnyShapeStyle(RadialGradient(colors: [color.opacity(0.95), color.opacity(0.65)],
+                                                    center: .center, startRadius: 2, endRadius: 26))
+        )
+    }
+
     var body: some View {
         Button(action: action) {
             ZStack {
-                Circle()
-                    .fill(RadialGradient(colors: [color.opacity(0.95), color.opacity(0.65)],
-                                          center: .center, startRadius: 2, endRadius: 26))
+                Circle().fill(fill)
                 Circle()
                     .strokeBorder(Color.white.opacity(0.85), style: StrokeStyle(lineWidth: 3, dash: [4, 3]))
                     .padding(3)
@@ -150,6 +156,7 @@ private struct ChipTokenButton: View {
                     .shadow(color: .black.opacity(0.6), radius: 1)
             }
             .frame(width: 44, height: 44)
+            .clipShape(Circle())
         }
         .buttonStyle(.plain)
         .opacity(isMaxedOut ? 0.35 : 1)

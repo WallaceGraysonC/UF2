@@ -1,10 +1,14 @@
 import SwiftUI
+import PhotosUI
+import UIKit
 
 /// Cosmetics shop. Every item is purchased with the free virtual chip
 /// currency earned at the table -- there is no real-money purchase path
 /// anywhere in this screen. Pricier items also require having reached a
 /// certain lifetime chip peak (won at the table, not just topped up) --
-/// see `BankrollManager.isUnlocked(_:)`.
+/// see `BankrollManager.isUnlocked(_:)`. Each category also has a free
+/// "Custom Photo" slot, unlocked the same way at a high lifetime peak, that
+/// lets the player upload their own image instead of a built-in style.
 struct StoreView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @Environment(\.dismiss) private var dismiss
@@ -59,7 +63,12 @@ struct StoreView: View {
 
 private struct CosmeticCard: View {
     @EnvironmentObject var bankroll: BankrollManager
+    @ObservedObject private var customStore = CustomCosmeticStore.shared
     let item: Cosmetic
+    @State private var pickerItem: PhotosPickerItem?
+
+    private var isCustomSlot: Bool { item.id == CustomCosmeticStore.customID(for: item.kind) }
+    private var hasCustomImage: Bool { customStore.hasImage(for: item.kind) }
 
     var owned: Bool { bankroll.owns(item) }
     var unlocked: Bool { bankroll.isUnlocked(item) }
@@ -83,7 +92,9 @@ private struct CosmeticCard: View {
                 .opacity(unlocked ? 1 : 0.4)
             Text(item.name).font(.subheadline.bold())
 
-            if equipped {
+            if isCustomSlot {
+                customSlotAction
+            } else if equipped {
                 Text("Equipped")
                     .font(.caption).bold()
                     .foregroundColor(.green)
@@ -126,46 +137,131 @@ private struct CosmeticCard: View {
                 .stroke(equipped ? PATheme.goldBright.opacity(0.6) : Color.white.opacity(0.08), lineWidth: equipped ? 1.5 : 1)
         )
         .materialShadow(radius: 5, y: 3)
+        .onChange(of: pickerItem) { _, newValue in
+            loadPickedPhoto(newValue)
+        }
+    }
+
+    @ViewBuilder
+    private var customSlotAction: some View {
+        if !unlocked {
+            VStack(spacing: 3) {
+                Label("Locked", systemImage: "lock.fill")
+                    .font(.footnote.bold())
+                    .foregroundColor(.secondary)
+                Text("Reach $\(item.unlockRequirement) lifetime to unlock")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        } else if equipped {
+            VStack(spacing: 6) {
+                Text("Equipped").font(.caption).bold().foregroundColor(.green)
+                replacePhotoButton
+            }
+        } else if hasCustomImage {
+            VStack(spacing: 6) {
+                Button("Equip") { bankroll.equip(item) }
+                    .buttonStyle(.bordered)
+                    .tint(PATheme.goldBright)
+                replacePhotoButton
+            }
+        } else {
+            VStack(spacing: 4) {
+                PhotosPicker(selection: $pickerItem, matching: .images) {
+                    Label("Upload Photo", systemImage: "photo.badge.plus")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PATheme.gold)
+                .foregroundStyle(PATheme.ink)
+                Text("Best at \(item.kind.recommendedImageSize)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private var replacePhotoButton: some View {
+        PhotosPicker(selection: $pickerItem, matching: .images) {
+            Text("Replace Photo").font(.caption2)
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(.secondary)
+    }
+
+    private func loadPickedPhoto(_ selection: PhotosPickerItem?) {
+        guard let selection else { return }
+        Task {
+            if let data = try? await selection.loadTransferable(type: Data.self),
+               let uiImage = UIImage(data: data) {
+                customStore.setImage(uiImage, for: item.kind)
+                bankroll.equip(item)
+            }
+            pickerItem = nil
+        }
     }
 
     @ViewBuilder
     private var swatch: some View {
-        switch item.kind {
-        case .cardBack:
-            CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
-        case .cardFace:
-            CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
-        case .tableFelt:
-            RoundedRectangle(cornerRadius: 10).fill(feltColor)
-        case .tableRail:
-            RoundedRectangle(cornerRadius: 10)
-                .fill(RailPalette.gradient(for: item.id))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
-                        .padding(4)
-                )
-        case .tableBackdrop:
-            RoundedRectangle(cornerRadius: 10)
-                .fill(BackdropPalette.gradient(for: item.id))
-        case .chipSet:
-            HStack(spacing: -8) {
-                Circle().fill(chipColor).frame(width: 30, height: 30)
-                Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
-            }
-        case .avatar:
-            Image(systemName: AvatarPalette.symbol(for: item.id))
-                .font(.system(size: 34))
-                .foregroundColor(.white)
-        case .avatarFrame:
-            ZStack {
-                Circle().fill(Color.black.opacity(0.35))
-                Image(systemName: "person.fill")
-                    .font(.system(size: 20))
+        if isCustomSlot {
+            customSwatch
+        } else {
+            switch item.kind {
+            case .cardBack:
+                CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
+            case .cardFace:
+                CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
+            case .tableFelt:
+                RoundedRectangle(cornerRadius: 10).fill(feltColor)
+            case .tableRail:
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(RailPalette.gradient(for: item.id))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
+                            .padding(4)
+                    )
+            case .tableBackdrop:
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(BackdropPalette.gradient(for: item.id))
+            case .chipSet:
+                HStack(spacing: -8) {
+                    Circle().fill(chipColor).frame(width: 30, height: 30)
+                    Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
+                }
+            case .avatar:
+                Image(systemName: AvatarPalette.symbol(for: item.id))
+                    .font(.system(size: 34))
                     .foregroundColor(.white)
+            case .avatarFrame:
+                ZStack {
+                    Circle().fill(Color.black.opacity(0.35))
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
+                .frame(width: 48, height: 48)
+                .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
             }
-            .frame(width: 48, height: 48)
-            .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
+        }
+    }
+
+    @ViewBuilder
+    private var customSwatch: some View {
+        if let image = customStore.image(for: item.kind) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 70, height: 70)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        } else {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    Image(systemName: "photo.badge.plus")
+                        .font(.system(size: 26))
+                        .foregroundColor(.secondary)
+                )
         }
     }
 

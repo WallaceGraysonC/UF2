@@ -1,4 +1,18 @@
 import SwiftUI
+import UIKit
+
+/// Fills a shape with the player's uploaded photo when the equipped id is
+/// that category's "Custom Photo" slot and a photo has actually been
+/// uploaded; otherwise returns the given built-in fallback style. Shared by
+/// every cosmetic category that renders as a filled/stroked shape.
+enum CustomCosmeticFill {
+    static func style(for id: String, kind: CosmeticKind, fallback: @autoclosure () -> AnyShapeStyle) -> AnyShapeStyle {
+        if id == CustomCosmeticStore.customID(for: kind), let image = CustomCosmeticStore.shared.image(for: kind) {
+            return AnyShapeStyle(ImagePaint(image: Image(uiImage: image)))
+        }
+        return fallback()
+    }
+}
 
 /// Shared color lookups so card backs and table felt render consistently
 /// wherever they're shown (table, store swatches, seat cards).
@@ -99,6 +113,22 @@ enum BackdropPalette {
     }
 }
 
+/// Renders the room/scene behind the table -- the player's uploaded photo
+/// if "Custom Photo" is equipped and one has been uploaded, otherwise the
+/// built-in gradient for their equipped backdrop.
+struct BackdropView: View {
+    let id: String
+
+    var body: some View {
+        if id == CustomCosmeticStore.customID(for: .tableBackdrop),
+           let image = CustomCosmeticStore.shared.image(for: .tableBackdrop) {
+            Image(uiImage: image).resizable().scaledToFill()
+        } else {
+            BackdropPalette.gradient(for: id)
+        }
+    }
+}
+
 /// SF Symbol used to represent an avatar cosmetic, shared between the store
 /// swatches and the small icon shown next to a player's name at the table.
 enum AvatarPalette {
@@ -120,7 +150,11 @@ enum AvatarPalette {
 /// a separate cosmetic slot from the avatar itself, so any avatar can be
 /// framed. "No Frame" renders as fully transparent, i.e. no ring at all.
 enum AvatarFramePalette {
-    static func stroke(for id: String) -> some ShapeStyle {
+    static func stroke(for id: String) -> AnyShapeStyle {
+        CustomCosmeticFill.style(for: id, kind: .avatarFrame, fallback: builtInStroke(for: id))
+    }
+
+    private static func builtInStroke(for id: String) -> AnyShapeStyle {
         switch id {
         case "frame.silver": return AnyShapeStyle(LinearGradient(colors: [Color(white: 0.9), Color(white: 0.6)], startPoint: .top, endPoint: .bottom))
         case "frame.gold": return AnyShapeStyle(PATheme.goldMaterial)
@@ -148,8 +182,10 @@ enum ChipPalette {
     }
 }
 
-/// Font design + weight for the rank/suit text on the *front* of every
-/// card -- a separate cosmetic slot from the card back.
+/// Rank/suit style on the *front* of every card -- a separate cosmetic slot
+/// from the card back. Each style is primarily a distinct ink color theme
+/// (the thing players actually notice at a glance), with font as a smaller
+/// secondary touch.
 enum CardFacePalette {
     static func design(for id: String) -> Font.Design {
         switch id {
@@ -162,5 +198,20 @@ enum CardFacePalette {
 
     static func weight(for id: String) -> Font.Weight {
         id == "face.blockBold" ? .heavy : .bold
+    }
+
+    /// The ink color for a card's rank/suit text -- `isRed` selects the
+    /// red-suit half of the theme (hearts/diamonds) vs. the black-suit half.
+    static func inkColor(isRed: Bool, for id: String) -> Color {
+        switch id {
+        case "face.modern":
+            return isRed ? Color(red: 0.80, green: 0.10, blue: 0.42) : Color(red: 0.06, green: 0.16, blue: 0.38)
+        case "face.rounded":
+            return isRed ? Color(red: 0.80, green: 0.38, blue: 0.05) : Color(red: 0.06, green: 0.36, blue: 0.20)
+        case "face.blockBold":
+            return isRed ? Color(red: 0.88, green: 0.10, blue: 0.55) : Color(red: 0.16, green: 0.05, blue: 0.36)
+        default: // face.classic
+            return isRed ? PATheme.crimsonDeep : PATheme.ink
+        }
     }
 }

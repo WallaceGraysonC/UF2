@@ -67,7 +67,7 @@ struct LocalGameView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                BackdropPalette.gradient(for: bankroll.equippedBackdrop).ignoresSafeArea()
+                BackdropView(id: bankroll.equippedBackdrop).ignoresSafeArea()
                 TableFeltView(communityCards: engine.communityCards, pot: engine.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack, cardFaceID: bankroll.equippedCardFace) { feltSize in
                     // The human's own seat is drawn separately below, layered
                     // above the button panel -- everyone else stays in the oval.

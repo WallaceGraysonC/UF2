@@ -15,6 +15,19 @@ enum CosmeticKind: String, Codable, CaseIterable {
         case .avatarFrame: return "Frames"
         }
     }
+
+    /// Suggested source-image dimensions for this category's "Custom Photo"
+    /// upload, shown to the player before they pick one -- matched to each
+    /// shape's on-screen proportions so the photo doesn't look stretched.
+    var recommendedImageSize: String {
+        switch self {
+        case .cardBack, .cardFace: return "400×600"
+        case .tableFelt: return "1600×1200"
+        case .tableRail: return "1600×300"
+        case .tableBackdrop: return "1200×2000"
+        case .chipSet, .avatar, .avatarFrame: return "512×512"
+        }
+    }
 }
 
 struct Cosmetic: Identifiable, Codable, Hashable {
@@ -113,6 +126,18 @@ enum CosmeticCatalog {
         Cosmetic(id: "frame.sapphire", kind: .avatarFrame, name: "Sapphire Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.sapphire"),
         Cosmetic(id: "frame.crimson", kind: .avatarFrame, name: "Crimson Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.crimson"),
         Cosmetic(id: "frame.royal", kind: .avatarFrame, name: "Royal Ring", price: 2400, unlockRequirement: 3000, assetName: "frame.royal"),
+
+        // MARK: Custom Photo -- one free "upload your own" slot per
+        // category, unlocked at a high lifetime chip peak so it's a real
+        // milestone to work toward rather than something to just buy.
+        Cosmetic(id: CustomCosmeticStore.customID(for: .cardBack), kind: .cardBack, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .cardFace), kind: .cardFace, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .tableFelt), kind: .tableFelt, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .tableRail), kind: .tableRail, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .tableBackdrop), kind: .tableBackdrop, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .chipSet), kind: .chipSet, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .avatar), kind: .avatar, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
+        Cosmetic(id: CustomCosmeticStore.customID(for: .avatarFrame), kind: .avatarFrame, name: "Custom Photo", price: 0, unlockRequirement: 5000, assetName: "custom"),
     ]
 
     static func items(of kind: CosmeticKind) -> [Cosmetic] {

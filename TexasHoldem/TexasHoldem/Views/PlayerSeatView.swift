@@ -1,4 +1,32 @@
 import SwiftUI
+import UIKit
+
+/// Renders a player's avatar -- their uploaded photo if "Custom Photo" is
+/// equipped and one has actually been uploaded, otherwise the built-in
+/// SF Symbol icon for their equipped avatar.
+struct AvatarBadge: View {
+    let avatarID: String
+    var size: CGFloat = 15
+
+    var body: some View {
+        ZStack {
+            Circle().fill(Color.black.opacity(0.35))
+            if avatarID == CustomCosmeticStore.customID(for: .avatar),
+               let image = CustomCosmeticStore.shared.image(for: .avatar) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            } else {
+                Image(systemName: AvatarPalette.symbol(for: avatarID))
+                    .font(.system(size: size * 0.55))
+                    .foregroundColor(.white)
+            }
+        }
+        .frame(width: size, height: size)
+    }
+}
 
 struct PlayerSeatView: View {
     let player: Player
@@ -24,14 +52,8 @@ struct PlayerSeatView: View {
                             .foregroundColor(PATheme.ink)
                             .materialShadow(radius: 2, y: 1)
                     }
-                    ZStack {
-                        Circle().fill(Color.black.opacity(0.35))
-                        Image(systemName: AvatarPalette.symbol(for: player.avatarID))
-                            .font(.system(size: 8))
-                            .foregroundColor(.white)
-                    }
-                    .frame(width: 15, height: 15)
-                    .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: player.avatarFrameID), lineWidth: 1.5))
+                    AvatarBadge(avatarID: player.avatarID, size: 15)
+                        .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: player.avatarFrameID), lineWidth: 1.5))
                     Text(player.name)
                         .font(.caption.bold())
                         .lineLimit(1)

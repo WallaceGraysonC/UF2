@@ -31,7 +31,7 @@ struct TableFeltView<Content: View>: View {
             // Outer rail, with a seam where it meets the felt -- both
             // customizable via the Table Rail cosmetic slot.
             RoundedRectangle(cornerRadius: 160)
-                .fill(RailPalette.gradient(for: railID))
+                .fill(CustomCosmeticFill.style(for: railID, kind: .tableRail, fallback: AnyShapeStyle(RailPalette.gradient(for: railID))))
                 .overlay(
                     RoundedRectangle(cornerRadius: 148)
                         .strokeBorder(RailPalette.seamColor(for: railID), lineWidth: 3)
@@ -42,8 +42,13 @@ struct TableFeltView<Content: View>: View {
             // Felt surface, inset from the rail
             RoundedRectangle(cornerRadius: 150)
                 .fill(
-                    RadialGradient(colors: [feltColor.opacity(0.9), feltColor, PATheme.feltDeeper.opacity(0.4)],
-                                   center: UnitPoint(x: 0.4, y: 0.35), startRadius: 10, endRadius: 460)
+                    CustomCosmeticFill.style(
+                        for: feltID, kind: .tableFelt,
+                        fallback: AnyShapeStyle(
+                            RadialGradient(colors: [feltColor.opacity(0.9), feltColor, PATheme.feltDeeper.opacity(0.4)],
+                                           center: UnitPoint(x: 0.4, y: 0.35), startRadius: 10, endRadius: 460)
+                        )
+                    )
                 )
                 .padding(16)
                 .overlay(

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CardView: View {
     let card: Card?
@@ -9,7 +10,7 @@ struct CardView: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: width * 0.14, style: .continuous)
-            .fill(faceDown || card == nil ? cardBackMaterial : PATheme.cardMaterial)
+            .fill(faceDown || card == nil ? cardBackFill : cardFaceFill)
             .frame(width: width, height: width * 1.4)
             .overlay(
                 RoundedRectangle(cornerRadius: width * 0.14, style: .continuous)
@@ -32,7 +33,12 @@ struct CardView: View {
                         Text(card.suit.symbol)
                             .font(.system(size: width * 0.34, design: CardFacePalette.design(for: cardFaceID)))
                     }
-                    .foregroundColor(card.suit.isRed ? PATheme.crimsonDeep : PATheme.ink)
+                    .foregroundColor(CardFacePalette.inkColor(isRed: card.suit.isRed, for: cardFaceID))
+                    // A custom face photo can be any color, so give the
+                    // rank/suit text a light backing plate to stay legible.
+                    .padding(.horizontal, isCustomFace ? width * 0.08 : 0)
+                    .background(isCustomFace ? Color.white.opacity(0.75) : Color.clear)
+                    .cornerRadius(width * 0.08)
                 } else {
                     Image(systemName: "suit.club.fill")
                         .foregroundColor(.white.opacity(0.3))
@@ -42,8 +48,19 @@ struct CardView: View {
             .materialShadow(radius: max(1.5, width * 0.05), y: max(1, width * 0.035))
     }
 
-    private var cardBackMaterial: LinearGradient {
-        PATheme.cardBackMaterial(base: CardBackPalette.color(for: cardBackID))
+    private var isCustomFace: Bool {
+        cardFaceID == CustomCosmeticStore.customID(for: .cardFace) && CustomCosmeticStore.shared.hasImage(for: .cardFace)
+    }
+
+    private var cardBackFill: AnyShapeStyle {
+        CustomCosmeticFill.style(
+            for: cardBackID, kind: .cardBack,
+            fallback: AnyShapeStyle(PATheme.cardBackMaterial(base: CardBackPalette.color(for: cardBackID)))
+        )
+    }
+
+    private var cardFaceFill: AnyShapeStyle {
+        CustomCosmeticFill.style(for: cardFaceID, kind: .cardFace, fallback: AnyShapeStyle(PATheme.cardMaterial))
     }
 }
 

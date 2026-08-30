@@ -48,7 +48,7 @@ struct OnlineGameView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                BackdropPalette.gradient(for: bankroll.equippedBackdrop).ignoresSafeArea()
+                BackdropView(id: bankroll.equippedBackdrop).ignoresSafeArea()
                 if let state = multiplayer.latestState {
                     TableFeltView(communityCards: state.communityCards, pot: state.potTotal, feltID: bankroll.equippedFelt, railID: bankroll.equippedRail, cardBackID: bankroll.equippedCardBack, cardFaceID: bankroll.equippedCardFace) { feltSize in
                         // The local player's own seat is drawn separately below,
