@@ -97,25 +97,35 @@ final class BankrollManager: ObservableObject {
     }
 
     private init() {
-        if defaults.object(forKey: Keys.chips) == nil {
-            chips = Self.startingChips
-        } else {
-            chips = defaults.integer(forKey: Keys.chips)
-        }
+        // Assigned straight into each @Published property's backing storage
+        // (rather than through its setter) so no didSet fires while other
+        // stored properties still don't have values yet -- calling a method
+        // like `write` from a didSet that runs before every stored property
+        // is set is exactly the "'self' used ... before all stored
+        // properties are initialized" error.
+        let initialChips = defaults.object(forKey: Keys.chips) == nil
+            ? Self.startingChips
+            : defaults.integer(forKey: Keys.chips)
+        _chips = Published(initialValue: initialChips)
+
         let savedPeak = defaults.integer(forKey: Keys.highestChips)
-        highestChips = max(savedPeak, chips, Self.startingChips)
+        _highestChips = Published(initialValue: max(savedPeak, initialChips, Self.startingChips))
+
         let savedTopUp = defaults.double(forKey: Keys.lastTopUpAt)
-        lastTopUpAt = savedTopUp > 0 ? Date(timeIntervalSince1970: savedTopUp) : nil
-        ownedCosmeticIDs = Set(defaults.stringArray(forKey: Keys.owned) ?? [])
-        equippedCardBack = defaults.string(forKey: Keys.equippedCardBack) ?? CosmeticCatalog.defaultCardBack
-        equippedCardFace = defaults.string(forKey: Keys.equippedCardFace) ?? CosmeticCatalog.defaultCardFace
-        equippedFelt = defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt
-        equippedRail = defaults.string(forKey: Keys.equippedRail) ?? CosmeticCatalog.defaultRail
-        equippedBackdrop = defaults.string(forKey: Keys.equippedBackdrop) ?? CosmeticCatalog.defaultBackdrop
-        equippedChips = defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips
-        equippedAvatar = defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar
-        equippedAvatarFrame = defaults.string(forKey: Keys.equippedAvatarFrame) ?? CosmeticCatalog.defaultAvatarFrame
-        xp = defaults.integer(forKey: Keys.xp)
+        _lastTopUpAt = Published(initialValue: savedTopUp > 0 ? Date(timeIntervalSince1970: savedTopUp) : nil)
+
+        _xp = Published(initialValue: defaults.integer(forKey: Keys.xp))
+
+        _ownedCosmeticIDs = Published(initialValue: Set(defaults.stringArray(forKey: Keys.owned) ?? []))
+
+        _equippedCardBack = Published(initialValue: defaults.string(forKey: Keys.equippedCardBack) ?? CosmeticCatalog.defaultCardBack)
+        _equippedCardFace = Published(initialValue: defaults.string(forKey: Keys.equippedCardFace) ?? CosmeticCatalog.defaultCardFace)
+        _equippedFelt = Published(initialValue: defaults.string(forKey: Keys.equippedFelt) ?? CosmeticCatalog.defaultFelt)
+        _equippedRail = Published(initialValue: defaults.string(forKey: Keys.equippedRail) ?? CosmeticCatalog.defaultRail)
+        _equippedBackdrop = Published(initialValue: defaults.string(forKey: Keys.equippedBackdrop) ?? CosmeticCatalog.defaultBackdrop)
+        _equippedChips = Published(initialValue: defaults.string(forKey: Keys.equippedChips) ?? CosmeticCatalog.defaultChips)
+        _equippedAvatar = Published(initialValue: defaults.string(forKey: Keys.equippedAvatar) ?? CosmeticCatalog.defaultAvatar)
+        _equippedAvatarFrame = Published(initialValue: defaults.string(forKey: Keys.equippedAvatarFrame) ?? CosmeticCatalog.defaultAvatarFrame)
 
         NotificationCenter.default.addObserver(
             self, selector: #selector(cloudDidChangeExternally),

@@ -133,12 +133,12 @@ struct LocalGameView: View {
             }
         }
         .onDisappear { saveProgress() }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase != .active { saveProgress() }
         }
-        .onChange(of: engine.activePlayerIndex) { _ in runBotTurnIfNeeded() }
-        .onChange(of: engine.round) { _ in runBotTurnIfNeeded() }
-        .onChange(of: engine.isHandInProgress) { inProgress in
+        .onChange(of: engine.activePlayerIndex) { _, _ in runBotTurnIfNeeded() }
+        .onChange(of: engine.round) { _, _ in runBotTurnIfNeeded() }
+        .onChange(of: engine.isHandInProgress) { _, inProgress in
             if !inProgress { handleHandEnd() }
         }
     }

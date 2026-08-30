@@ -28,8 +28,8 @@ struct BettingControlsView: View {
                 // can move this range on a re-render of the *same* slider instance --
                 // onAppear alone won't refire, so re-clamp explicitly or the slider's
                 // stored value can end up outside its own range and crash.
-                .onChange(of: minTarget) { _ in clampRaiseAmount() }
-                .onChange(of: maxTarget) { _ in clampRaiseAmount() }
+                .onChange(of: minTarget) { _, _ in clampRaiseAmount() }
+                .onChange(of: maxTarget) { _, _ in clampRaiseAmount() }
 
             HStack(spacing: 6) {
                 Button(role: .destructive) { onAction(.fold) } label: {
