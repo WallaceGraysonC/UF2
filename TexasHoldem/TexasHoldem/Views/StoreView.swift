@@ -171,14 +171,5 @@ private struct CosmeticCard: View {
 
     private var feltColor: Color { FeltPalette.color(for: item.id) }
 
-    private var chipColor: Color {
-        switch item.id {
-        case "chips.neon": return .green
-        case "chips.marble": return .gray
-        case "chips.jade": return Color(red: 0.0, green: 0.6, blue: 0.4)
-        case "chips.sapphire": return Color(red: 0.1, green: 0.3, blue: 0.9)
-        case "chips.diamond": return .white
-        default: return .red
-        }
-    }
+    private var chipColor: Color { ChipPalette.color(for: item.id) }
 }

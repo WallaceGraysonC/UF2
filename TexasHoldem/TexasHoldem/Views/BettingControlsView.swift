@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BettingControlsView: View {
+    @EnvironmentObject var bankroll: BankrollManager
     let player: Player
     let currentBet: Int
     let minRaise: Int
@@ -9,10 +10,13 @@ struct BettingControlsView: View {
 
     @State private var raiseAmount: Double = 0
 
+    private static let chipDenominations = [5, 10, 25, 100, 500, 1000]
+
     private var toCall: Int { max(0, currentBet - player.currentBet) }
     private var minTarget: Int { currentBet == 0 ? bigBlind : currentBet + minRaise }
     // Always >= minTarget, so this ClosedRange can never invert.
     private var maxTarget: Int { max(minTarget, player.chips + player.currentBet) }
+    private var chipColor: Color { ChipPalette.color(for: bankroll.equippedChips) }
 
     var body: some View {
         VStack(spacing: 10) {
@@ -21,15 +25,33 @@ struct BettingControlsView: View {
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
                 Spacer()
+                Button {
+                    raiseAmount = Double(minTarget)
+                } label: {
+                    Label("Reset", systemImage: "arrow.counterclockwise")
+                        .font(.caption2.bold())
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.white.opacity(0.6))
             }
-            Slider(value: $raiseAmount, in: Double(minTarget)...Double(maxTarget), step: 1)
-                .onAppear { raiseAmount = Double(minTarget) }
-                // player.chips/currentBet/minRaise change after every action, which
-                // can move this range on a re-render of the *same* slider instance --
-                // onAppear alone won't refire, so re-clamp explicitly or the slider's
-                // stored value can end up outside its own range and crash.
-                .onChange(of: minTarget) { _, _ in clampRaiseAmount() }
-                .onChange(of: maxTarget) { _, _ in clampRaiseAmount() }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Self.chipDenominations, id: \.self) { amount in
+                        ChipTokenButton(amount: amount, color: chipColor, isMaxedOut: raiseAmount >= Double(maxTarget)) {
+                            raiseAmount = min(raiseAmount + Double(amount), Double(maxTarget))
+                        }
+                    }
+                }
+                .padding(.vertical, 2)
+                .padding(.horizontal, 1)
+            }
+            // player.chips/currentBet/minRaise change after every action, which
+            // can move this range on a re-render of the *same* view instance --
+            // re-clamp explicitly or raiseAmount can end up outside its own range.
+            .onAppear { raiseAmount = Double(minTarget) }
+            .onChange(of: minTarget) { _, _ in clampRaiseAmount() }
+            .onChange(of: maxTarget) { _, _ in clampRaiseAmount() }
 
             HStack(spacing: 6) {
                 Button(role: .destructive) { onAction(.fold) } label: {
@@ -98,5 +120,40 @@ struct BettingControlsView: View {
 
     private func clampRaiseAmount() {
         raiseAmount = Double(min(max(Int(raiseAmount), minTarget), maxTarget))
+    }
+}
+
+/// A tappable poker-chip token that adds a fixed amount to the pending bet,
+/// styled with whatever chip set the player has equipped from the Store.
+private struct ChipTokenButton: View {
+    let amount: Int
+    let color: Color
+    let isMaxedOut: Bool
+    let action: () -> Void
+
+    private var label: String {
+        amount >= 1000 ? "\(amount / 1000)K" : "\(amount)"
+    }
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(RadialGradient(colors: [color.opacity(0.95), color.opacity(0.65)],
+                                          center: .center, startRadius: 2, endRadius: 26))
+                Circle()
+                    .strokeBorder(Color.white.opacity(0.85), style: StrokeStyle(lineWidth: 3, dash: [4, 3]))
+                    .padding(3)
+                Text(label)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+                    .shadow(color: .black.opacity(0.6), radius: 1)
+            }
+            .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.plain)
+        .opacity(isMaxedOut ? 0.35 : 1)
+        .disabled(isMaxedOut)
+        .materialShadow(radius: 4, y: 2)
     }
 }

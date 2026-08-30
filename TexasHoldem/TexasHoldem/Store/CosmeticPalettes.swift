@@ -132,6 +132,22 @@ enum AvatarFramePalette {
     }
 }
 
+/// The color of a player's chip stack and the quick-bet chip tokens at the
+/// table -- shared between the store swatch and the live betting controls
+/// so raising with a chip token always matches the player's equipped set.
+enum ChipPalette {
+    static func color(for id: String) -> Color {
+        switch id {
+        case "chips.neon": return .green
+        case "chips.marble": return .gray
+        case "chips.jade": return Color(red: 0.0, green: 0.6, blue: 0.4)
+        case "chips.sapphire": return Color(red: 0.1, green: 0.3, blue: 0.9)
+        case "chips.diamond": return .white
+        default: return .red // chips.classic
+        }
+    }
+}
+
 /// Font design + weight for the rank/suit text on the *front* of every
 /// card -- a separate cosmetic slot from the card back.
 enum CardFacePalette {
