@@ -35,22 +35,33 @@ struct LocalGameView: View {
             self.buyIn = saved.buyIn
             self.resumedFromSave = true
         } else {
-            let human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false,
+            var human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false,
                                 cardBackID: BankrollManager.shared.equippedCardBack,
                                 cardFaceID: BankrollManager.shared.equippedCardFace,
                                 avatarID: BankrollManager.shared.equippedAvatar,
                                 avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
-            let bots = (1...botCount).map { i in
-                Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
+            human.seatIndex = 0
+            let bots = (1...botCount).map { i -> Player in
+                var bot = Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
                        cardBackID: BankrollManager.shared.equippedCardBack,
                        cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())
+                bot.seatIndex = i
+                return bot
             }
             _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots, smallBlind: smallBlind, bigBlind: bigBlind))
             self.humanID = human.id
             self.buyIn = buyIn
             self.resumedFromSave = false
         }
+    }
+
+    /// The table's fixed seat count, established when players first sat down
+    /// -- seats are positioned against this instead of the live (shrinking)
+    /// player count, so a bust just empties a seat instead of reshuffling
+    /// everyone else around a smaller oval.
+    private var totalSeats: Int {
+        (engine.players.map { $0.seatIndex }.max() ?? engine.players.count - 1) + 1
     }
 
     var body: some View {
@@ -62,7 +73,7 @@ struct LocalGameView: View {
                     // above the button panel -- everyone else stays in the oval.
                     ForEach(Array(engine.players.enumerated()), id: \.element.id) { index, player in
                         if player.id != humanID {
-                            let offset = SeatLayout.offsets(count: engine.players.count)[index]
+                            let offset = SeatLayout.offsets(count: totalSeats)[player.seatIndex]
                             PlayerSeatView(
                                 player: player,
                                 isActive: engine.activePlayerIndex == index,

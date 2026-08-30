@@ -15,6 +15,12 @@ struct Player: Identifiable, Codable, Hashable {
     var cardFaceID: String = CosmeticCatalog.defaultCardFace
     var avatarID: String = CosmeticCatalog.defaultAvatar
     var avatarFrameID: String = CosmeticCatalog.defaultAvatarFrame
+    /// Fixed seat slot assigned once when a player sits down, independent of
+    /// their live position in the engine's `players` array. Seat rendering
+    /// keys off this instead of array index so a table with N starting
+    /// seats keeps everyone in their original spot as others bust out,
+    /// rather than reshuffling every remaining seat around a shrinking oval.
+    var seatIndex: Int = 0
 
     var isEliminated: Bool { chips <= 0 && !isAllIn }
 

@@ -28,12 +28,18 @@ struct OnlineGameView: View {
 
         var engine: PokerEngine?
         if isHost {
-            var players = [Player(id: localID, name: GKLocalPlayer.local.displayName, chips: Self.buyIn,
+            var host = Player(id: localID, name: GKLocalPlayer.local.displayName, chips: Self.buyIn,
                                    cardBackID: BankrollManager.shared.equippedCardBack,
                                    cardFaceID: BankrollManager.shared.equippedCardFace,
                                    avatarID: BankrollManager.shared.equippedAvatar,
-                                   avatarFrameID: BankrollManager.shared.equippedAvatarFrame)]
-            players += match.players.map { Player(id: $0.gamePlayerID, name: $0.displayName, chips: Self.buyIn) }
+                                   avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
+            host.seatIndex = 0
+            var players = [host]
+            players += match.players.enumerated().map { i, gkPlayer in
+                var p = Player(id: gkPlayer.gamePlayerID, name: gkPlayer.displayName, chips: Self.buyIn)
+                p.seatIndex = i + 1
+                return p
+            }
             engine = PokerEngine(players: players)
         }
         _multiplayer = StateObject(wrappedValue: MultiplayerMatch(isHost: isHost, engine: engine, localPlayerID: localID))
@@ -49,7 +55,8 @@ struct OnlineGameView: View {
                         // layered above the button panel -- everyone else stays in the oval.
                         ForEach(Array(state.players.enumerated()), id: \.element.id) { index, player in
                             if player.id != localID {
-                                let offset = SeatLayout.offsets(count: state.players.count)[index]
+                                let totalSeats = (state.players.map { $0.seatIndex }.max() ?? state.players.count - 1) + 1
+                                let offset = SeatLayout.offsets(count: totalSeats)[player.seatIndex]
                                 PlayerSeatView(
                                     player: player,
                                     isActive: state.activePlayerIndex == index,
