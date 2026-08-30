@@ -131,8 +131,13 @@ final class BankrollManager: ObservableObject {
             self, selector: #selector(cloudDidChangeExternally),
             name: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud
         )
-        cloud.synchronize()
-        pullFromCloudIfNewer()
+        // `synchronize()` and the initial cloud read are deferred off the
+        // launch path (to the next run loop turn) so the very first frame
+        // isn't held up waiting on iCloud's key-value store.
+        DispatchQueue.main.async { [weak self] in
+            self?.cloud.synchronize()
+            self?.pullFromCloudIfNewer()
+        }
     }
 
     private func write<T>(_ value: T, forKey key: String) where T: Any {

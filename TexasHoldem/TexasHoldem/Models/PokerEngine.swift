@@ -74,6 +74,9 @@ final class PokerEngine: ObservableObject {
         guard players.count >= 2 else {
             lastActionDescription = "Not enough players with chips to continue."
             isHandInProgress = false
+            // Stale index into the now-shrunk `players` array -- clear it so
+            // nothing (e.g. `currentPlayer()`) indexes out of range.
+            activePlayerIndex = nil
             return
         }
 
@@ -121,7 +124,7 @@ final class PokerEngine: ObservableObject {
     // MARK: - Actions
 
     func currentPlayer() -> Player? {
-        guard let idx = activePlayerIndex else { return nil }
+        guard let idx = activePlayerIndex, players.indices.contains(idx) else { return nil }
         return players[idx]
     }
 

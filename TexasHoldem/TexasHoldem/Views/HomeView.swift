@@ -32,8 +32,10 @@ struct HomeView: View {
                 PATheme.feltBackground
                     .ignoresSafeArea()
 
-                VStack(spacing: 32) {
-                    Spacer()
+                GeometryReader { geo in
+                    ScrollView {
+                        VStack(spacing: 32) {
+                    Spacer(minLength: 24)
 
                     VStack(spacing: 10) {
                         PocketAcesMark()
@@ -108,7 +110,7 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 32)
 
-                    Spacer()
+                    Spacer(minLength: 24)
 
                     if bankroll.canTopUpBankroll {
                         Button("Low on chips? Get $\(BankrollManager.bankrollTopUpAmount)") {
@@ -117,6 +119,9 @@ struct HomeView: View {
                         .font(.footnote)
                         .foregroundColor(.white.opacity(0.7))
                         .padding(.bottom, 12)
+                    }
+                        }
+                        .frame(minHeight: geo.size.height)
                     }
                 }
             }
@@ -159,7 +164,9 @@ struct HomeView: View {
                 .ignoresSafeArea()
             }
         }
-        .onAppear { gameCenter.authenticate() }
+        // Game Center auth can pop a system sign-in sheet and involves a
+        // network round trip -- deferred off the launch path and only
+        // triggered when the player actually taps "Play with Friends".
     }
 }
 
