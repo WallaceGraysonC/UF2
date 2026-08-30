@@ -1,7 +1,12 @@
 import SwiftUI
+import WatchKit
+import UIKit
 
 /// Compact bot-practice table for watchOS: your two cards, the five
-/// community cards, current hand type, and Fold / Check-Call / Bet.
+/// community cards, a live bot roster, current hand type, and
+/// Fold / Check-Call / Bet -- styled with whatever cosmetics are equipped
+/// on the phone (they sync over automatically via `BankrollManager`'s
+/// iCloud key-value store, same account, same data).
 struct WatchGameView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @Environment(\.dismiss) private var dismiss
@@ -10,6 +15,7 @@ struct WatchGameView: View {
     private let buyIn: Int
     private let resumedFromSave: Bool
     @State private var hasSettled = false
+    @State private var showHandGuide = false
 
     init(botCount: Int = 3, buyIn: Int = 500) {
         if let saved = GamePersistence.loadLocalGame() {
@@ -18,8 +24,17 @@ struct WatchGameView: View {
             self.buyIn = saved.buyIn
             resumedFromSave = true
         } else {
-            let human = Player(id: "watch-human", name: "You", chips: buyIn, isBot: false)
-            let bots = (1...botCount).map { Player(id: "watch-bot-\($0)", name: BotNames.random(), chips: buyIn, isBot: true) }
+            let human = Player(id: "watch-human", name: "You", chips: buyIn, isBot: false,
+                                cardBackID: BankrollManager.shared.equippedCardBack,
+                                cardFaceID: BankrollManager.shared.equippedCardFace,
+                                avatarID: BankrollManager.shared.equippedAvatar,
+                                avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
+            let bots = (1...botCount).map { i in
+                Player(id: "watch-bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
+                       cardBackID: BankrollManager.shared.equippedCardBack,
+                       cardFaceID: BankrollManager.shared.equippedCardFace,
+                       avatarID: BotNames.randomAvatar())
+            }
             _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots))
             humanID = human.id
             self.buyIn = buyIn
@@ -30,12 +45,16 @@ struct WatchGameView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
+                botRoster
+
                 Text("Pot $\(engine.potTotal)")
                     .font(.caption.bold())
+                    .foregroundColor(PATheme.goldBright)
 
                 HStack(spacing: 3) {
                     ForEach(0..<5, id: \.self) { i in
-                        WatchCardView(card: i < engine.communityCards.count ? engine.communityCards[i] : nil)
+                        WatchCardView(card: i < engine.communityCards.count ? engine.communityCards[i] : nil,
+                                      cardFaceID: bankroll.equippedCardFace)
                     }
                 }
 
@@ -44,21 +63,28 @@ struct WatchGameView: View {
                         .font(.caption2.bold())
                         .foregroundColor(.black)
                         .padding(.horizontal, 8).padding(.vertical, 2)
-                        .background(Capsule().fill(Color.yellow))
+                        .background(Capsule().fill(PATheme.goldMaterial))
                 }
 
                 if let human = engine.players.first(where: { $0.id == humanID }) {
                     HStack(spacing: 3) {
                         ForEach(human.holeCards) { card in
-                            WatchCardView(card: card)
+                            WatchCardView(card: card, cardFaceID: bankroll.equippedCardFace)
                         }
                     }
                     Text("You: $\(human.chips)")
                         .font(.caption2)
-                        .foregroundColor(.yellow)
+                        .foregroundColor(PATheme.goldBright)
                 }
 
-                if !engine.lastActionDescription.isEmpty {
+                if !engine.showdownResults.isEmpty {
+                    ForEach(engine.showdownResults) { result in
+                        Text("\(result.playerName) +$\(result.amountWon)\n\(result.hand.category.displayName)")
+                            .font(.caption2.bold())
+                            .foregroundColor(.yellow)
+                            .multilineTextAlignment(.center)
+                    }
+                } else if !engine.lastActionDescription.isEmpty {
                     Text(engine.lastActionDescription)
                         .font(.caption2)
                         .foregroundColor(.secondary)
@@ -66,9 +92,18 @@ struct WatchGameView: View {
                 }
 
                 footer
+
+                Button {
+                    showHandGuide = true
+                } label: {
+                    Label("Hands", systemImage: "questionmark.circle")
+                        .font(.caption2)
+                }
+                .tint(.gray)
             }
             .padding(.horizontal, 4)
         }
+        .background(FeltPalette.color(for: bankroll.equippedFelt).opacity(0.25).ignoresSafeArea())
         .onAppear {
             if !resumedFromSave {
                 bankroll.applyDelta(-buyIn)
@@ -78,8 +113,50 @@ struct WatchGameView: View {
             }
         }
         .onDisappear { saveProgress() }
-        .onChange(of: engine.activePlayerIndex) { _ in runBotTurnIfNeeded() }
-        .onChange(of: engine.round) { _ in runBotTurnIfNeeded() }
+        .onChange(of: engine.activePlayerIndex) { _, _ in
+            runBotTurnIfNeeded()
+            notifyIfHumanTurn()
+        }
+        .onChange(of: engine.round) { _, _ in runBotTurnIfNeeded() }
+        .sheet(isPresented: $showHandGuide) { WatchHandRankingsView() }
+    }
+
+    /// A compact, always-visible row of every bot still at the table --
+    /// name, stack, and status -- so the player has table awareness beyond
+    /// just their own cards on a screen too small for full seats.
+    private var botRoster: some View {
+        VStack(spacing: 2) {
+            ForEach(engine.players.filter { $0.id != humanID }) { bot in
+                HStack(spacing: 4) {
+                    if engine.dealerIndex < engine.players.count, engine.players[engine.dealerIndex].id == bot.id {
+                        Text("D")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(PATheme.ink)
+                            .padding(2)
+                            .background(Circle().fill(PATheme.goldMaterial))
+                    }
+                    WatchAvatarBadge(avatarID: bot.avatarID, size: 12)
+                    Text(bot.name)
+                        .font(.caption2)
+                        .lineLimit(1)
+                    Spacer()
+                    Text(bot.isFolded ? "Folded" : bot.isAllIn ? "All In" : "$\(bot.chips)")
+                        .font(.caption2)
+                        .foregroundColor(bot.isFolded ? .gray : bot.isAllIn ? .orange : .secondary)
+                }
+                .opacity(bot.isFolded ? 0.5 : 1)
+                .padding(.horizontal, 6).padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isActive(bot) ? Color.white.opacity(0.15) : Color.clear)
+                )
+            }
+        }
+    }
+
+    private func isActive(_ player: Player) -> Bool {
+        guard let idx = engine.activePlayerIndex, engine.players.indices.contains(idx) else { return false }
+        return engine.players[idx].id == player.id
     }
 
     @ViewBuilder
@@ -153,10 +230,44 @@ struct WatchGameView: View {
             engine.apply(BotAI.decideAction(for: current, engine: engine), by: current.id)
         }
     }
+
+    /// A gentle tap on the wrist when it becomes the player's turn -- easy
+    /// to miss a screen glance while playing one-handed.
+    private func notifyIfHumanTurn() {
+        guard engine.currentPlayer()?.id == humanID else { return }
+        WKInterfaceDevice.current().play(.notification)
+    }
+}
+
+/// Tiny avatar icon for the bot roster -- the watch's own copy of the same
+/// idea as the phone's `AvatarBadge`, since that lives in an iOS-only file.
+private struct WatchAvatarBadge: View {
+    let avatarID: String
+    var size: CGFloat = 12
+
+    var body: some View {
+        ZStack {
+            Circle().fill(Color.black.opacity(0.35))
+            if avatarID == CustomCosmeticStore.customID(for: .avatar),
+               let image = CustomCosmeticStore.shared.image(for: .avatar) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            } else {
+                Image(systemName: AvatarPalette.symbol(for: avatarID))
+                    .font(.system(size: size * 0.55))
+                    .foregroundColor(.white)
+            }
+        }
+        .frame(width: size, height: size)
+    }
 }
 
 private struct WatchCardView: View {
     let card: Card?
+    var cardFaceID: String = CosmeticCatalog.defaultCardFace
 
     var body: some View {
         RoundedRectangle(cornerRadius: 4)
@@ -168,7 +279,7 @@ private struct WatchCardView: View {
                         Text(card.rank.label).font(.system(size: 9, weight: .bold))
                         Text(card.suit.symbol).font(.system(size: 9))
                     }
-                    .foregroundColor(card.suit.isRed ? .red : .black)
+                    .foregroundColor(CardFacePalette.inkColor(isRed: card.suit.isRed, for: cardFaceID))
                 }
             }
     }
