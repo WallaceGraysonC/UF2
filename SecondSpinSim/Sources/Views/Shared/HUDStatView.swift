@@ -12,6 +12,10 @@ struct HUDStatView: View {
             Text(value)
                 .font(Theme.display(valueSize))
                 .foregroundStyle(Theme.amber)
+                // Rolls the digits when cash or the day changes instead of
+                // snapping, which reads much better during day resolution.
+                .contentTransition(.numericText())
+                .animation(.easeOut(duration: 0.4), value: value)
             Text(label)
                 .font(Theme.mono(8, weight: .semibold))
                 .foregroundStyle(Theme.inkSoft)

@@ -7,6 +7,11 @@ struct ShopFloorView: View {
     @State private var showingUpgrade = false
     @State private var showingAds = false
 
+    /// Day-resolution playback.
+    @State private var popups: [DayEvent] = []
+    @State private var isResolving = false
+    @State private var resolutionTask: Task<Void, Never>?
+
     /// Called when the player taps a tab other than Floor. Floor is the hub
     /// this view already renders, so navigating away is the parent's job.
     var onNavigate: (AppTab) -> Void = { _ in }
@@ -19,6 +24,7 @@ struct ShopFloorView: View {
         VStack(spacing: 0) {
             hud
             floorContent
+            ShopStatBar()
             AppTabBar(selection: $selectedTab)
         }
         .background(Theme.paper)
@@ -26,6 +32,11 @@ struct ShopFloorView: View {
             guard newValue != .floor else { return }
             onNavigate(newValue)
             selectedTab = .floor
+        }
+        .onDisappear {
+            // Don't leave a playback task running behind a pushed screen.
+            resolutionTask?.cancel()
+            resolutionTask = nil
         }
         .sheet(isPresented: $showingReport) {
             DayReportSheet(report: game.lastReport)
@@ -157,22 +168,78 @@ struct ShopFloorView: View {
         .buttonStyle(.plain)
     }
 
+    @ViewBuilder
     private var endDayButton: some View {
-        HStack(spacing: 8) {
-            Button { showingAds = true } label: {
-                Text(adLabel)
-            }
-            .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
-            .frame(maxWidth: 118)
+        if isResolving {
+            Button { skipResolution() } label: { Text("SKIP") }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+        } else {
+            HStack(spacing: 8) {
+                Button { showingAds = true } label: {
+                    Text(adLabel)
+                }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                .frame(maxWidth: 118)
 
-            Button {
-                game.endDay()
-                showingReport = true
-            } label: {
-                Text("END DAY")
+                Button {
+                    runDay()
+                } label: {
+                    Text("END DAY")
+                }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
             }
-            .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
         }
+    }
+
+    // MARK: Day resolution
+
+    /// Advances the simulation, then narrates what it did. The sim is already
+    /// final by the time the first popup shows — this is a replay, not the
+    /// source of truth, which keeps the animation from ever desyncing.
+    private func runDay() {
+        game.endDay()
+        let events = game.lastEvents
+
+        guard !events.isEmpty else {
+            showingReport = true
+            return
+        }
+
+        isResolving = true
+        popups = []
+
+        // Squeeze the gap on a busy day so a big haul doesn't drag.
+        let gap = min(DayPacing.betweenEvents,
+                      DayPacing.maxDuration / Double(events.count))
+
+        resolutionTask = Task { @MainActor in
+            for event in events {
+                if Task.isCancelled { break }
+                popups.append(event)
+                // Retire it once its own animation has finished.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(DayPacing.popupLifetime))
+                    popups.removeAll { $0.id == event.id }
+                }
+                try? await Task.sleep(for: .seconds(gap))
+            }
+            if !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(DayPacing.beforeReport))
+                finishResolution()
+            }
+        }
+    }
+
+    private func skipResolution() {
+        resolutionTask?.cancel()
+        finishResolution()
+    }
+
+    private func finishResolution() {
+        resolutionTask = nil
+        popups = []
+        isResolving = false
+        showingReport = true
     }
 
     /// Shows the running campaign's remaining days rather than a dead label.
@@ -198,21 +265,39 @@ struct ShopFloorView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
 
-            HStack {
-                shopperSprite(color: Theme.steel)
-                    .padding(.leading, 40)
-                Spacer()
-                shopperSprite(color: Theme.red)
-                    .padding(.trailing, 60)
+            // One station per staffer (capped), each a lane popups rise from.
+            HStack(spacing: 0) {
+                ForEach(0..<laneCount, id: \.self) { lane in
+                    ZStack(alignment: .bottom) {
+                        shopperSprite(color: laneTint(lane))
+                            .opacity(isResolving ? 1 : 0.85)
+
+                        ForEach(popups.filter { $0.lane == lane }) { event in
+                            FloatingEventView(event: event)
+                                .offset(y: -34)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
             }
-            .padding(.bottom, 34)
+            .padding(.bottom, 30)
             .frame(maxHeight: .infinity, alignment: .bottom)
 
-            speechBubble("got any \(game.trendingFormat.abbreviation)?")
-                .padding(.top, 12)
-                .padding(.leading, 30)
+            if !isResolving {
+                speechBubble("got any \(game.trendingFormat.abbreviation)?")
+                    .padding(.top, 10)
+                    .padding(.leading, 24)
+            }
         }
-        .frame(minHeight: 120)
+        .frame(minHeight: 132)
+    }
+
+    /// A station per staffer, capped so the floor doesn't get crowded.
+    private var laneCount: Int { max(1, min(game.staff.count, 4)) }
+
+    private func laneTint(_ lane: Int) -> Color {
+        let palette = [Theme.steel, Theme.red, Theme.plum, Theme.teal]
+        return palette[lane % palette.count]
     }
 
     private func shopperSprite(color: Color) -> some View {
@@ -312,6 +397,20 @@ private struct DayReportSheet: View {
                             .font(.system(size: 11.5))
                             .foregroundStyle(Theme.ink)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                if !report.trainingFinished.isEmpty {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("BACK FROM A CONVENTION")
+                            .font(Theme.mono(9, weight: .bold))
+                            .foregroundStyle(Theme.steel)
+                        ForEach(report.trainingFinished, id: \.self) { line in
+                            Text(line)
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(Theme.ink)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }

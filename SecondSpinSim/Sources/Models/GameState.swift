@@ -1,5 +1,8 @@
 import Foundation
 import Observation
+// DayEvent carries a tint, so the day-replay colours are resolved here.
+// Consistent with the other models that expose display colours.
+import SwiftUI
 
 /// Single source of truth for a run. Every screen reads from this, and
 /// `endDay()` is the one place the simulation actually advances.
@@ -63,6 +66,10 @@ final class GameState {
     /// Summary of the most recent `endDay()`, shown as the day-report.
     /// Deliberately not persisted — it's a transient beat, not run state.
     var lastReport: DayReport?
+
+    /// Blow-by-blow of the last day, for the floor to play back. Also
+    /// transient — a replay of what the sim already decided.
+    var lastEvents: [DayEvent] = []
 
     init() {}
 
@@ -205,6 +212,14 @@ final class GameState {
         var itemsSold = 0
         var soldIDs: [UUID] = []
 
+        lastEvents = []
+        let lanes = max(1, min(staff.count, 4))
+        var lane = 0
+        func nextLane() -> Int {
+            defer { lane = (lane + 1) % lanes }
+            return lane
+        }
+
         // --- Sales ---
         for item in shelvedInventory {
             guard let buyer = interestedArchetype(for: item) else { continue }
@@ -223,6 +238,10 @@ final class GameState {
             ledger.append(LedgerEntry(day: day, detail: "\(item.title) → \(buyer.rawValue)",
                                       amount: paid, kind: .sale))
             bumpReputation(buyer, by: item.isRare ? 4 : 1)
+            lastEvents.append(DayEvent(headline: "+$\(paid)",
+                                       detail: "\(item.format.abbreviation) → \(buyer.rawValue)",
+                                       tint: item.isRare ? Theme.red : Theme.green,
+                                       lane: nextLane()))
         }
         inventory.removeAll { soldIDs.contains($0.id) }
 
@@ -235,12 +254,18 @@ final class GameState {
             let points = Double(tech.restoration) * tech.effectiveness * specBonus
             benchJobs[index].progress += (points / 100.0) / benchJobs[index].effortMultiplier
             advanced += 1
+            lastEvents.append(DayEvent(headline: "+\(Int(points))",
+                                       detail: "\(tech.name) · restoration",
+                                       tint: Theme.teal, lane: nextLane()))
 
             if benchJobs[index].progress >= 1.0 {
                 benchJobs[index].progress = 0
                 if let next = benchJobs[index].grade.next {
                     benchJobs[index].grade = next
                     gradeUps.append("\(benchJobs[index].itemName) → \(next.label)")
+                    lastEvents.append(DayEvent(headline: next.label,
+                                               detail: "graded up",
+                                               tint: Theme.amberDeep, lane: nextLane()))
                 }
             }
         }
@@ -256,6 +281,8 @@ final class GameState {
         }
         ledger.append(LedgerEntry(day: day, detail: "Staff wages (\(staff.count))",
                                   amount: -wages, kind: .wages))
+        lastEvents.append(DayEvent(headline: "-$\(wages)", detail: "wages",
+                                   tint: Theme.red, lane: nextLane()))
 
         // --- Fatigue: staff on the bench or out on a run tire, the rest recover.
         // Runs are still active here — a buyer tires on the day they get back too.
@@ -279,6 +306,9 @@ final class GameState {
                 staff[index].raise(stat, by: gain)
                 staff[index].trainingStat = nil
                 trainingFinished.append("\(staff[index].name) — \(stat.rawValue) +\(gain)")
+                lastEvents.append(DayEvent(headline: "+\(gain)",
+                                           detail: "\(staff[index].name) · \(stat.rawValue)",
+                                           tint: Theme.steel, lane: nextLane()))
             }
         }
 
@@ -290,6 +320,9 @@ final class GameState {
                 let haul = resolveHaul(for: run)
                 pendingHaul.append(contentsOf: haul)
                 haulSize = haul.count
+                lastEvents.append(DayEvent(headline: "\(haul.count) ITEMS",
+                                           detail: "haul is back",
+                                           tint: Theme.amberDeep, lane: nextLane()))
                 activeRun = nil
             } else {
                 activeRun = run
@@ -305,9 +338,12 @@ final class GameState {
             let comboBonus = drop.affinity.multiplier
             for curator in crew {
                 let specBonus = curator.specialization == drop.theme.format ? 1.3 : 1.0
-                drop.designPoints += Double(curator.design) * curator.effectiveness
-                    * specBonus * comboBonus * 0.5
+                let design = Double(curator.design) * curator.effectiveness * specBonus * comboBonus * 0.5
+                drop.designPoints += design
                 drop.hypePoints += Double(curator.hype) * curator.effectiveness * 0.5
+                lastEvents.append(DayEvent(headline: "+\(Int(design))",
+                                           detail: "\(curator.name) · design",
+                                           tint: Theme.plum, lane: nextLane()))
             }
             drop.daysRemaining -= 1
 
