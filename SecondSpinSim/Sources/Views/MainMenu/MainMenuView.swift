@@ -79,21 +79,21 @@ struct MainMenuView: View {
 
     private var title: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 14) {
-                SpinningRecordView()
-                    .frame(width: 44, height: 44)
+            LogoBadgeView()
+                .frame(width: 92, height: 92)
+                .padding(.bottom, 4)
 
-                Text("SECOND SPIN")
-                    .font(Theme.display(34))
-                    .foregroundStyle(Theme.cream)
-                    .kerning(1)
-            }
+            Text("SECOND SPIN")
+                .font(Theme.display(34))
+                .foregroundStyle(Theme.cream)
+                .kerning(1)
+
             Text("SIM")
                 .font(Theme.display(16))
                 .foregroundStyle(Theme.amber)
                 .kerning(6)
 
-            Text("run the shop nobody else wanted to open")
+            Text("buy it. grade it. flip it.")
                 .font(Theme.mono(11))
                 .foregroundStyle(Theme.inkSoft.opacity(0.9))
                 .padding(.top, 2)
