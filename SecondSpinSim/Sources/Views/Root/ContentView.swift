@@ -26,6 +26,7 @@ struct ContentView: View {
         case .shopFloor: ShopFloorView(onNavigate: handleTab)
         case .sourcingRun: SourcingRunView()
         case .bench: BenchView()
+        case .drops: DropsView()
         case .staff: StaffView()
         case .ledger: LedgerView()
         }
@@ -41,6 +42,7 @@ struct ContentView: View {
         case .floor: break
         case .source: path.append(Route.sourcingRun)
         case .bench: path.append(Route.bench)
+        case .drops: path.append(Route.drops)
         case .staff: path.append(Route.staff)
         case .ledger: path.append(Route.ledger)
         }
@@ -50,6 +52,7 @@ struct ContentView: View {
         case shopFloor
         case sourcingRun
         case bench
+        case drops
         case staff
         case ledger
     }

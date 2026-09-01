@@ -93,16 +93,20 @@ struct ShopFloorView: View {
     @ViewBuilder
     private var statusStrip: some View {
         if !game.pendingHaul.isEmpty {
-            statusPill(text: "\(game.pendingHaul.count) ITEMS TO GRADE", color: Theme.red)
+            statusPill(text: "\(game.pendingHaul.count) ITEMS TO GRADE",
+                       color: Theme.red, destination: .source)
+        } else if let drop = game.activeDrop {
+            statusPill(text: "\(drop.theme.rawValue.uppercased()) — \(drop.dayLabel)",
+                       color: Theme.plum, destination: .drops)
         } else if let run = game.activeRun {
             statusPill(text: "\(run.location.rawValue.uppercased()) — \(run.dayLabel)",
-                       color: Theme.amberDeep)
+                       color: Theme.amberDeep, destination: .source)
         }
     }
 
-    private func statusPill(text: String, color: Color) -> some View {
+    private func statusPill(text: String, color: Color, destination: AppTab) -> some View {
         Button {
-            onNavigate(.source)
+            onNavigate(destination)
         } label: {
             HStack {
                 Text(text)
@@ -243,6 +247,26 @@ private struct DayReportSheet: View {
                 .background(Theme.cream)
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                if let drop = report.dropResult {
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack {
+                            Text("DROP LAUNCHED")
+                                .font(Theme.mono(9, weight: .bold))
+                                .foregroundStyle(Theme.red)
+                            Spacer()
+                            Text(String(repeating: "★", count: drop.stars)
+                                 + String(repeating: "☆", count: 5 - drop.stars))
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.amberDeep)
+                        }
+                        Text(drop.review)
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(Theme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
                 if !report.gradeUps.isEmpty {
                     VStack(alignment: .leading, spacing: 5) {

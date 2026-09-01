@@ -5,6 +5,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     case floor = "Floor"
     case source = "Source"
     case bench = "Bench"
+    case drops = "Drops"
     case staff = "Staff"
     case ledger = "Ledger"
 

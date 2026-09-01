@@ -19,6 +19,12 @@ final class GameState {
     /// Haul waiting to be graded — items aren't stock until the player rules on them.
     var pendingHaul: [InventoryItem] = []
 
+    /// At most one Drop in prep at a time.
+    var activeDrop: CuratedDrop?
+    /// The most recent write-up, and the running history of them.
+    var lastDropResult: DropResult?
+    var dropHistory: [DropResult] = []
+
     let benchCapacity = 4
 
     var reputation: [CustomerArchetype: Int] = [
@@ -43,6 +49,8 @@ final class GameState {
         var gradeUps: [String]
         /// Non-nil on the day a Sourcing Run comes back.
         var haulSize: Int?
+        /// Non-nil on the day a Drop launches.
+        var dropResult: DropResult?
 
         var net: Int { revenue - wages }
     }
@@ -124,6 +132,7 @@ final class GameState {
         // Runs are still active here — a buyer tires on the day they get back too.
         var workingIDs = Set(benchJobs.compactMap(\.assignedTechID))
         workingIDs.formUnion(activeRun?.buyerIDs ?? [])
+        workingIDs.formUnion(activeDrop?.curatorIDs ?? [])
         for index in staff.indices {
             if workingIDs.contains(staff[index].id) {
                 staff[index].fatigue = min(100, staff[index].fatigue + 12)
@@ -146,6 +155,26 @@ final class GameState {
             }
         }
 
+        // --- Curated Drops ---
+        var launchedDrop: DropResult?
+        if var drop = activeDrop {
+            let crew = drop.curatorIDs.compactMap { staffMember(id: $0) }
+            for curator in crew {
+                let specBonus = curator.specialization == drop.theme.format ? 1.3 : 1.0
+                drop.designPoints += Double(curator.design) * curator.effectiveness * specBonus * 0.5
+                drop.hypePoints += Double(curator.hype) * curator.effectiveness * 0.5
+            }
+            drop.daysRemaining -= 1
+
+            if drop.daysRemaining <= 0 {
+                resolveDrop(drop)
+                launchedDrop = lastDropResult
+                activeDrop = nil
+            } else {
+                activeDrop = drop
+            }
+        }
+
         // --- Trend rotation ---
         trendDaysRemaining -= 1
         if trendDaysRemaining <= 0 {
@@ -155,7 +184,8 @@ final class GameState {
 
         lastReport = DayReport(day: day, itemsSold: itemsSold, revenue: revenue,
                                wages: wages, restorationsAdvanced: advanced,
-                               gradeUps: gradeUps, haulSize: haulSize)
+                               gradeUps: gradeUps, haulSize: haulSize,
+                               dropResult: launchedDrop)
         day += 1
     }
 
@@ -248,6 +278,73 @@ final class GameState {
     /// Dump it — some of what comes back in a storage unit is genuinely junk.
     func discard(_ item: InventoryItem) {
         pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    // MARK: Curated Drops
+
+    var curators: [StaffMember] { staff.filter { $0.role == .curator } }
+
+    func canAfford(_ theme: DropTheme) -> Bool { cash >= theme.cost }
+
+    func startDrop(theme: DropTheme, curatorIDs: [UUID]) {
+        guard activeDrop == nil, !curatorIDs.isEmpty, canAfford(theme) else { return }
+        cash -= theme.cost
+        ledger.append(LedgerEntry(day: day, detail: "\(theme.rawValue) — setup",
+                                  amount: -theme.cost, kind: .upgrade))
+        activeDrop = CuratedDrop(theme: theme, curatorIDs: curatorIDs)
+    }
+
+    /// Launch day. Hype sets how many people show up; Design decides whether
+    /// what they found was worth the trip — a big turnout on a thin display
+    /// is the bad review, which is why Hype alone isn't a strategy.
+    private func resolveDrop(_ drop: CuratedDrop) {
+        let theme = drop.theme
+
+        let turnout = max(1, Int((drop.hypePoints / 8.0) * (1.0 + Double(overallReputation) / 120.0)))
+
+        // Design measured against what the theme promised.
+        let ratio = drop.designPoints / theme.expectation
+        let stars: Int
+        switch ratio {
+        case ..<0.4: stars = 1
+        case ..<0.7: stars = 2
+        case ..<1.1: stars = 3
+        case ..<1.6: stars = 4
+        default: stars = 5
+        }
+
+        // Themed stock moves at a premium, capped by how many people came.
+        var revenue = 0
+        var soldIDs: [UUID] = []
+        let sellable = shelvedInventory.filter { $0.format == theme.format }
+        for item in sellable.prefix(max(1, turnout / 3)) {
+            let price = Double(item.askingPrice(trendModifier: trendModifier(for: item.format)))
+            let premium = 1.0 + Double(stars) * 0.08
+            revenue += Int((price * premium).rounded())
+            soldIDs.append(item.id)
+        }
+        inventory.removeAll { soldIDs.contains($0.id) }
+
+        if revenue > 0 {
+            cash += revenue
+            ledger.append(LedgerEntry(day: day, detail: "\(theme.rawValue) — \(soldIDs.count) sold",
+                                      amount: revenue, kind: .sale))
+        }
+
+        // Reputation swings both ways: a 1- or 2-star write-up costs you.
+        let repDelta = (stars - 2) * 4
+        var gains: [CustomerArchetype: Int] = [:]
+        for archetype in theme.draws {
+            let before = reputation[archetype] ?? 0
+            reputation[archetype] = max(0, min(100, before + repDelta))
+            gains[archetype] = (reputation[archetype] ?? 0) - before
+        }
+
+        let result = DropResult(themeName: theme.rawValue, day: day, turnout: turnout,
+                                stars: stars, revenue: revenue, repGains: gains,
+                                review: DropResult.review(stars: stars, themeName: theme.rawValue))
+        lastDropResult = result
+        dropHistory.append(result)
     }
 }
 
