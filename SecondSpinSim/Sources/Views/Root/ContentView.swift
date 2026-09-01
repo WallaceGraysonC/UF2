@@ -20,17 +20,22 @@ struct ContentView: View {
                 case .sourcingRun:
                     SourcingRunView()
                         .navigationBarBackButtonHidden()
+                case .bench:
+                    BenchView()
+                        .navigationBarBackButtonHidden()
                 }
             }
         }
     }
 
-    /// Bench, Staff, and Ledger aren't built yet — only Source routes for now.
+    /// Staff and Ledger aren't built yet.
     private func handleTab(_ tab: AppTab) {
         switch tab {
         case .source:
             path.append(Route.sourcingRun)
-        case .floor, .bench, .staff, .ledger:
+        case .bench:
+            path.append(Route.bench)
+        case .floor, .staff, .ledger:
             break
         }
     }
@@ -38,6 +43,7 @@ struct ContentView: View {
     private enum Route: Hashable {
         case shopFloor
         case sourcingRun
+        case bench
     }
 }
 
