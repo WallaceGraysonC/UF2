@@ -62,7 +62,7 @@ struct DropsView: View {
                     .foregroundStyle(Theme.ink)
 
                 VStack(spacing: 7) {
-                    ForEach(DropTheme.allCases) { theme in
+                    ForEach(game.availableThemes) { theme in
                         ThemeCard(
                             theme: theme,
                             isSelected: chosenTheme == theme,

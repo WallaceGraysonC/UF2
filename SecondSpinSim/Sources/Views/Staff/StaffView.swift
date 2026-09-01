@@ -35,29 +35,115 @@ struct StaffView: View {
     }
 
     private var content: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("STAFF")
-                .font(Theme.display(14))
-                .foregroundStyle(Theme.ink)
-                .padding(.horizontal, 16)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("STAFF")
+                    .font(Theme.display(14))
+                    .foregroundStyle(Theme.ink)
 
-            ScrollView {
-                VStack(spacing: 8) {
-                    ForEach(game.staff) { member in
-                        StaffCard(member: member)
-                    }
+                ForEach(game.staff) { member in
+                    StaffCard(
+                        member: member,
+                        canTrain: game.canTrain(member),
+                        onTrain: { stat in game.sendToConvention(member, for: stat) }
+                    )
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+
+                hiringSection
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 20)
+        }
+    }
+
+    private var hiringSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("HIRING BOARD")
+                    .font(Theme.display(13))
+                    .foregroundStyle(Theme.ink)
+                Spacer()
+                Button { game.refreshHiringBoard() } label: {
+                    Text("REFRESH")
+                        .font(Theme.mono(8, weight: .bold))
+                        .foregroundStyle(Theme.inkSoft)
+                }
+            }
+            .padding(.top, 8)
+
+            if game.hiringBoard.isEmpty {
+                Text("Nobody's looking right now. Refresh, or level up the shop to draw better people.")
+                    .font(Theme.mono(9))
+                    .foregroundStyle(Theme.inkSoft)
+            } else {
+                ForEach(game.hiringBoard) { candidate in
+                    CandidateCard(
+                        candidate: candidate,
+                        affordable: game.canHire(candidate),
+                        onHire: { game.hire(candidate) }
+                    )
+                }
             }
         }
-        .padding(.top, 14)
-        .frame(maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct CandidateCard: View {
+    let candidate: StaffMember
+    let affordable: Bool
+    let onHire: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(candidate.name.uppercased())
+                        .font(Theme.display(14))
+                        .foregroundStyle(Theme.ink)
+                    Text("\(candidate.role.rawValue.uppercased()) · \(candidate.primaryStat.label) \(candidate.primaryStat.value)")
+                        .font(Theme.mono(8, weight: .semibold))
+                        .foregroundStyle(Theme.inkSoft)
+                }
+                Spacer()
+                Text(candidate.specialization.abbreviation)
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(candidate.specialization.binColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+            }
+
+            HStack {
+                Text("SIGNING $\(candidate.signingFee) · $\(candidate.dailyWage)/DAY")
+                    .font(Theme.mono(8, weight: .semibold))
+                    .foregroundStyle(affordable ? Theme.inkSoft : Theme.red)
+                Spacer()
+                Button(action: onHire) {
+                    Text(affordable ? "HIRE" : "TOO DEAR")
+                        .font(Theme.mono(9, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(affordable ? Theme.amberDeep : Theme.inkSoft)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+                .buttonStyle(.plain)
+                .disabled(!affordable)
+            }
+        }
+        .padding(11)
+        .background(Theme.cream)
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 }
 
 private struct StaffCard: View {
     let member: StaffMember
+    let canTrain: Bool
+    let onTrain: (TrainableStat) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
@@ -89,11 +175,51 @@ private struct StaffCard: View {
                     .foregroundStyle(Theme.inkSoft)
             }
             .padding(.top, 2)
+
+            trainingControl
         }
         .padding(12)
         .background(Theme.cream)
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
+    /// Conventions take the staffer off the floor for three days, so this
+    /// shows a countdown rather than a button while one is running.
+    @ViewBuilder
+    private var trainingControl: some View {
+        if member.isTraining {
+            HStack {
+                Text("AT A CONVENTION")
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(Theme.amberDeep)
+                Spacer()
+                Text("\(member.trainingDaysRemaining)D LEFT")
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity)
+            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.amberDeep, lineWidth: 1))
+        } else {
+            Menu {
+                ForEach(TrainableStat.allCases) { stat in
+                    Button("\(stat.rawValue) — now \(member.value(of: stat))") {
+                        onTrain(stat)
+                    }
+                }
+            } label: {
+                Text(canTrain ? "SEND TO A CONVENTION — $\(GameState.trainingCost)" : "CAN'T AFFORD TRAINING")
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(canTrain ? Theme.teal : Theme.inkSoft)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .overlay(RoundedRectangle(cornerRadius: 4)
+                        .stroke(canTrain ? Theme.teal : Theme.line, lineWidth: 1))
+            }
+            .disabled(!canTrain)
+        }
     }
 
     private var specializationChip: some View {

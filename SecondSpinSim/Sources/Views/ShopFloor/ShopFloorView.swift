@@ -4,13 +4,11 @@ struct ShopFloorView: View {
     @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .floor
     @State private var showingReport = false
+    @State private var showingUpgrade = false
 
     /// Called when the player taps a tab other than Floor. Floor is the hub
     /// this view already renders, so navigating away is the parent's job.
     var onNavigate: (AppTab) -> Void = { _ in }
-
-    /// Six across, two rows — the shelf wall the player actually sees.
-    private let binCapacity = 12
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,6 +25,10 @@ struct ShopFloorView: View {
         .sheet(isPresented: $showingReport) {
             DayReportSheet(report: game.lastReport)
         }
+        .sheet(isPresented: $showingUpgrade) {
+            UpgradeSheet()
+                .environment(game)
+        }
     }
 
     // MARK: HUD
@@ -37,7 +39,16 @@ struct ShopFloorView: View {
             Spacer()
             HUDStatView(value: "$\(game.cash)", label: "CASH")
             Spacer()
-            HUDStatView(value: "LV. \(game.shopLevel)", label: "SHOP")
+            Button { showingUpgrade = true } label: {
+                HUDStatView(value: "LV. \(game.shopLevel)", label: "SHOP")
+            }
+            .buttonStyle(.plain)
+            .overlay(alignment: .topTrailing) {
+                // A dot when the next rung is actually affordable.
+                if let next = game.nextUpgrade, game.canUpgrade(to: next) {
+                    Circle().fill(Theme.red).frame(width: 7, height: 7).offset(x: 6, y: -2)
+                }
+            }
         }
         .padding(.horizontal, 18)
         .padding(.top, 54)
@@ -82,7 +93,7 @@ struct ShopFloorView: View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 6)
         let stock = game.shelvedInventory
         return LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(0..<binCapacity, id: \.self) { index in
+            ForEach(0..<game.binCapacity, id: \.self) { index in
                 ShelfBinView(item: index < stock.count ? stock[index] : nil)
             }
         }

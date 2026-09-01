@@ -7,7 +7,7 @@ struct BenchView: View {
 
     private var benchSlots: Int { game.benchCapacity }
 
-    private var techs: [StaffMember] { game.staff.filter { $0.role == .tech } }
+    private var techs: [StaffMember] { game.techs }
 
     var body: some View {
         VStack(spacing: 0) {
