@@ -1,42 +1,48 @@
 import SwiftUI
 
-/// Root of the view hierarchy. A single NavigationStack for now — Main Menu
-/// pushes straight to the Shop Floor, since there's no shop-naming flow or
-/// save system yet to gate on.
+/// Root of the view hierarchy. Main Menu pushes to the Shop Floor hub, and
+/// the hub's tab bar pushes on to each project screen.
 struct ContentView: View {
+    @State private var game = GameState()
     @State private var path = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $path) {
             MainMenuView(
-                onNewGame: { path.append(Route.shopFloor) },
+                onNewGame: { startNewGame() },
                 onContinue: { path.append(Route.shopFloor) }
             )
             .navigationDestination(for: Route.self) { route in
-                switch route {
-                case .shopFloor:
-                    ShopFloorView(onNavigate: handleTab)
-                        .navigationBarBackButtonHidden()
-                case .sourcingRun:
-                    SourcingRunView()
-                        .navigationBarBackButtonHidden()
-                case .bench:
-                    BenchView()
-                        .navigationBarBackButtonHidden()
-                }
+                destination(for: route)
+                    .navigationBarBackButtonHidden()
             }
+        }
+        .environment(game)
+    }
+
+    @ViewBuilder
+    private func destination(for route: Route) -> some View {
+        switch route {
+        case .shopFloor: ShopFloorView(onNavigate: handleTab)
+        case .sourcingRun: SourcingRunView()
+        case .bench: BenchView()
+        case .staff: StaffView()
+        case .ledger: LedgerView()
         }
     }
 
-    /// Staff and Ledger aren't built yet.
+    private func startNewGame() {
+        game = GameState()
+        path.append(Route.shopFloor)
+    }
+
     private func handleTab(_ tab: AppTab) {
         switch tab {
-        case .source:
-            path.append(Route.sourcingRun)
-        case .bench:
-            path.append(Route.bench)
-        case .floor, .staff, .ledger:
-            break
+        case .floor: break
+        case .source: path.append(Route.sourcingRun)
+        case .bench: path.append(Route.bench)
+        case .staff: path.append(Route.staff)
+        case .ledger: path.append(Route.ledger)
         }
     }
 
@@ -44,6 +50,8 @@ struct ContentView: View {
         case shopFloor
         case sourcingRun
         case bench
+        case staff
+        case ledger
     }
 }
 

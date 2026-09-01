@@ -2,15 +2,12 @@ import SwiftUI
 
 struct BenchView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .bench
 
     var benchSlots: Int = 4
-    var jobs: [RestorationJob] = [
-        RestorationJob(itemName: "Blondie — Parallel Lines", format: .vinyl, startGrade: .good, progress: 0.7, assignedTechName: "Priya"),
-        RestorationJob(itemName: "Night Tide (Criterion LD)", format: .laserdisc, startGrade: .fair, progress: 0.3, assignedTechName: "Priya"),
-        RestorationJob(itemName: "Chrono Trigger (cart only)", format: .game, startGrade: .poor, progress: 0.1, assignedTechName: nil),
-        RestorationJob(itemName: "The Warriors (VHS, clamshell)", format: .vhs, startGrade: .veryGood, progress: 0.9, assignedTechName: nil)
-    ]
+
+    private var techs: [StaffMember] { game.staff.filter { $0.role == .tech } }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,15 +29,19 @@ struct BenchView: View {
                 Text("‹ BACK").font(Theme.mono(10, weight: .semibold))
             }
             Spacer()
-            HUDStatView(value: "\(jobs.count)/\(benchSlots)", label: "BENCH", valueSize: 14)
+            HUDStatView(value: "\(game.benchJobs.count)/\(benchSlots)", label: "BENCH", valueSize: 14)
             Spacer()
-            HUDStatView(value: "\(jobs.filter { $0.assignedTechName != nil }.count)", label: "STAFFED", valueSize: 14)
+            HUDStatView(value: "\(staffedCount)", label: "STAFFED", valueSize: 14)
         }
         .padding(.horizontal, 18)
         .padding(.top, 54)
         .padding(.bottom, 12)
         .background(Theme.ink)
         .foregroundStyle(Theme.cream)
+    }
+
+    private var staffedCount: Int {
+        game.benchJobs.filter { $0.assignedTechID != nil }.count
     }
 
     // MARK: Content
@@ -54,10 +55,15 @@ struct BenchView: View {
 
             ScrollView {
                 VStack(spacing: 8) {
-                    ForEach(jobs) { job in
-                        RestorationJobRow(job: job)
+                    ForEach(game.benchJobs) { job in
+                        RestorationJobRow(
+                            job: job,
+                            techs: techs,
+                            assignedTech: game.staffMember(id: job.assignedTechID),
+                            onAssign: { techID in game.assign(techID: techID, to: job.id) }
+                        )
                     }
-                    if jobs.count < benchSlots {
+                    if game.benchJobs.count < benchSlots {
                         emptySlotRow
                     }
                 }
@@ -70,7 +76,7 @@ struct BenchView: View {
     }
 
     private var emptySlotRow: some View {
-        Text("OPEN BENCH SLOT — send a haul here from the Ledger")
+        Text("OPEN BENCH SLOT — send a haul here from a Sourcing Run")
             .font(Theme.mono(9, weight: .semibold))
             .foregroundStyle(Theme.inkSoft)
             .frame(maxWidth: .infinity)
@@ -85,6 +91,9 @@ struct BenchView: View {
 
 private struct RestorationJobRow: View {
     let job: RestorationJob
+    let techs: [StaffMember]
+    let assignedTech: StaffMember?
+    let onAssign: (UUID?) -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -104,9 +113,9 @@ private struct RestorationJobRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: 6) {
-                    Text(job.startGrade.label)
+                    Text(job.grade.label)
                         .font(Theme.mono(8, weight: .bold))
-                        .foregroundStyle(job.startGrade.color)
+                        .foregroundStyle(job.grade.color)
 
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
@@ -117,9 +126,7 @@ private struct RestorationJobRow: View {
                     .frame(height: 5)
                 }
 
-                Text(job.assignedTechName.map { "\($0.uppercased()) · TECH" } ?? "UNASSIGNED")
-                    .font(Theme.mono(8, weight: .semibold))
-                    .foregroundStyle(job.assignedTechName == nil ? Theme.red : Theme.inkSoft)
+                assignMenu
             }
         }
         .padding(10)
@@ -127,8 +134,22 @@ private struct RestorationJobRow: View {
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
+
+    private var assignMenu: some View {
+        Menu {
+            Button("Unassigned") { onAssign(nil) }
+            ForEach(techs) { tech in
+                Button("\(tech.name) — restoration \(tech.restoration)") { onAssign(tech.id) }
+            }
+        } label: {
+            Text(assignedTech.map { "\($0.name.uppercased()) · TECH" } ?? "UNASSIGNED — TAP TO STAFF")
+                .font(Theme.mono(8, weight: .semibold))
+                .foregroundStyle(assignedTech == nil ? Theme.red : Theme.inkSoft)
+        }
+    }
 }
 
 #Preview {
     BenchView()
+        .environment(GameState())
 }

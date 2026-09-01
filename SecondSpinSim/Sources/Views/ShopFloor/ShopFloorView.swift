@@ -1,30 +1,16 @@
 import SwiftUI
 
-/// One slot on the shelf grid — empty slots render as a dashed placeholder,
-/// `isRare` draws the red grail outline used for a standout find.
-struct ShelfBin: Identifiable {
-    let id = UUID()
-    var format: MediaFormat?
-    var isRare: Bool = false
-}
-
 struct ShopFloorView: View {
+    @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .floor
+    @State private var showingReport = false
 
     /// Called when the player taps a tab other than Floor. Floor is the hub
     /// this view already renders, so navigating away is the parent's job.
     var onNavigate: (AppTab) -> Void = { _ in }
 
-    // Sample data until this is backed by a real inventory model.
-    var day: Int = 14
-    var cash: Int = 1240
-    var shopLevel: Int = 3
-    var hasNewHaul: Bool = true
-    var bins: [ShelfBin] = [
-        .init(format: .vinyl), .init(format: .vinyl), .init(format: .cd), .init(format: .cd),
-        .init(format: .vhs), .init(format: .vhs, isRare: true), .init(format: .game), .init(format: .game),
-        .init(format: .vinyl), .init(format: .cd), .init(format: nil), .init(format: nil)
-    ]
+    /// Six across, two rows — the shelf wall the player actually sees.
+    private let binCapacity = 12
 
     var body: some View {
         VStack(spacing: 0) {
@@ -38,17 +24,20 @@ struct ShopFloorView: View {
             onNavigate(newValue)
             selectedTab = .floor
         }
+        .sheet(isPresented: $showingReport) {
+            DayReportSheet(report: game.lastReport)
+        }
     }
 
     // MARK: HUD
 
     private var hud: some View {
         HStack {
-            HUDStatView(value: "DAY \(day)", label: "SEASON 1")
+            HUDStatView(value: "DAY \(game.day)", label: "SEASON 1")
             Spacer()
-            HUDStatView(value: "$\(cash)", label: "CASH")
+            HUDStatView(value: "$\(game.cash)", label: "CASH")
             Spacer()
-            HUDStatView(value: "LV. \(shopLevel)", label: "SHOP")
+            HUDStatView(value: "LV. \(game.shopLevel)", label: "SHOP")
         }
         .padding(.horizontal, 18)
         .padding(.top, 54)
@@ -66,33 +55,45 @@ struct ShopFloorView: View {
                     .font(Theme.display(14))
                     .foregroundStyle(Theme.ink)
                 Spacer()
-                if hasNewHaul {
-                    Text("NEW HAUL")
-                        .font(Theme.mono(9, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 4)
-                        .background(Theme.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 2))
-                }
+                Text("TRENDING: \(game.trendingFormat.abbreviation)")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(Theme.red)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
             }
 
             shelfGrid
 
             floorScene
+
+            endDayButton
         }
         .padding(.horizontal, 14)
         .padding(.top, 14)
+        .padding(.bottom, 10)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private var shelfGrid: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 6)
+        let stock = game.shelvedInventory
         return LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(bins) { bin in
-                ShelfBinView(bin: bin)
+            ForEach(0..<binCapacity, id: \.self) { index in
+                ShelfBinView(item: index < stock.count ? stock[index] : nil)
             }
         }
+    }
+
+    private var endDayButton: some View {
+        Button {
+            game.endDay()
+            showingReport = true
+        } label: {
+            Text("END DAY")
+        }
+        .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
     }
 
     private var floorScene: some View {
@@ -105,7 +106,7 @@ struct ShopFloorView: View {
                 Spacer()
                 Rectangle()
                     .fill(Color(hex: 0xB98A4C))
-                    .frame(height: 40)
+                    .frame(height: 34)
                     .overlay(Rectangle().fill(Color(hex: 0x8A6136)).frame(height: 3), alignment: .top)
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -117,14 +118,14 @@ struct ShopFloorView: View {
                 shopperSprite(color: Theme.red)
                     .padding(.trailing, 60)
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 34)
             .frame(maxHeight: .infinity, alignment: .bottom)
 
-            speechBubble("got any Blondie?")
-                .padding(.top, 14)
+            speechBubble("got any \(game.trendingFormat.abbreviation)?")
+                .padding(.top, 12)
                 .padding(.leading, 30)
         }
-        .frame(minHeight: 150)
+        .frame(minHeight: 120)
     }
 
     private func shopperSprite(color: Color) -> some View {
@@ -134,7 +135,7 @@ struct ShopFloorView: View {
                 .frame(width: 16, height: 16)
             RoundedRectangle(cornerRadius: 5)
                 .fill(color)
-                .frame(width: 22, height: 34)
+                .frame(width: 22, height: 30)
         }
     }
 
@@ -150,33 +151,99 @@ struct ShopFloorView: View {
     }
 }
 
+/// One slot on the shelf wall — an empty slot renders as a dashed placeholder,
+/// a rare item gets the red grail outline.
 private struct ShelfBinView: View {
-    let bin: ShelfBin
+    let item: InventoryItem?
 
     var body: some View {
         RoundedRectangle(cornerRadius: 3)
-            .fill(bin.format?.binColor ?? Color(hex: 0xD7D0BE))
+            .fill(item?.format.binColor ?? Color(hex: 0xD7D0BE))
             .aspectRatio(1, contentMode: .fit)
             .overlay(
                 Group {
-                    if bin.format == nil {
+                    if item == nil {
                         RoundedRectangle(cornerRadius: 3)
                             .stroke(style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
                             .foregroundStyle(Color(hex: 0xB7AF97))
-                    } else if bin.isRare {
+                    } else if item?.isRare == true {
                         RoundedRectangle(cornerRadius: 3)
                             .stroke(Theme.red, lineWidth: 2)
                     }
                 }
             )
             .overlay(
-                Text(bin.format?.abbreviation ?? "")
+                Text(item?.format.abbreviation ?? "")
                     .font(Theme.mono(8, weight: .bold))
                     .foregroundStyle(.white.opacity(0.85))
             )
     }
 }
 
+/// The end-of-day summary — the beat where a Kairosoft game tells you how
+/// the day actually went.
+private struct DayReportSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let report: GameState.DayReport?
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("DAY \(report?.day ?? 0) REPORT")
+                .font(Theme.display(20))
+                .foregroundStyle(Theme.ink)
+
+            if let report {
+                VStack(spacing: 8) {
+                    reportRow("ITEMS SOLD", "\(report.itemsSold)", Theme.ink)
+                    reportRow("REVENUE", "+$\(report.revenue)", Theme.green)
+                    reportRow("WAGES", "-$\(report.wages)", Theme.red)
+                    reportRow("NET", (report.net >= 0 ? "+$\(report.net)" : "-$\(abs(report.net))"),
+                              report.net >= 0 ? Theme.green : Theme.red)
+                    reportRow("BENCH JOBS WORKED", "\(report.restorationsAdvanced)", Theme.ink)
+                }
+                .padding(14)
+                .background(Theme.cream)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                if !report.gradeUps.isEmpty {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("GRADE UPS")
+                            .font(Theme.mono(9, weight: .bold))
+                            .foregroundStyle(Theme.amberDeep)
+                        ForEach(report.gradeUps, id: \.self) { line in
+                            Text(line)
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(Theme.ink)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+
+            Button { dismiss() } label: { Text("OPEN UP") }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 30)
+        .background(Theme.paper)
+    }
+
+    private func reportRow(_ label: String, _ value: String, _ color: Color) -> some View {
+        HStack {
+            Text(label)
+                .font(Theme.mono(9, weight: .semibold))
+                .foregroundStyle(Theme.inkSoft)
+            Spacer()
+            Text(value)
+                .font(Theme.mono(11, weight: .bold))
+                .foregroundStyle(color)
+        }
+    }
+}
+
 #Preview {
     ShopFloorView()
+        .environment(GameState())
 }

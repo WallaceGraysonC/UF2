@@ -1,14 +1,36 @@
 import Foundation
 
-/// One item sitting on the Backroom Bench — grading in from Sourcing at
-/// `startGrade`, climbing toward `mint` as `progress` fills.
+/// One item sitting on the Backroom Bench, climbing grade bands as an
+/// assigned Tech pours Restoration points into it.
 struct RestorationJob: Identifiable {
     let id = UUID()
     var itemName: String
     var format: MediaFormat
-    var startGrade: ConditionGrade
-    /// 0...1 toward the next grade band. Diminishing returns near Mint are a
-    /// balance concern (bigger steps needed higher up), not modeled here yet.
+    var grade: ConditionGrade
+    /// 0...1 toward the next grade band.
     var progress: Double
-    var assignedTechName: String?
+    var assignedTechID: UUID?
+
+    /// Points needed per band climb rise sharply near Mint — restoring a
+    /// beat copy to Good is quick, pushing Near Mint to Mint is not.
+    var effortMultiplier: Double {
+        switch grade {
+        case .poor, .fair: return 1.0
+        case .good: return 1.4
+        case .veryGood: return 2.2
+        case .nearMint: return 3.5
+        case .mint: return .infinity
+        }
+    }
+
+    static func starterJobs() -> [RestorationJob] {
+        [
+            RestorationJob(itemName: "Blondie — Parallel Lines", format: .vinyl,
+                           grade: .good, progress: 0.7, assignedTechID: nil),
+            RestorationJob(itemName: "Night Tide (Criterion LD)", format: .laserdisc,
+                           grade: .fair, progress: 0.3, assignedTechID: nil),
+            RestorationJob(itemName: "Chrono Trigger (cart only)", format: .game,
+                           grade: .poor, progress: 0.1, assignedTechID: nil)
+        ]
+    }
 }

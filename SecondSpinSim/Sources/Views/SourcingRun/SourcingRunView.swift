@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SourcingRunView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .source
     @State private var isGraded = false
 
@@ -10,10 +11,9 @@ struct SourcingRunView: View {
     var itemName: String = "Laserdisc — \"Night Tide\" (1961)"
     var itemDetail: String = "Criterion pressing"
     var conditionValue: Double = 0.64
-    var staff: [StaffSummary] = [
-        StaffSummary(name: "Mara", role: "Buyer", statValue: 0.8),
-        StaffSummary(name: "Dev", role: "Buyer", statValue: 0.45)
-    ]
+
+    /// Buyers are the role that runs Sourcing.
+    private var staff: [StaffMember] { game.staff.filter { $0.role == .buyer } }
 
     private var grade: ConditionGrade { ConditionGrade(value: conditionValue) }
 
@@ -139,13 +139,14 @@ struct SourcingRunView: View {
         HStack(spacing: 8) {
             ForEach(staff) { member in
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(member.name.uppercased()) · \(member.role)")
+                    Text("\(member.name.uppercased()) · \(member.role.rawValue)")
                         .font(Theme.mono(8, weight: .bold))
                         .foregroundStyle(Theme.ink)
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             Capsule().fill(Color(hex: 0xD7D0BE))
-                            Capsule().fill(Theme.teal).frame(width: geo.size.width * member.statValue)
+                            Capsule().fill(Theme.teal)
+                                .frame(width: geo.size.width * (Double(member.raritySense) / 99.0))
                         }
                     }
                     .frame(height: 4)
@@ -187,4 +188,5 @@ private struct GhostButtonStyle: ButtonStyle {
 
 #Preview {
     SourcingRunView()
+        .environment(GameState())
 }
