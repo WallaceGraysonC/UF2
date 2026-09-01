@@ -11,6 +11,10 @@ struct ShelfBin: Identifiable {
 struct ShopFloorView: View {
     @State private var selectedTab: AppTab = .floor
 
+    /// Called when the player taps a tab other than Floor. Floor is the hub
+    /// this view already renders, so navigating away is the parent's job.
+    var onNavigate: (AppTab) -> Void = { _ in }
+
     // Sample data until this is backed by a real inventory model.
     var day: Int = 14
     var cash: Int = 1240
@@ -29,35 +33,28 @@ struct ShopFloorView: View {
             AppTabBar(selection: $selectedTab)
         }
         .background(Theme.paper)
+        .onChange(of: selectedTab) { _, newValue in
+            guard newValue != .floor else { return }
+            onNavigate(newValue)
+            selectedTab = .floor
+        }
     }
 
     // MARK: HUD
 
     private var hud: some View {
         HStack {
-            hudStat(value: "DAY \(day)", label: "SEASON 1")
+            HUDStatView(value: "DAY \(day)", label: "SEASON 1")
             Spacer()
-            hudStat(value: "$\(cash)", label: "CASH")
+            HUDStatView(value: "$\(cash)", label: "CASH")
             Spacer()
-            hudStat(value: "LV. \(shopLevel)", label: "SHOP")
+            HUDStatView(value: "LV. \(shopLevel)", label: "SHOP")
         }
         .padding(.horizontal, 18)
         .padding(.top, 54)
         .padding(.bottom, 12)
         .background(Theme.ink)
         .foregroundStyle(Theme.cream)
-    }
-
-    private func hudStat(value: String, label: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(Theme.display(15))
-                .foregroundStyle(Theme.amber)
-            Text(label)
-                .font(Theme.mono(8, weight: .semibold))
-                .foregroundStyle(Theme.inkSoft)
-                .kerning(0.5)
-        }
     }
 
     // MARK: Floor

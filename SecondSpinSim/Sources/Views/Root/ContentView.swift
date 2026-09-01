@@ -15,15 +15,29 @@ struct ContentView: View {
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .shopFloor:
-                    ShopFloorView()
+                    ShopFloorView(onNavigate: handleTab)
+                        .navigationBarBackButtonHidden()
+                case .sourcingRun:
+                    SourcingRunView()
                         .navigationBarBackButtonHidden()
                 }
             }
         }
     }
 
+    /// Bench, Staff, and Ledger aren't built yet — only Source routes for now.
+    private func handleTab(_ tab: AppTab) {
+        switch tab {
+        case .source:
+            path.append(Route.sourcingRun)
+        case .floor, .bench, .staff, .ledger:
+            break
+        }
+    }
+
     private enum Route: Hashable {
         case shopFloor
+        case sourcingRun
     }
 }
 
