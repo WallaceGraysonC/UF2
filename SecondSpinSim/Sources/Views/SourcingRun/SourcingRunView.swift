@@ -1,21 +1,14 @@
 import SwiftUI
 
+/// Three states in one screen: plan a run, watch one in progress, or grade
+/// the haul it brought back. Only one run is ever out at a time.
 struct SourcingRunView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .source
-    @State private var isGraded = false
 
-    var locationName: String = "ESTATE SALE — WESTSIDE"
-    var runProgress: String = "DAY 2/3"
-    var itemName: String = "Laserdisc — \"Night Tide\" (1961)"
-    var itemDetail: String = "Criterion pressing"
-    var conditionValue: Double = 0.64
-
-    /// Buyers are the role that runs Sourcing.
-    private var staff: [StaffMember] { game.staff.filter { $0.role == .buyer } }
-
-    private var grade: ConditionGrade { ConditionGrade(value: conditionValue) }
+    @State private var chosenLocation: SourcingLocation = .estateSale
+    @State private var chosenBuyerIDs: Set<UUID> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,9 +18,7 @@ struct SourcingRunView: View {
         }
         .background(Theme.paper)
         .onChange(of: selectedTab) { _, newValue in
-            if newValue != .source {
-                dismiss()
-            }
+            if newValue != .source { dismiss() }
         }
     }
 
@@ -35,16 +26,13 @@ struct SourcingRunView: View {
 
     private var hud: some View {
         HStack {
-            Button {
-                dismiss()
-            } label: {
-                Text("‹ BACK")
-                    .font(Theme.mono(10, weight: .semibold))
+            Button { dismiss() } label: {
+                Text("‹ BACK").font(Theme.mono(10, weight: .semibold))
             }
             Spacer()
-            HUDStatView(value: runProgress, label: "RUN", valueSize: 14)
+            HUDStatView(value: "$\(game.cash)", label: "CASH", valueSize: 14)
             Spacer()
-            HUDStatView(value: "×\(staff.count)", label: "STAFF", valueSize: 14)
+            HUDStatView(value: statusValue, label: "SOURCING", valueSize: 14)
         }
         .padding(.horizontal, 18)
         .padding(.top, 54)
@@ -53,115 +41,361 @@ struct SourcingRunView: View {
         .foregroundStyle(Theme.cream)
     }
 
+    private var statusValue: String {
+        if !game.pendingHaul.isEmpty { return "\(game.pendingHaul.count) TO GRADE" }
+        if let run = game.activeRun { return run.dayLabel }
+        return "IDLE"
+    }
+
     // MARK: Content
 
+    @ViewBuilder
     private var content: some View {
-        VStack(spacing: 16) {
-            Text(locationName)
-                .font(Theme.display(13))
-                .foregroundStyle(Theme.ink)
-
-            itemCard
-
-            staffStrip
+        if !game.pendingHaul.isEmpty {
+            haulGrading
+        } else if let run = game.activeRun {
+            runInProgress(run)
+        } else {
+            runPlanner
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 18)
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    private var itemCard: some View {
-        VStack(spacing: 12) {
-            RecordDiscView()
-                .frame(width: 84, height: 84)
+    // MARK: State 1 — plan a run
 
-            VStack(spacing: 2) {
-                Text(itemName)
-                    .font(.system(size: 13, weight: .semibold))
-                    .multilineTextAlignment(.center)
-                Text(itemDetail)
-                    .font(.system(size: 11))
-                    .foregroundStyle(Theme.inkSoft)
-            }
+    private var runPlanner: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("PLAN A RUN")
+                    .font(Theme.display(14))
+                    .foregroundStyle(Theme.ink)
 
-            gradeMeter
-
-            HStack(spacing: 10) {
-                Button {
-                    dismiss()
-                } label: {
-                    Text("SKIP")
+                VStack(spacing: 7) {
+                    ForEach(SourcingLocation.allCases) { location in
+                        LocationCard(
+                            location: location,
+                            isSelected: chosenLocation == location,
+                            affordable: game.canAfford(location),
+                            onTap: { chosenLocation = location }
+                        )
+                    }
                 }
-                .buttonStyle(GhostButtonStyle())
+
+                Text("SEND BUYERS")
+                    .font(Theme.display(13))
+                    .foregroundStyle(Theme.ink)
+                    .padding(.top, 4)
+
+                VStack(spacing: 6) {
+                    ForEach(game.buyers) { buyer in
+                        BuyerToggleRow(
+                            buyer: buyer,
+                            isSelected: chosenBuyerIDs.contains(buyer.id),
+                            onTap: { toggle(buyer.id) }
+                        )
+                    }
+                }
 
                 Button {
-                    withAnimation(.easeOut(duration: 0.2)) { isGraded = true }
+                    game.startRun(location: chosenLocation, buyerIDs: Array(chosenBuyerIDs))
+                    chosenBuyerIDs = []
                 } label: {
-                    Text(isGraded ? "GRADED" : "GRADE IT")
+                    Text(startLabel)
                 }
                 .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
-                .disabled(isGraded)
+                .disabled(!canStart)
+                .opacity(canStart ? 1 : 0.4)
+                .padding(.top, 4)
             }
-        }
-        .padding(16)
-        .background(Theme.cream)
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-    }
-
-    private var gradeMeter: some View {
-        VStack(spacing: 5) {
-            HStack {
-                Text("POOR").font(Theme.mono(8)).foregroundStyle(Theme.inkSoft)
-                Spacer()
-                Text("MINT").font(Theme.mono(8)).foregroundStyle(Theme.inkSoft)
-            }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color(hex: 0xD7D0BE))
-                    Capsule()
-                        .fill(grade.color)
-                        .frame(width: geo.size.width * conditionValue)
-                }
-            }
-            .frame(height: 9)
-
-            if isGraded {
-                Text("\(grade.label) — grail candidate")
-                    .font(Theme.display(12))
-                    .foregroundStyle(Theme.red)
-                    .transition(.opacity)
-            }
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 20)
         }
     }
 
-    private var staffStrip: some View {
-        HStack(spacing: 8) {
-            ForEach(staff) { member in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(member.name.uppercased()) · \(member.role.rawValue)")
-                        .font(Theme.mono(8, weight: .bold))
-                        .foregroundStyle(Theme.ink)
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(Color(hex: 0xD7D0BE))
-                            Capsule().fill(Theme.teal)
-                                .frame(width: geo.size.width * (Double(member.raritySense) / 99.0))
-                        }
+    private var canStart: Bool {
+        !chosenBuyerIDs.isEmpty && game.canAfford(chosenLocation)
+    }
+
+    private var startLabel: String {
+        if chosenBuyerIDs.isEmpty { return "PICK A BUYER" }
+        if !game.canAfford(chosenLocation) { return "NOT ENOUGH CASH" }
+        return "SEND OUT — $\(chosenLocation.cost)"
+    }
+
+    private func toggle(_ id: UUID) {
+        if chosenBuyerIDs.contains(id) {
+            chosenBuyerIDs.remove(id)
+        } else {
+            chosenBuyerIDs.insert(id)
+        }
+    }
+
+    // MARK: State 2 — run in progress
+
+    private func runInProgress(_ run: SourcingRun) -> some View {
+        VStack(spacing: 16) {
+            Text(run.location.rawValue.uppercased())
+                .font(Theme.display(15))
+                .foregroundStyle(Theme.ink)
+
+            Text(run.location.blurb)
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.inkSoft)
+                .multilineTextAlignment(.center)
+
+            VStack(spacing: 8) {
+                Text(run.dayLabel)
+                    .font(Theme.display(20))
+                    .foregroundStyle(Theme.amberDeep)
+
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color(hex: 0xD7D0BE))
+                        Capsule().fill(Theme.amberDeep)
+                            .frame(width: geo.size.width * run.progress)
                     }
-                    .frame(height: 4)
                 }
-                .padding(7)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.cream)
-                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.line, lineWidth: 1))
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .frame(height: 9)
+
+                Text("Out digging. End the day to move the run along.")
+                    .font(Theme.mono(9))
+                    .foregroundStyle(Theme.inkSoft)
             }
+            .padding(16)
+            .background(Theme.cream)
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("CREW")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.inkSoft)
+                ForEach(run.buyerIDs.compactMap { game.staffMember(id: $0) }) { buyer in
+                    HStack {
+                        Text(buyer.name.uppercased())
+                            .font(Theme.mono(9, weight: .bold))
+                            .foregroundStyle(Theme.ink)
+                        Spacer()
+                        Text("RARITY \(buyer.raritySense) · FATIGUE \(buyer.fatigue)")
+                            .font(Theme.mono(8))
+                            .foregroundStyle(Theme.inkSoft)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(Theme.cream)
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 18)
+    }
+
+    // MARK: State 3 — grade the haul
+
+    @ViewBuilder
+    private var haulGrading: some View {
+        if let item = game.pendingHaul.first {
+            VStack(spacing: 14) {
+                HStack {
+                    Text("HAUL — \(game.pendingHaul.count) LEFT")
+                        .font(Theme.display(13))
+                        .foregroundStyle(Theme.ink)
+                    Spacer()
+                    if item.isRare {
+                        Text("GRAIL")
+                            .font(Theme.mono(8, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(Theme.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                    }
+                }
+
+                HaulItemCard(item: item, trendModifier: game.trendModifier(for: item.format))
+
+                VStack(spacing: 8) {
+                    Button {
+                        game.shelve(item)
+                    } label: {
+                        Text("SHELVE IT")
+                    }
+                    .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
+
+                    HStack(spacing: 8) {
+                        Button {
+                            game.sendToBench(item)
+                        } label: {
+                            Text(game.benchHasRoom ? "TO BENCH" : "BENCH FULL")
+                        }
+                        .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                        .disabled(!game.benchHasRoom)
+                        .opacity(game.benchHasRoom ? 1 : 0.4)
+
+                        Button {
+                            game.discard(item)
+                        } label: {
+                            Text("BIN IT")
+                        }
+                        .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
         }
     }
 }
 
-/// Simple vinyl/laserdisc stand-in — a couple of concentric rings and a label hole.
+// MARK: - Components
+
+private struct LocationCard: View {
+    let location: SourcingLocation
+    let isSelected: Bool
+    let affordable: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    Text(location.rawValue.uppercased())
+                        .font(Theme.display(13))
+                        .foregroundStyle(Theme.ink)
+                    Spacer()
+                    Text("$\(location.cost)")
+                        .font(Theme.mono(10, weight: .bold))
+                        .foregroundStyle(affordable ? Theme.green : Theme.red)
+                }
+
+                Text(location.blurb)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Theme.inkSoft)
+                    .multilineTextAlignment(.leading)
+
+                HStack(spacing: 6) {
+                    tag("\(location.days)D")
+                    tag("\(location.itemRange.lowerBound)-\(location.itemRange.upperBound) ITEMS")
+                    tag("RARE \(Int(location.rareChance * 100))%")
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(11)
+            .background(Theme.cream)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(isSelected ? Theme.amberDeep : Theme.line,
+                            lineWidth: isSelected ? 2 : 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func tag(_ text: String) -> some View {
+        Text(text)
+            .font(Theme.mono(7.5, weight: .semibold))
+            .foregroundStyle(Theme.inkSoft)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Theme.line, lineWidth: 1))
+    }
+}
+
+private struct BuyerToggleRow: View {
+    let buyer: StaffMember
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(isSelected ? Theme.amberDeep : Color(hex: 0xD7D0BE))
+                    .frame(width: 16, height: 16)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(buyer.name.uppercased())
+                        .font(Theme.mono(10, weight: .bold))
+                        .foregroundStyle(Theme.ink)
+                    Text("VOL \(buyer.volume) · RARITY \(buyer.raritySense) · FATIGUE \(buyer.fatigue)")
+                        .font(Theme.mono(8))
+                        .foregroundStyle(buyer.fatigue >= 60 ? Theme.red : Theme.inkSoft)
+                }
+
+                Spacer()
+
+                Text(buyer.specialization.abbreviation)
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(buyer.specialization.binColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+            }
+            .padding(10)
+            .background(Theme.cream)
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct HaulItemCard: View {
+    let item: InventoryItem
+    let trendModifier: Double
+
+    var body: some View {
+        VStack(spacing: 11) {
+            RecordDiscView()
+                .frame(width: 78, height: 78)
+
+            Text(item.title)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 8) {
+                Text(item.format.abbreviation)
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(item.format.binColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+
+                Text(item.grade.label)
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(item.grade.color)
+            }
+
+            HStack {
+                Text("ASKING")
+                    .font(Theme.mono(8, weight: .semibold))
+                    .foregroundStyle(Theme.inkSoft)
+                Spacer()
+                Text("$\(item.askingPrice(trendModifier: trendModifier))")
+                    .font(Theme.display(16))
+                    .foregroundStyle(Theme.green)
+            }
+            .padding(.top, 2)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(Theme.cream)
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+/// Simple vinyl/laserdisc stand-in — concentric rings and a label hole.
 private struct RecordDiscView: View {
     var body: some View {
         ZStack {
@@ -171,18 +405,6 @@ private struct RecordDiscView: View {
             Circle().fill(Theme.cream).frame(width: 18, height: 18)
         }
         .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-    }
-}
-
-private struct GhostButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(Theme.display(13))
-            .foregroundStyle(Theme.inkSoft)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: 0xB7AF97), lineWidth: 1))
-            .opacity(configuration.isPressed ? 0.6 : 1)
     }
 }
 

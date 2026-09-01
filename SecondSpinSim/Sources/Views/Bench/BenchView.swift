@@ -5,7 +5,7 @@ struct BenchView: View {
     @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .bench
 
-    var benchSlots: Int = 4
+    private var benchSlots: Int { game.benchCapacity }
 
     private var techs: [StaffMember] { game.staff.filter { $0.role == .tech } }
 

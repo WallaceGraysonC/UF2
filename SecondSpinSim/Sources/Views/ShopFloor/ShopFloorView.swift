@@ -66,6 +66,8 @@ struct ShopFloorView: View {
 
             shelfGrid
 
+            statusStrip
+
             floorScene
 
             endDayButton
@@ -84,6 +86,39 @@ struct ShopFloorView: View {
                 ShelfBinView(item: index < stock.count ? stock[index] : nil)
             }
         }
+    }
+
+    /// What's outstanding right now — a haul waiting to be graded, or a run
+    /// still out. Tapping jumps to Sourcing to deal with it.
+    @ViewBuilder
+    private var statusStrip: some View {
+        if !game.pendingHaul.isEmpty {
+            statusPill(text: "\(game.pendingHaul.count) ITEMS TO GRADE", color: Theme.red)
+        } else if let run = game.activeRun {
+            statusPill(text: "\(run.location.rawValue.uppercased()) — \(run.dayLabel)",
+                       color: Theme.amberDeep)
+        }
+    }
+
+    private func statusPill(text: String, color: Color) -> some View {
+        Button {
+            onNavigate(.source)
+        } label: {
+            HStack {
+                Text(text)
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(.white)
+                Spacer()
+                Text("OPEN ›")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(color)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
+        .buttonStyle(.plain)
     }
 
     private var endDayButton: some View {
@@ -200,6 +235,9 @@ private struct DayReportSheet: View {
                     reportRow("NET", (report.net >= 0 ? "+$\(report.net)" : "-$\(abs(report.net))"),
                               report.net >= 0 ? Theme.green : Theme.red)
                     reportRow("BENCH JOBS WORKED", "\(report.restorationsAdvanced)", Theme.ink)
+                    if let haulSize = report.haulSize {
+                        reportRow("HAUL BACK", "\(haulSize) items to grade", Theme.amberDeep)
+                    }
                 }
                 .padding(14)
                 .background(Theme.cream)

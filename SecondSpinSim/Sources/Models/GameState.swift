@@ -14,6 +14,13 @@ final class GameState {
     var benchJobs: [RestorationJob] = RestorationJob.starterJobs()
     var ledger: [LedgerEntry] = []
 
+    /// At most one buying trip out at a time.
+    var activeRun: SourcingRun?
+    /// Haul waiting to be graded — items aren't stock until the player rules on them.
+    var pendingHaul: [InventoryItem] = []
+
+    let benchCapacity = 4
+
     var reputation: [CustomerArchetype: Int] = [
         .collector: 40, .crateDigger: 55, .completionist: 20,
         .nostalgic: 60, .reseller: 30, .casual: 70
@@ -34,6 +41,8 @@ final class GameState {
         var wages: Int
         var restorationsAdvanced: Int
         var gradeUps: [String]
+        /// Non-nil on the day a Sourcing Run comes back.
+        var haulSize: Int?
 
         var net: Int { revenue - wages }
     }
@@ -111,13 +120,29 @@ final class GameState {
         ledger.append(LedgerEntry(day: day, detail: "Staff wages (\(staff.count))",
                                   amount: -wages, kind: .wages))
 
-        // --- Fatigue: assigned techs tire, everyone else recovers ---
-        let workingIDs = Set(benchJobs.compactMap(\.assignedTechID))
+        // --- Fatigue: staff on the bench or out on a run tire, the rest recover.
+        // Runs are still active here — a buyer tires on the day they get back too.
+        var workingIDs = Set(benchJobs.compactMap(\.assignedTechID))
+        workingIDs.formUnion(activeRun?.buyerIDs ?? [])
         for index in staff.indices {
             if workingIDs.contains(staff[index].id) {
                 staff[index].fatigue = min(100, staff[index].fatigue + 12)
             } else {
                 staff[index].fatigue = max(0, staff[index].fatigue - 18)
+            }
+        }
+
+        // --- Sourcing runs ---
+        var haulSize: Int?
+        if var run = activeRun {
+            run.daysRemaining -= 1
+            if run.daysRemaining <= 0 {
+                let haul = resolveHaul(for: run)
+                pendingHaul.append(contentsOf: haul)
+                haulSize = haul.count
+                activeRun = nil
+            } else {
+                activeRun = run
             }
         }
 
@@ -130,7 +155,7 @@ final class GameState {
 
         lastReport = DayReport(day: day, itemsSold: itemsSold, revenue: revenue,
                                wages: wages, restorationsAdvanced: advanced,
-                               gradeUps: gradeUps)
+                               gradeUps: gradeUps, haulSize: haulSize)
         day += 1
     }
 
@@ -155,6 +180,74 @@ final class GameState {
     func assign(techID: UUID?, to jobID: UUID) {
         guard let index = benchJobs.firstIndex(where: { $0.id == jobID }) else { return }
         benchJobs[index].assignedTechID = techID
+    }
+
+    // MARK: Sourcing
+
+    var buyers: [StaffMember] { staff.filter { $0.role == .buyer } }
+
+    func canAfford(_ location: SourcingLocation) -> Bool { cash >= location.cost }
+
+    /// Sends buyers out. Cost is paid up front, win or lose.
+    func startRun(location: SourcingLocation, buyerIDs: [UUID]) {
+        guard activeRun == nil, !buyerIDs.isEmpty, canAfford(location) else { return }
+        cash -= location.cost
+        ledger.append(LedgerEntry(day: day, detail: "\(location.rawValue) — buy-in",
+                                  amount: -location.cost, kind: .purchase))
+        activeRun = SourcingRun(location: location, buyerIDs: buyerIDs)
+    }
+
+    /// Turns a finished run into stock. Volume comes from the location and the
+    /// buyers' Volume stat; rare odds come from their Rarity Sense; condition
+    /// is rolled per item within the location's range.
+    private func resolveHaul(for run: SourcingRun) -> [InventoryItem] {
+        let crew = run.buyerIDs.compactMap { staffMember(id: $0) }
+        guard !crew.isEmpty else { return [] }
+
+        let avgVolume = Double(crew.map(\.volume).reduce(0, +)) / Double(crew.count)
+        let avgRarity = Double(crew.map(\.raritySense).reduce(0, +)) / Double(crew.count)
+        let effectiveness = crew.map(\.effectiveness).reduce(0, +) / Double(crew.count)
+
+        let range = run.location.itemRange
+        // A strong crew pushes toward the top of the location's range.
+        let volumeBias = (avgVolume / 99.0) * effectiveness
+        let span = Double(range.upperBound - range.lowerBound)
+        let count = range.lowerBound + Int((span * volumeBias).rounded())
+
+        let rareChance = min(0.6, run.location.rareChance * (1.0 + avgRarity / 60.0) * effectiveness)
+
+        return (0..<max(1, count)).map { _ in
+            let format = run.location.formats.randomElement() ?? .cd
+            let isRare = Double.random(in: 0...1) < rareChance
+            let condition = Double.random(in: run.location.conditionRange)
+            return HaulCatalog.roll(format: format, isRare: isRare, condition: condition)
+        }
+    }
+
+    // MARK: Grading the haul
+
+    var benchHasRoom: Bool { benchJobs.count < benchCapacity }
+
+    /// Put a graded item straight out on the floor.
+    func shelve(_ item: InventoryItem) {
+        var shelved = item
+        shelved.isShelved = true
+        inventory.append(shelved)
+        pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    /// Send it to the backroom bench to have its grade worked up first.
+    func sendToBench(_ item: InventoryItem) {
+        guard benchHasRoom else { return }
+        benchJobs.append(RestorationJob(itemName: item.title, format: item.format,
+                                        grade: item.grade, progress: 0,
+                                        assignedTechID: nil))
+        pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    /// Dump it — some of what comes back in a storage unit is genuinely junk.
+    func discard(_ item: InventoryItem) {
+        pendingHaul.removeAll { $0.id == item.id }
     }
 }
 
