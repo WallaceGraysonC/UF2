@@ -8,8 +8,12 @@ struct MainMenuView: View {
     /// "DAY 14 · LV. 3 · $1,240" — what Continue would return you to.
     var savedSummary: String?
 
+    /// "2 SHOPS CLOSED · BEST 4120" — nil before the first retirement.
+    var legacySummary: String?
+
     var onNewGame: () -> Void = {}
     var onContinue: () -> Void = {}
+    var onLegacy: () -> Void = {}
 
     var body: some View {
         ZStack {
@@ -127,6 +131,21 @@ struct MainMenuView: View {
 
                 if let savedSummary {
                     Text(savedSummary)
+                        .font(Theme.mono(9, weight: .semibold))
+                        .foregroundStyle(Theme.amber)
+                }
+            }
+
+            VStack(spacing: 4) {
+                Button {
+                    onLegacy()
+                } label: {
+                    Text("LEGACY")
+                }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+
+                if let legacySummary {
+                    Text(legacySummary)
                         .font(Theme.mono(9, weight: .semibold))
                         .foregroundStyle(Theme.amber)
                 }

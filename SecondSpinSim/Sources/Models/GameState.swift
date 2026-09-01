@@ -45,11 +45,31 @@ final class GameState {
     var trendingFormat: MediaFormat = .vhs
     private var trendDaysRemaining: Int = 6
 
+    /// Pieces retired from sale onto the Museum Wall (Level 10).
+    var museum: [MuseumPiece] = []
+
+    /// Run totals that feed cosmetic unlocks and the legacy score.
+    var highestSaleValue: Int = 0
+    var lifetimeRevenue: Int = 0
+    var staffTrainedCount: Int = 0
+    var fiveStarDrops: Int = 0
+
+    /// Carried in from the legacy profile so perks apply for the whole run.
+    var perks: [LegacyPerk] = []
+
     /// Summary of the most recent `endDay()`, shown as the day-report.
     /// Deliberately not persisted — it's a transient beat, not run state.
     var lastReport: DayReport?
 
     init() {}
+
+    /// A fresh run that inherits whatever previous shops earned.
+    convenience init(legacy: LegacyProfile) {
+        self.init()
+        perks = legacy.perks
+        if legacy.has(.seedMoney) { cash += 400 }
+        if legacy.has(.rolodex) { staff.append(StaffMember.candidate(shopLevel: 1)) }
+    }
 
     // MARK: Persistence
 
@@ -63,7 +83,10 @@ final class GameState {
             activeDrop: activeDrop, lastDropResult: lastDropResult,
             dropHistory: dropHistory, discoveredCombos: discoveredCombos,
             reputation: reputation, trendingFormat: trendingFormat,
-            trendDaysRemaining: trendDaysRemaining
+            trendDaysRemaining: trendDaysRemaining,
+            museum: museum, highestSaleValue: highestSaleValue,
+            lifetimeRevenue: lifetimeRevenue, staffTrainedCount: staffTrainedCount,
+            fiveStarDrops: fiveStarDrops, perks: perks
         )
     }
 
@@ -85,6 +108,12 @@ final class GameState {
         reputation = snapshot.reputation
         trendingFormat = snapshot.trendingFormat
         trendDaysRemaining = snapshot.trendDaysRemaining
+        museum = snapshot.museum
+        highestSaleValue = snapshot.highestSaleValue
+        lifetimeRevenue = snapshot.lifetimeRevenue
+        staffTrainedCount = snapshot.staffTrainedCount
+        fiveStarDrops = snapshot.fiveStarDrops
+        perks = snapshot.perks
     }
 
     func save() {
@@ -183,6 +212,7 @@ final class GameState {
             let paid = Int((price * buyer.priceMultiplier).rounded())
             revenue += paid
             itemsSold += 1
+            highestSaleValue = max(highestSaleValue, paid)
             soldIDs.append(item.id)
             ledger.append(LedgerEntry(day: day, detail: "\(item.title) → \(buyer.rawValue)",
                                       amount: paid, kind: .sale))
@@ -212,6 +242,12 @@ final class GameState {
         // --- Wages ---
         let wages = dailyWageBill
         cash += revenue - wages
+        lifetimeRevenue += revenue
+
+        // The wall works every day it stands.
+        if museumDailyRep > 0 {
+            bumpReputation(.collector, by: museumDailyRep)
+        }
         ledger.append(LedgerEntry(day: day, detail: "Staff wages (\(staff.count))",
                                   amount: -wages, kind: .wages))
 
@@ -352,7 +388,9 @@ final class GameState {
         let span = Double(range.upperBound - range.lowerBound)
         let count = range.lowerBound + Int((span * volumeBias).rounded())
 
-        let rareChance = min(0.6, run.location.rareChance * (1.0 + avgRarity / 60.0) * effectiveness)
+        let perkBonus = perks.contains(.eyeForIt) ? 1.25 : 1.0
+        let rareChance = min(0.6, run.location.rareChance
+                             * (1.0 + avgRarity / 60.0) * effectiveness * perkBonus)
 
         // Hauls only turn up formats the shop is licensed to sell — the
         // Vinyl/Games/Laserdisc sections have to be unlocked first.
@@ -391,6 +429,75 @@ final class GameState {
     /// Dump it — some of what comes back in a storage unit is genuinely junk.
     func discard(_ item: InventoryItem) {
         pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    // MARK: The Museum Wall
+
+    var museumUnlocked: Bool { shopLevel >= 10 }
+    var museumCapacity: Int { 8 }
+    var museumHasRoom: Bool { museum.count < museumCapacity }
+
+    /// Standing reputation the wall generates every day, forever.
+    var museumDailyRep: Int {
+        museum.map(\.dailyRepContribution).reduce(0, +)
+    }
+
+    /// Take something off the market for good. The value is forfeited on
+    /// purpose — that's the whole point of the wall.
+    func mount(_ item: InventoryItem) {
+        guard museumUnlocked, museumHasRoom else { return }
+        let price = item.askingPrice(trendModifier: trendModifier(for: item.format))
+        museum.append(MuseumPiece(from: item, askingPrice: price, day: day))
+        inventory.removeAll { $0.id == item.id }
+        pendingHaul.removeAll { $0.id == item.id }
+        save()
+    }
+
+    // MARK: Closing up shop
+
+    /// Retirement opens once the shop is finished and you've committed at
+    /// least one piece to the wall — but it's never forced. Staying open
+    /// keeps growing the score, so when to stop is the player's call.
+    var canCloseUpShop: Bool {
+        shopLevel >= 10 && !museum.isEmpty
+    }
+
+    /// What retiring right now would be worth. Keeps climbing the longer you
+    /// trade, which is what makes "one more day" a real temptation.
+    var legacyScore: Int {
+        let repScore = overallReputation * 12
+        let museumScore = museum.map(\.forgoneValue).reduce(0, +) * 2
+        let tradeScore = lifetimeRevenue / 10
+        let crewScore = staffTrainedCount * 60
+        let dropScore = fiveStarDrops * 120
+        return repScore + museumScore + tradeScore + crewScore + dropScore
+    }
+
+    /// Rolls this run's totals into the permanent profile and reports what
+    /// changed, so the retirement screen can show it.
+    func closeUpShop(into profile: inout LegacyProfile, perk: LegacyPerk?) -> [Cosmetic] {
+        let score = legacyScore
+
+        profile.prestigeCount += 1
+        profile.totalLegacyScore += score
+        profile.bestLegacyScore = max(profile.bestLegacyScore, score)
+        if let perk, !profile.perks.contains(perk) {
+            profile.perks.append(perk)
+        }
+
+        profile.lifetimeRevenue += lifetimeRevenue
+        profile.highestSaleValue = max(profile.highestSaleValue, highestSaleValue)
+        profile.bestShopLevel = max(profile.bestShopLevel, shopLevel)
+        profile.totalMuseumPieces += museum.count
+        profile.totalStaffTrained += staffTrainedCount
+        profile.totalFiveStarDrops += fiveStarDrops
+        profile.lowestRetirementCash = min(profile.lowestRetirementCash, cash)
+
+        let newlyUnlocked = profile.refreshUnlocks()
+        LegacyStore.save(profile)
+        // The run is over — its save goes, the profile stays.
+        SaveStore.deleteSave()
+        return newlyUnlocked
     }
 
     // MARK: The shop ladder
@@ -476,8 +583,10 @@ final class GameState {
         cash -= Self.trainingCost
         ledger.append(LedgerEntry(day: day, detail: "\(member.name) — convention (\(stat.rawValue))",
                                   amount: -Self.trainingCost, kind: .upgrade))
-        staff[index].trainingDaysRemaining = Self.trainingDays
+        let days = perks.contains(.quickStudy) ? Self.trainingDays - 1 : Self.trainingDays
+        staff[index].trainingDaysRemaining = max(1, days)
         staff[index].trainingStat = stat
+        staffTrainedCount += 1
     }
 
     // MARK: Curated Drops
@@ -554,6 +663,7 @@ final class GameState {
         let result = DropResult(themeName: drop.name, day: day, turnout: turnout,
                                 stars: stars, revenue: revenue, repGains: gains,
                                 review: DropResult.review(stars: stars, themeName: drop.name))
+        if stars == 5 { fiveStarDrops += 1 }
         lastDropResult = result
         dropHistory.append(result)
     }

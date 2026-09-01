@@ -9,6 +9,10 @@ struct ShopFloorView: View {
     /// Called when the player taps a tab other than Floor. Floor is the hub
     /// this view already renders, so navigating away is the parent's job.
     var onNavigate: (AppTab) -> Void = { _ in }
+    /// The Museum Wall isn't a tab — it's reached from the floor at Level 10.
+    var onOpenMuseum: () -> Void = {}
+    /// Equipped cosmetics, resolved from the legacy profile by the root.
+    var skin: ShopSkin = .default
 
     var body: some View {
         VStack(spacing: 0) {
@@ -64,8 +68,20 @@ struct ShopFloorView: View {
             HStack {
                 Text("SHOP FLOOR")
                     .font(Theme.display(14))
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(skin.sign)
                 Spacer()
+                if game.museumUnlocked {
+                    Button(action: onOpenMuseum) {
+                        Text("THE WALL")
+                            .font(Theme.mono(9, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .background(Theme.plum)
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
+                    }
+                    .buttonStyle(.plain)
+                }
                 Text("TRENDING: \(game.trendingFormat.abbreviation)")
                     .font(Theme.mono(9, weight: .bold))
                     .foregroundStyle(.white)
@@ -149,15 +165,15 @@ struct ShopFloorView: View {
     private var floorScene: some View {
         ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color(hex: 0xDCD5C1))
+                .fill(skin.floor)
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
 
             VStack {
                 Spacer()
                 Rectangle()
-                    .fill(Color(hex: 0xB98A4C))
+                    .fill(skin.counter)
                     .frame(height: 34)
-                    .overlay(Rectangle().fill(Color(hex: 0x8A6136)).frame(height: 3), alignment: .top)
+                    .overlay(Rectangle().fill(.black.opacity(0.25)).frame(height: 3), alignment: .top)
             }
             .clipShape(RoundedRectangle(cornerRadius: 6))
 

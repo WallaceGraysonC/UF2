@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Root of the view hierarchy. Owns the run and the save slot: Continue
-/// resumes the file on disk, New Game replaces it.
+/// Root of the view hierarchy. Owns the run, the save slot, and the legacy
+/// profile that outlives both.
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
 
@@ -9,14 +9,18 @@ struct ContentView: View {
     @State private var path = NavigationPath()
     /// Checked once at launch so the menu knows whether Continue is live.
     @State private var savedGame: SaveGame? = SaveStore.load()
+    @State private var legacy: LegacyProfile = LegacyStore.load()
+    @State private var showingLegacy = false
 
     var body: some View {
         NavigationStack(path: $path) {
             MainMenuView(
                 hasSave: savedGame != nil,
                 savedSummary: savedSummary,
+                legacySummary: legacySummary,
                 onNewGame: { startNewGame() },
-                onContinue: { continueSavedGame() }
+                onContinue: { continueSavedGame() },
+                onLegacy: { showingLegacy = true }
             )
             .navigationDestination(for: Route.self) { route in
                 destination(for: route)
@@ -24,6 +28,9 @@ struct ContentView: View {
             }
         }
         .environment(game)
+        .sheet(isPresented: $showingLegacy) {
+            LegacyView(profile: $legacy)
+        }
         .onChange(of: scenePhase) { _, phase in
             // Backgrounding is the other moment a run can end abruptly.
             if phase != .active, !path.isEmpty {
@@ -35,12 +42,16 @@ struct ContentView: View {
     @ViewBuilder
     private func destination(for route: Route) -> some View {
         switch route {
-        case .shopFloor: ShopFloorView(onNavigate: handleTab)
+        case .shopFloor:
+            ShopFloorView(onNavigate: handleTab,
+                          onOpenMuseum: { path.append(Route.museum) },
+                          skin: ShopSkin(profile: legacy))
         case .sourcingRun: SourcingRunView()
         case .bench: BenchView()
         case .drops: DropsView()
         case .staff: StaffView()
         case .ledger: LedgerView()
+        case .museum: MuseumView(onCloseUpShop: { retireAndReopen() })
         }
     }
 
@@ -50,9 +61,14 @@ struct ContentView: View {
         return "DAY \(savedGame.day) · LV. \(savedGame.shopLevel) · $\(savedGame.cash)"
     }
 
+    private var legacySummary: String? {
+        guard legacy.prestigeCount > 0 else { return nil }
+        return "\(legacy.prestigeCount) SHOP\(legacy.prestigeCount == 1 ? "" : "S") CLOSED · BEST \(legacy.bestLegacyScore)"
+    }
+
     private func startNewGame() {
         SaveStore.deleteSave()
-        game = GameState()
+        game = GameState(legacy: legacy)
         game.save()
         savedGame = game.snapshot()
         path.append(Route.shopFloor)
@@ -62,6 +78,15 @@ struct ContentView: View {
         guard let savedGame else { return }
         game = GameState(snapshot: savedGame)
         path.append(Route.shopFloor)
+    }
+
+    /// After closing up shop the run save is already gone — reload the profile
+    /// so the new run inherits the perk just chosen, and go back to the menu.
+    private func retireAndReopen() {
+        legacy = LegacyStore.load()
+        savedGame = nil
+        game = GameState(legacy: legacy)
+        path = NavigationPath()
     }
 
     private func handleTab(_ tab: AppTab) {
@@ -82,6 +107,7 @@ struct ContentView: View {
         case drops
         case staff
         case ledger
+        case museum
     }
 }
 

@@ -31,6 +31,13 @@ struct SaveGame: Codable {
     var trendingFormat: MediaFormat
     var trendDaysRemaining: Int
 
+    var museum: [MuseumPiece]
+    var highestSaleValue: Int
+    var lifetimeRevenue: Int
+    var staffTrainedCount: Int
+    var fiveStarDrops: Int
+    var perks: [LegacyPerk]
+
     /// Shown on the main menu so Continue says what you'd be returning to.
     var savedAt: Date = Date()
 }
