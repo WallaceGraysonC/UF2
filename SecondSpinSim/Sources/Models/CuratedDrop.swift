@@ -2,8 +2,8 @@ import Foundation
 
 /// A Drop in prep. Curators pour Design and Hype into it across the prep
 /// cycle; it "ships" on the last day and gets written up.
-struct CuratedDrop: Identifiable {
-    let id = UUID()
+struct CuratedDrop: Identifiable, Codable {
+    var id = UUID()
     /// What the player calls it on the poster in the window.
     var name: String
     var theme: DropTheme
@@ -37,8 +37,8 @@ struct CuratedDrop: Identifiable {
 
 /// The write-up — the Kairosoft "review score" beat, scaled to how well the
 /// curation met what the theme promised.
-struct DropResult: Identifiable {
-    let id = UUID()
+struct DropResult: Identifiable, Codable {
+    var id = UUID()
     var themeName: String
     var day: Int
     var turnout: Int

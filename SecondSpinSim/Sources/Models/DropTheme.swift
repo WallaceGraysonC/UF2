@@ -3,7 +3,7 @@ import Foundation
 /// A themed display or in-store event. Each theme pulls a particular crowd,
 /// which is how a Drop converts curation work into reputation with the
 /// people you actually want walking in.
-enum DropTheme: String, CaseIterable, Identifiable {
+enum DropTheme: String, CaseIterable, Identifiable, Codable {
     case horrorNight = "80s Horror VHS Night"
     case breakbeatWall = "Breakbeat 7-inch Wall"
     case importShelf = "Import RPG Shelf"

@@ -3,7 +3,7 @@ import Foundation
 /// Where buyers go to find stock. Cheap locations churn out common filler;
 /// expensive ones are where grails actually turn up — which is the whole
 /// tension of deciding what a run is worth.
-enum SourcingLocation: String, CaseIterable, Identifiable {
+enum SourcingLocation: String, CaseIterable, Identifiable, Codable {
     case fleaMarket = "Flea Market"
     case estateSale = "Estate Sale"
     case storageAuction = "Storage Auction"

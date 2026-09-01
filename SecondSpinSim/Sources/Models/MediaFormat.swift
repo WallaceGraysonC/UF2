@@ -3,7 +3,7 @@ import SwiftUI
 /// The physical formats the shop deals in. Order here doubles as unlock order
 /// (see the Shop Ladder in the design reference — CD/VHS at open, Vinyl at
 /// Level 2, Games at Level 4, Laserdisc at Level 6).
-enum MediaFormat: String, CaseIterable, Identifiable {
+enum MediaFormat: String, CaseIterable, Identifiable, Codable {
     case vinyl, cd, vhs, game, laserdisc
 
     var id: String { rawValue }

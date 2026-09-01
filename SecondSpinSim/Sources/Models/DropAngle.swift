@@ -3,7 +3,7 @@ import Foundation
 /// The second axis of a Drop — the "topic" to the theme's "genre".
 /// Theme decides the format and the crowd; Angle decides the hook, and the
 /// pairing of the two is what makes a Drop land or fall flat.
-enum DropAngle: String, CaseIterable, Identifiable {
+enum DropAngle: String, CaseIterable, Identifiable, Codable {
     case slasher = "Slasher"
     case cultSciFi = "Cult Sci-Fi"
     case soundtracks = "Soundtracks"

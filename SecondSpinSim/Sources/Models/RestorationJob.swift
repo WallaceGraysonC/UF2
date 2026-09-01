@@ -2,8 +2,8 @@ import Foundation
 
 /// One item sitting on the Backroom Bench, climbing grade bands as an
 /// assigned Tech pours Restoration points into it.
-struct RestorationJob: Identifiable {
-    let id = UUID()
+struct RestorationJob: Identifiable, Codable {
+    var id = UUID()
     var itemName: String
     var format: MediaFormat
     var grade: ConditionGrade

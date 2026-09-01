@@ -1,7 +1,7 @@
 import Foundation
 
 /// The six stats a convention can raise.
-enum TrainableStat: String, CaseIterable, Identifiable {
+enum TrainableStat: String, CaseIterable, Identifiable, Codable {
     case volume = "Volume"
     case raritySense = "Rarity Sense"
     case negotiation = "Negotiation"
@@ -12,7 +12,7 @@ enum TrainableStat: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-enum StaffRole: String, CaseIterable, Identifiable {
+enum StaffRole: String, CaseIterable, Identifiable, Codable {
     case buyer = "Buyer"
     case tech = "Tech"
     case curator = "Curator"
@@ -32,8 +32,8 @@ enum StaffRole: String, CaseIterable, Identifiable {
 /// A staff member on the roster. Six stats mirror the design reference:
 /// Volume / Rarity Sense / Negotiation for Buyers, Restoration for Techs,
 /// Design / Hype for Curators. Everyone has all six; roles govern growth.
-struct StaffMember: Identifiable {
-    let id = UUID()
+struct StaffMember: Identifiable, Codable {
+    var id = UUID()
     var name: String
     var role: StaffRole
     /// Format familiarity — multiplies stat output when working this format.

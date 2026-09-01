@@ -2,8 +2,8 @@ import Foundation
 
 /// A single piece of stock. Price follows the design reference's formula:
 /// base × condition × rarity × trend.
-struct InventoryItem: Identifiable {
-    let id = UUID()
+struct InventoryItem: Identifiable, Codable {
+    var id = UUID()
     var title: String
     var format: MediaFormat
     var grade: ConditionGrade

@@ -46,7 +46,50 @@ final class GameState {
     private var trendDaysRemaining: Int = 6
 
     /// Summary of the most recent `endDay()`, shown as the day-report.
+    /// Deliberately not persisted — it's a transient beat, not run state.
     var lastReport: DayReport?
+
+    init() {}
+
+    // MARK: Persistence
+
+    /// Everything worth carrying across a launch.
+    func snapshot() -> SaveGame {
+        SaveGame(
+            day: day, cash: cash, shopLevel: shopLevel,
+            staff: staff, inventory: inventory, benchJobs: benchJobs,
+            ledger: ledger, hiringBoard: hiringBoard,
+            activeRun: activeRun, pendingHaul: pendingHaul,
+            activeDrop: activeDrop, lastDropResult: lastDropResult,
+            dropHistory: dropHistory, discoveredCombos: discoveredCombos,
+            reputation: reputation, trendingFormat: trendingFormat,
+            trendDaysRemaining: trendDaysRemaining
+        )
+    }
+
+    init(snapshot: SaveGame) {
+        day = snapshot.day
+        cash = snapshot.cash
+        shopLevel = snapshot.shopLevel
+        staff = snapshot.staff
+        inventory = snapshot.inventory
+        benchJobs = snapshot.benchJobs
+        ledger = snapshot.ledger
+        hiringBoard = snapshot.hiringBoard
+        activeRun = snapshot.activeRun
+        pendingHaul = snapshot.pendingHaul
+        activeDrop = snapshot.activeDrop
+        lastDropResult = snapshot.lastDropResult
+        dropHistory = snapshot.dropHistory
+        discoveredCombos = snapshot.discoveredCombos
+        reputation = snapshot.reputation
+        trendingFormat = snapshot.trendingFormat
+        trendDaysRemaining = snapshot.trendDaysRemaining
+    }
+
+    func save() {
+        SaveStore.save(snapshot())
+    }
 
     struct DayReport {
         var day: Int
@@ -247,6 +290,9 @@ final class GameState {
                                gradeUps: gradeUps, trainingFinished: trainingFinished,
                                haulSize: haulSize, dropResult: launchedDrop)
         day += 1
+
+        // Day boundaries are the natural save point.
+        save()
     }
 
     /// Picks which archetype, if any, is in the market for this item today.
@@ -286,6 +332,7 @@ final class GameState {
         ledger.append(LedgerEntry(day: day, detail: "\(location.rawValue) — buy-in",
                                   amount: -location.cost, kind: .purchase))
         activeRun = SourcingRun(location: location, buyerIDs: buyerIDs)
+        save()
     }
 
     /// Turns a finished run into stock. Volume comes from the location and the
@@ -394,6 +441,7 @@ final class GameState {
         ledger.append(LedgerEntry(day: day, detail: "Upgrade — \(upgrade.title)",
                                   amount: -upgrade.cash, kind: .upgrade))
         refreshHiringBoard()
+        save()
     }
 
     // MARK: Hiring & training
@@ -411,6 +459,7 @@ final class GameState {
                                   amount: -candidate.signingFee, kind: .purchase))
         staff.append(candidate)
         hiringBoard.removeAll { $0.id == candidate.id }
+        save()
     }
 
     /// A convention costs cash and takes the staffer off the floor for three
@@ -447,6 +496,7 @@ final class GameState {
         // Running a pairing is how you learn what it's worth.
         discoveredCombos.insert(DropCombo.key(theme: theme, angle: angle))
         activeDrop = CuratedDrop(name: name, theme: theme, angle: angle, curatorIDs: curatorIDs)
+        save()
     }
 
     /// A pairing the player has run before, so the planner can show its rating

@@ -2,7 +2,9 @@ import SwiftUI
 
 /// The condition bands shown on the grading meter, Poor→Mint — the same
 /// scale used across every format's inspection minigame.
-enum ConditionGrade: CaseIterable {
+/// Raw values are the on-disk representation — renaming a case breaks old
+/// saves, so they're spelled out rather than left to the compiler.
+enum ConditionGrade: String, CaseIterable, Codable {
     case poor, fair, good, veryGood, nearMint, mint
 
     /// Buckets a 0...1 inspection value into a grade.

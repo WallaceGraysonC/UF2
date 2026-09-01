@@ -3,10 +3,10 @@ import SwiftUI
 struct MainMenuView: View {
     @State private var showNewGameConfirm = false
 
-    /// Set once a save exists — swap this for a real SwiftData query when the
-    /// save model lands. Kept here as the single flag that governs Continue's
-    /// enabled state and the New Game confirmation.
+    /// Whether a save file exists — governs Continue and the New Game warning.
     var hasSave: Bool = false
+    /// "DAY 14 · LV. 3 · $1,240" — what Continue would return you to.
+    var savedSummary: String?
 
     var onNewGame: () -> Void = {}
     var onContinue: () -> Void = {}
@@ -115,14 +115,22 @@ struct MainMenuView: View {
             }
             .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
 
-            Button {
-                onContinue()
-            } label: {
-                Text("CONTINUE")
+            VStack(spacing: 4) {
+                Button {
+                    onContinue()
+                } label: {
+                    Text("CONTINUE")
+                }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                .disabled(!hasSave)
+                .opacity(hasSave ? 1 : 0.4)
+
+                if let savedSummary {
+                    Text(savedSummary)
+                        .font(Theme.mono(9, weight: .semibold))
+                        .foregroundStyle(Theme.amber)
+                }
             }
-            .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
-            .disabled(!hasSave)
-            .opacity(hasSave ? 1 : 0.4)
 
             HStack(spacing: 12) {
                 Button {

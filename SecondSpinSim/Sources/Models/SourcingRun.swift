@@ -2,8 +2,8 @@ import Foundation
 
 /// An in-flight buying trip. Buyers are committed for its duration, and the
 /// haul only materialises when it finishes — the "ship day" for inventory.
-struct SourcingRun: Identifiable {
-    let id = UUID()
+struct SourcingRun: Identifiable, Codable {
+    var id = UUID()
     var location: SourcingLocation
     var buyerIDs: [UUID]
     var daysRemaining: Int

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Reputation is tracked per archetype rather than as one global meter —
 /// a shop known to collectors is a different shop than one known to DJs.
-enum CustomerArchetype: String, CaseIterable, Identifiable {
+enum CustomerArchetype: String, CaseIterable, Identifiable, Codable {
     case collector = "Collector"
     case crateDigger = "Crate-Digger"
     case completionist = "Completionist"
