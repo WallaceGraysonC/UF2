@@ -11,11 +11,18 @@ targets:
     platform: iOS
     sources:
       - path: Sources
+      - path: Resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.graysonwallace.secondspinsim
         TARGETED_DEVICE_FAMILY: "1"
-        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
-        GENERATE_INFOPLIST_FILE: "YES"
-        INFOPLIST_KEY_CFBundleDisplayName: "Second Spin Sim"
+    info:
+      path: Generated-Info.plist
+      properties:
+        CFBundleDisplayName: "Second Spin Sim"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIAppFonts:
+          - Silkscreen-Regular.ttf
+          - Silkscreen-Bold.ttf

@@ -8,6 +8,9 @@ struct MainMenuView: View {
     /// enabled state and the New Game confirmation.
     var hasSave: Bool = false
 
+    var onNewGame: () -> Void = {}
+    var onContinue: () -> Void = {}
+
     var body: some View {
         ZStack {
             background
@@ -29,7 +32,8 @@ struct MainMenuView: View {
             titleVisibility: .visible
         ) {
             Button("Start New Shop", role: .destructive) {
-                // TODO: reset save, navigate to shop-name entry
+                // TODO: reset save before real persistence exists
+                onNewGame()
             }
             Button("Cancel", role: .cancel) {}
         }
@@ -104,7 +108,7 @@ struct MainMenuView: View {
                 if hasSave {
                     showNewGameConfirm = true
                 } else {
-                    // TODO: navigate to shop-name entry
+                    onNewGame()
                 }
             } label: {
                 Text("NEW GAME")
@@ -112,7 +116,7 @@ struct MainMenuView: View {
             .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
 
             Button {
-                // TODO: load save, navigate to Shop Floor
+                onContinue()
             } label: {
                 Text("CONTINUE")
             }

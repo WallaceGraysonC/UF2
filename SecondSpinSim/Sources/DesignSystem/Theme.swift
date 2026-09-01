@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Shared palette and type scale for Second Spin Sim.
 /// Carries the amber/red/green/teal accents established in the design reference,
@@ -27,11 +28,17 @@ enum Theme {
     // MARK: Type
 
     /// Chunky pixel/display face for titles, buttons, and HUD numbers — the Kairosoft "menu voice."
-    /// Falls back to the system rounded design until Silkscreen (or Press Start 2P) is bundled
-    /// as a .ttf in the asset catalog and registered in Info.plist under "Fonts provided by application".
-    static func display(_ size: CGFloat) -> Font {
-        .system(size: size, weight: .bold, design: .rounded)
+    /// Backed by Silkscreen (Resources/Fonts, registered via UIAppFonts in project.yml). Falls back
+    /// to system rounded bold if the font isn't found — e.g. a preview target that skips resources.
+    static func display(_ size: CGFloat, weight: DisplayWeight = .bold) -> Font {
+        let name = weight == .bold ? "Silkscreen-Bold" : "Silkscreen-Regular"
+        if UIFont(name: name, size: size) != nil {
+            return .custom(name, size: size)
+        }
+        return .system(size: size, weight: weight == .bold ? .bold : .regular, design: .rounded)
     }
+
+    enum DisplayWeight { case regular, bold }
 
     /// Ledger/mono face for item names, prices, and body copy — keeps the "shop receipt" texture.
     static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
