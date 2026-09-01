@@ -24,6 +24,9 @@ final class GameState {
     /// The most recent write-up, and the running history of them.
     var lastDropResult: DropResult?
     var dropHistory: [DropResult] = []
+    /// Theme×angle pairings the player has actually run — ratings stay hidden
+    /// until tried, so combinations are something you learn, not read off.
+    var discoveredCombos: Set<String> = []
 
     /// Three faces rotating on the hiring board, refreshed on a level-up.
     var hiringBoard: [StaffMember] = [
@@ -212,9 +215,13 @@ final class GameState {
         var launchedDrop: DropResult?
         if var drop = activeDrop {
             let crew = drop.curatorIDs.compactMap { staffMember(id: $0) }
+            // Theme x angle is worth more than an extra body — a perfect
+            // pairing is a 1.5x on everything the curators put in.
+            let comboBonus = drop.affinity.multiplier
             for curator in crew {
                 let specBonus = curator.specialization == drop.theme.format ? 1.3 : 1.0
-                drop.designPoints += Double(curator.design) * curator.effectiveness * specBonus * 0.5
+                drop.designPoints += Double(curator.design) * curator.effectiveness
+                    * specBonus * comboBonus * 0.5
                 drop.hypePoints += Double(curator.hype) * curator.effectiveness * 0.5
             }
             drop.daysRemaining -= 1
@@ -432,12 +439,20 @@ final class GameState {
 
     func canAfford(_ theme: DropTheme) -> Bool { cash >= theme.cost }
 
-    func startDrop(theme: DropTheme, curatorIDs: [UUID]) {
+    func startDrop(name: String, theme: DropTheme, angle: DropAngle, curatorIDs: [UUID]) {
         guard activeDrop == nil, !curatorIDs.isEmpty, canAfford(theme) else { return }
         cash -= theme.cost
         ledger.append(LedgerEntry(day: day, detail: "\(theme.rawValue) — setup",
                                   amount: -theme.cost, kind: .upgrade))
-        activeDrop = CuratedDrop(theme: theme, curatorIDs: curatorIDs)
+        // Running a pairing is how you learn what it's worth.
+        discoveredCombos.insert(DropCombo.key(theme: theme, angle: angle))
+        activeDrop = CuratedDrop(name: name, theme: theme, angle: angle, curatorIDs: curatorIDs)
+    }
+
+    /// A pairing the player has run before, so the planner can show its rating
+    /// up front instead of making them guess twice.
+    func hasDiscovered(theme: DropTheme, angle: DropAngle) -> Bool {
+        discoveredCombos.contains(DropCombo.key(theme: theme, angle: angle))
     }
 
     /// Launch day. Hype sets how many people show up; Design decides whether
@@ -473,7 +488,7 @@ final class GameState {
 
         if revenue > 0 {
             cash += revenue
-            ledger.append(LedgerEntry(day: day, detail: "\(theme.rawValue) — \(soldIDs.count) sold",
+            ledger.append(LedgerEntry(day: day, detail: "\(drop.name) — \(soldIDs.count) sold",
                                       amount: revenue, kind: .sale))
         }
 
@@ -486,9 +501,9 @@ final class GameState {
             gains[archetype] = (reputation[archetype] ?? 0) - before
         }
 
-        let result = DropResult(themeName: theme.rawValue, day: day, turnout: turnout,
+        let result = DropResult(themeName: drop.name, day: day, turnout: turnout,
                                 stars: stars, revenue: revenue, repGains: gains,
-                                review: DropResult.review(stars: stars, themeName: theme.rawValue))
+                                review: DropResult.review(stars: stars, themeName: drop.name))
         lastDropResult = result
         dropHistory.append(result)
     }

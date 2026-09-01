@@ -7,8 +7,18 @@ struct DropsView: View {
     @Environment(GameState.self) private var game
     @State private var selectedTab: AppTab = .drops
 
+    @State private var dropName: String = ""
     @State private var chosenTheme: DropTheme = .staffPicks
+    @State private var chosenAngle: DropAngle = .localBands
     @State private var chosenCuratorIDs: Set<UUID> = []
+
+    private var affinity: ComboAffinity {
+        DropCombo.affinity(theme: chosenTheme, angle: chosenAngle)
+    }
+
+    private var comboKnown: Bool {
+        game.hasDiscovered(theme: chosenTheme, angle: chosenAngle)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -61,6 +71,12 @@ struct DropsView: View {
                     .font(Theme.display(14))
                     .foregroundStyle(Theme.ink)
 
+                nameField
+
+                Text("THEME")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.inkSoft)
+
                 VStack(spacing: 7) {
                     ForEach(game.availableThemes) { theme in
                         ThemeCard(
@@ -71,6 +87,15 @@ struct DropsView: View {
                         )
                     }
                 }
+
+                Text("ANGLE")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.inkSoft)
+                    .padding(.top, 4)
+
+                angleGrid
+
+                comboReadout
 
                 Text("ASSIGN CURATORS")
                     .font(Theme.display(13))
@@ -94,8 +119,10 @@ struct DropsView: View {
                 }
 
                 Button {
-                    game.startDrop(theme: chosenTheme, curatorIDs: Array(chosenCuratorIDs))
+                    game.startDrop(name: dropName, theme: chosenTheme, angle: chosenAngle,
+                                   curatorIDs: Array(chosenCuratorIDs))
                     chosenCuratorIDs = []
+                    dropName = ""
                 } label: {
                     Text(startLabel)
                 }
@@ -108,6 +135,66 @@ struct DropsView: View {
             .padding(.top, 14)
             .padding(.bottom, 20)
         }
+    }
+
+    private var nameField: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("CALL IT")
+                .font(Theme.mono(9, weight: .bold))
+                .foregroundStyle(Theme.inkSoft)
+            TextField(chosenTheme.rawValue, text: $dropName)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+                .padding(10)
+                .background(Theme.cream)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+    }
+
+    private var angleGrid: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 2)
+        return LazyVGrid(columns: columns, spacing: 6) {
+            ForEach(DropAngle.allCases) { angle in
+                AngleChip(
+                    angle: angle,
+                    isSelected: chosenAngle == angle,
+                    knownAffinity: game.hasDiscovered(theme: chosenTheme, angle: angle)
+                        ? DropCombo.affinity(theme: chosenTheme, angle: angle) : nil,
+                    onTap: { chosenAngle = angle }
+                )
+            }
+        }
+    }
+
+    /// The pairing verdict. Hidden until the player has actually run this
+    /// combination once — learning the matrix is part of the game.
+    private var comboReadout: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(chosenTheme.rawValue.uppercased()) × \(chosenAngle.rawValue.uppercased())")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.ink)
+                Text(comboKnown
+                     ? "You've run this pairing before."
+                     : "Untried pairing — no telling until you run it.")
+                    .font(Theme.mono(8))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            Spacer()
+            Text(comboKnown ? affinity.label : "???")
+                .font(Theme.display(13))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .background(comboKnown ? affinity.color : Theme.inkSoft)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
+        .padding(11)
+        .background(Theme.cream)
+        .overlay(RoundedRectangle(cornerRadius: 6)
+            .stroke(comboKnown ? affinity.color : Theme.line, lineWidth: comboKnown ? 2 : 1))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private var canStart: Bool {
@@ -132,15 +219,22 @@ struct DropsView: View {
 
     private func dropInPrep(_ drop: CuratedDrop) -> some View {
         VStack(spacing: 14) {
-            Text(drop.theme.rawValue.uppercased())
+            Text(drop.name.uppercased())
                 .font(Theme.display(15))
                 .foregroundStyle(Theme.ink)
                 .multilineTextAlignment(.center)
 
-            Text(drop.theme.blurb)
-                .font(.system(size: 12))
+            Text("\(drop.theme.rawValue) × \(drop.angle.rawValue)")
+                .font(Theme.mono(9, weight: .semibold))
                 .foregroundStyle(Theme.inkSoft)
-                .multilineTextAlignment(.center)
+
+            Text(drop.affinity.label)
+                .font(Theme.display(12))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(drop.affinity.color)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
 
             VStack(spacing: 10) {
                 Text(drop.dayLabel)
@@ -237,6 +331,45 @@ private struct ReviewCard: View {
         .background(Theme.cream)
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.red, lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+private struct AngleChip: View {
+    let angle: DropAngle
+    let isSelected: Bool
+    /// Only shown once the player has run this pairing.
+    let knownAffinity: ComboAffinity?
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Text(angle.rawValue.uppercased())
+                        .font(Theme.mono(8.5, weight: .bold))
+                        .foregroundStyle(Theme.ink)
+                    Spacer(minLength: 2)
+                    if let known = knownAffinity {
+                        Circle().fill(known.color).frame(width: 7, height: 7)
+                    }
+                }
+                Text(angle.blurb)
+                    .font(.system(size: 9.5))
+                    .foregroundStyle(Theme.inkSoft)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background(Theme.cream)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(isSelected ? Theme.amberDeep : Theme.line,
+                            lineWidth: isSelected ? 2 : 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
     }
 }
 

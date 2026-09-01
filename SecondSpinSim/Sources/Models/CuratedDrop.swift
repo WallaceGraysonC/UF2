@@ -4,7 +4,10 @@ import Foundation
 /// cycle; it "ships" on the last day and gets written up.
 struct CuratedDrop: Identifiable {
     let id = UUID()
+    /// What the player calls it on the poster in the window.
+    var name: String
     var theme: DropTheme
+    var angle: DropAngle
     var curatorIDs: [UUID]
     var daysRemaining: Int
     var totalDays: Int
@@ -14,8 +17,12 @@ struct CuratedDrop: Identifiable {
     var designPoints: Double = 0
     var hypePoints: Double = 0
 
-    init(theme: DropTheme, curatorIDs: [UUID]) {
+    var affinity: ComboAffinity { DropCombo.affinity(theme: theme, angle: angle) }
+
+    init(name: String, theme: DropTheme, angle: DropAngle, curatorIDs: [UUID]) {
+        self.name = name.isEmpty ? theme.rawValue : name
         self.theme = theme
+        self.angle = angle
         self.curatorIDs = curatorIDs
         self.daysRemaining = theme.prepDays
         self.totalDays = theme.prepDays
