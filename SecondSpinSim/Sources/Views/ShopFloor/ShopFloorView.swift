@@ -5,6 +5,7 @@ struct ShopFloorView: View {
     @State private var selectedTab: AppTab = .floor
     @State private var showingReport = false
     @State private var showingUpgrade = false
+    @State private var showingAds = false
 
     /// Called when the player taps a tab other than Floor. Floor is the hub
     /// this view already renders, so navigating away is the parent's job.
@@ -31,6 +32,10 @@ struct ShopFloorView: View {
         }
         .sheet(isPresented: $showingUpgrade) {
             UpgradeSheet()
+                .environment(game)
+        }
+        .sheet(isPresented: $showingAds) {
+            AdvertisingSheet()
                 .environment(game)
         }
     }
@@ -153,13 +158,29 @@ struct ShopFloorView: View {
     }
 
     private var endDayButton: some View {
-        Button {
-            game.endDay()
-            showingReport = true
-        } label: {
-            Text("END DAY")
+        HStack(spacing: 8) {
+            Button { showingAds = true } label: {
+                Text(adLabel)
+            }
+            .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+            .frame(maxWidth: 118)
+
+            Button {
+                game.endDay()
+                showingReport = true
+            } label: {
+                Text("END DAY")
+            }
+            .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
         }
-        .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
+    }
+
+    /// Shows the running campaign's remaining days rather than a dead label.
+    private var adLabel: String {
+        if let campaign = game.activeCampaign {
+            return "ADS \(campaign.daysRemaining)D"
+        }
+        return "ADS"
     }
 
     private var floorScene: some View {

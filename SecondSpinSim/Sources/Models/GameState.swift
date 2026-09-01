@@ -45,6 +45,9 @@ final class GameState {
     var trendingFormat: MediaFormat = .vhs
     private var trendDaysRemaining: Int = 6
 
+    /// Paid promotion currently running. At most one at a time.
+    var activeCampaign: AdCampaign?
+
     /// Pieces retired from sale onto the Museum Wall (Level 10).
     var museum: [MuseumPiece] = []
 
@@ -84,6 +87,7 @@ final class GameState {
             dropHistory: dropHistory, discoveredCombos: discoveredCombos,
             reputation: reputation, trendingFormat: trendingFormat,
             trendDaysRemaining: trendDaysRemaining,
+            activeCampaign: activeCampaign,
             museum: museum, highestSaleValue: highestSaleValue,
             lifetimeRevenue: lifetimeRevenue, staffTrainedCount: staffTrainedCount,
             fiveStarDrops: fiveStarDrops, perks: perks
@@ -108,6 +112,7 @@ final class GameState {
         reputation = snapshot.reputation
         trendingFormat = snapshot.trendingFormat
         trendDaysRemaining = snapshot.trendDaysRemaining
+        activeCampaign = snapshot.activeCampaign
         museum = snapshot.museum
         highestSaleValue = snapshot.highestSaleValue
         lifetimeRevenue = snapshot.lifetimeRevenue
@@ -206,7 +211,8 @@ final class GameState {
             let repScore = Double(reputation[buyer] ?? 0) / 100.0
             // Rare stock moves slower; it takes the right buyer walking in.
             let baseChance = item.isRare ? 0.08 : 0.28
-            guard Double.random(in: 0...1) < baseChance + repScore * 0.25 else { continue }
+            let traffic = activeCampaign?.method.trafficBoost ?? 0
+            guard Double.random(in: 0...1) < baseChance + repScore * 0.25 + traffic else { continue }
 
             let price = Double(item.askingPrice(trendModifier: trendModifier(for: item.format)))
             let paid = Int((price * buyer.priceMultiplier).rounded())
@@ -312,6 +318,12 @@ final class GameState {
             } else {
                 activeDrop = drop
             }
+        }
+
+        // --- Advertising ---
+        if var campaign = activeCampaign {
+            campaign.daysRemaining -= 1
+            activeCampaign = campaign.daysRemaining > 0 ? campaign : nil
         }
 
         // --- Trend rotation ---
@@ -429,6 +441,24 @@ final class GameState {
     /// Dump it — some of what comes back in a storage unit is genuinely junk.
     func discard(_ item: InventoryItem) {
         pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    // MARK: Advertising
+
+    func canAfford(_ method: AdMethod) -> Bool { cash >= method.cost }
+
+    /// Buys a campaign. Only one runs at a time — stacking billboards isn't
+    /// a strategy, choosing the right reach for what you're holding is.
+    func runCampaign(_ method: AdMethod) {
+        guard activeCampaign == nil, canAfford(method) else { return }
+        cash -= method.cost
+        ledger.append(LedgerEntry(day: day, detail: "\(method.rawValue) — advertising",
+                                  amount: -method.cost, kind: .upgrade))
+        for archetype in method.reaches {
+            bumpReputation(archetype, by: method.repGain)
+        }
+        activeCampaign = AdCampaign(method: method)
+        save()
     }
 
     // MARK: The Museum Wall
