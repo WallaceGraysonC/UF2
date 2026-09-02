@@ -107,11 +107,16 @@ struct ShopFloorView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 2))
             }
 
-            shelfGrid
+            // What the room is working toward, up top where it belongs.
+            ActiveProjectsPanel()
 
             statusStrip
 
-            floorScene
+            // The room itself takes whatever space is left.
+            WorkroomView(skin: skin, popups: popups, isResolving: isResolving)
+                .frame(maxHeight: .infinity)
+
+            shelfStrip
 
             endDayButton
         }
@@ -121,29 +126,30 @@ struct ShopFloorView: View {
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    private var shelfGrid: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 6)
+    /// The shelves get one slim row now that the room is the main event —
+    /// the full grid lives in the shelf detail, not the hub.
+    private var shelfStrip: some View {
         let stock = game.shelvedInventory
-        return LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(0..<game.binCapacity, id: \.self) { index in
+        let slots = min(game.binCapacity, 10)
+        return HStack(spacing: 4) {
+            ForEach(0..<slots, id: \.self) { index in
                 ShelfBinView(item: index < stock.count ? stock[index] : nil)
             }
+            if stock.count > slots {
+                Text("+\(stock.count - slots)")
+                    .font(Theme.mono(8, weight: .bold))
+                    .foregroundStyle(Theme.inkSoft)
+            }
         }
+        .frame(height: 22)
     }
 
-    /// What's outstanding right now — a haul waiting to be graded, or a run
-    /// still out. Tapping jumps to Sourcing to deal with it.
+    /// Anything needing a decision — a haul to grade. Tapping jumps to it.
     @ViewBuilder
     private var statusStrip: some View {
         if !game.pendingHaul.isEmpty {
             statusPill(text: "\(game.pendingHaul.count) ITEMS TO GRADE",
                        color: Theme.red, destination: .source)
-        } else if let drop = game.activeDrop {
-            statusPill(text: "\(drop.theme.rawValue.uppercased()) — \(drop.dayLabel)",
-                       color: Theme.plum, destination: .drops)
-        } else if let run = game.activeRun {
-            statusPill(text: "\(run.location.rawValue.uppercased()) — \(run.dayLabel)",
-                       color: Theme.amberDeep, destination: .source)
         }
     }
 
@@ -250,77 +256,6 @@ struct ShopFloorView: View {
         return "ADS"
     }
 
-    private var floorScene: some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(skin.floor)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.line, lineWidth: 1))
-
-            VStack {
-                Spacer()
-                Rectangle()
-                    .fill(skin.counter)
-                    .frame(height: 34)
-                    .overlay(Rectangle().fill(.black.opacity(0.25)).frame(height: 3), alignment: .top)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-
-            // One station per staffer (capped), each a lane popups rise from.
-            HStack(spacing: 0) {
-                ForEach(0..<laneCount, id: \.self) { lane in
-                    ZStack(alignment: .bottom) {
-                        shopperSprite(color: laneTint(lane))
-                            .opacity(isResolving ? 1 : 0.85)
-
-                        ForEach(popups.filter { $0.lane == lane }) { event in
-                            FloatingEventView(event: event)
-                                .offset(y: -34)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .padding(.bottom, 30)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-
-            if !isResolving {
-                speechBubble("got any \(game.trendingFormat.abbreviation)?")
-                    .padding(.top, 10)
-                    .padding(.leading, 24)
-            }
-        }
-        .frame(minHeight: 132)
-    }
-
-    /// A station per staffer, capped so the floor doesn't get crowded.
-    private var laneCount: Int { max(1, min(game.staff.count, 4)) }
-
-    private func laneTint(_ lane: Int) -> Color {
-        let palette = [Theme.steel, Theme.red, Theme.plum, Theme.teal]
-        return palette[lane % palette.count]
-    }
-
-    private func shopperSprite(color: Color) -> some View {
-        VStack(spacing: 0) {
-            Circle()
-                .fill(Color(hex: 0xE8C9A0))
-                .frame(width: 16, height: 16)
-            RoundedRectangle(cornerRadius: 5)
-                .fill(color)
-                .frame(width: 22, height: 30)
-        }
-    }
-
-    private func speechBubble(_ text: String) -> some View {
-        Text(text)
-            .font(Theme.mono(9, weight: .bold))
-            .foregroundStyle(Theme.ink)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(Theme.cream)
-            .overlay(RoundedRectangle(cornerRadius: 3).stroke(Theme.ink, lineWidth: 1))
-            .clipShape(RoundedRectangle(cornerRadius: 3))
-    }
 }
 
 /// One slot on the shelf wall — an empty slot renders as a dashed placeholder,

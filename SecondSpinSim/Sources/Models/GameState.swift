@@ -194,6 +194,11 @@ final class GameState {
         return reputation.values.reduce(0, +) / reputation.count
     }
 
+    /// Which desk a staffer sits at, so their points pop from the right one.
+    func laneIndex(for member: StaffMember) -> Int {
+        staff.firstIndex { $0.id == member.id } ?? 0
+    }
+
     func staffMember(id: UUID?) -> StaffMember? {
         guard let id else { return nil }
         return staff.first { $0.id == id }
@@ -213,7 +218,9 @@ final class GameState {
         var soldIDs: [UUID] = []
 
         lastEvents = []
-        let lanes = max(1, min(staff.count, 4))
+        // Shop-wide events (a sale, wages) aren't any one person's, so they
+        // cycle across every desk rather than piling on the first few.
+        let lanes = max(1, staff.count)
         var lane = 0
         func nextLane() -> Int {
             defer { lane = (lane + 1) % lanes }
@@ -256,7 +263,7 @@ final class GameState {
             advanced += 1
             lastEvents.append(DayEvent(headline: "+\(Int(points))",
                                        detail: "\(tech.name) · restoration",
-                                       tint: Theme.teal, lane: nextLane()))
+                                       tint: Theme.teal, lane: laneIndex(for: tech)))
 
             if benchJobs[index].progress >= 1.0 {
                 benchJobs[index].progress = 0
@@ -308,13 +315,26 @@ final class GameState {
                 trainingFinished.append("\(staff[index].name) — \(stat.rawValue) +\(gain)")
                 lastEvents.append(DayEvent(headline: "+\(gain)",
                                            detail: "\(staff[index].name) · \(stat.rawValue)",
-                                           tint: Theme.steel, lane: nextLane()))
+                                           tint: Theme.steel, lane: index))
             }
         }
 
         // --- Sourcing runs ---
         var haulSize: Int?
         if var run = activeRun {
+            let crew = run.buyerIDs.compactMap { staffMember(id: $0) }
+            let perkBonus = perks.contains(.eyeForIt) ? 1.25 : 1.0
+            for buyer in crew {
+                let specBonus = run.location.formats.contains(buyer.specialization) ? 1.3 : 1.0
+                let volume = Double(buyer.volume) * buyer.effectiveness * specBonus
+                run.volumePoints += volume
+                run.rarityPoints += Double(buyer.raritySense) * buyer.effectiveness * perkBonus
+                run.negotiationPoints += Double(buyer.negotiation) * buyer.effectiveness
+                lastEvents.append(DayEvent(headline: "+\(Int(volume))",
+                                           detail: "\(buyer.name) · digging",
+                                           tint: Theme.amberDeep,
+                                           lane: laneIndex(for: buyer)))
+            }
             run.daysRemaining -= 1
             if run.daysRemaining <= 0 {
                 let haul = resolveHaul(for: run)
@@ -343,7 +363,8 @@ final class GameState {
                 drop.hypePoints += Double(curator.hype) * curator.effectiveness * 0.5
                 lastEvents.append(DayEvent(headline: "+\(Int(design))",
                                            detail: "\(curator.name) · design",
-                                           tint: Theme.plum, lane: nextLane()))
+                                           tint: Theme.plum,
+                                           lane: laneIndex(for: curator)))
             }
             drop.daysRemaining -= 1
 
@@ -423,22 +444,19 @@ final class GameState {
     /// buyers' Volume stat; rare odds come from their Rarity Sense; condition
     /// is rolled per item within the location's range.
     private func resolveHaul(for run: SourcingRun) -> [InventoryItem] {
-        let crew = run.buyerIDs.compactMap { staffMember(id: $0) }
-        guard !crew.isEmpty else { return [] }
+        guard !run.buyerIDs.isEmpty else { return [] }
 
-        let avgVolume = Double(crew.map(\.volume).reduce(0, +)) / Double(crew.count)
-        let avgRarity = Double(crew.map(\.raritySense).reduce(0, +)) / Double(crew.count)
-        let effectiveness = crew.map(\.effectiveness).reduce(0, +) / Double(crew.count)
+        // Everything now comes from what the crew actually banked over the run.
+        let dayCount = Double(max(1, run.totalDays))
+        let crewSize = Double(max(1, run.buyerIDs.count))
+        let volumePerHead = run.volumePoints / (dayCount * crewSize)
+        let rarityPerHead = run.rarityPoints / (dayCount * crewSize)
 
         let range = run.location.itemRange
-        // A strong crew pushes toward the top of the location's range.
-        let volumeBias = (avgVolume / 99.0) * effectiveness
         let span = Double(range.upperBound - range.lowerBound)
-        let count = range.lowerBound + Int((span * volumeBias).rounded())
+        let count = range.lowerBound + Int((span * min(1.0, volumePerHead / 99.0)).rounded())
 
-        let perkBonus = perks.contains(.eyeForIt) ? 1.25 : 1.0
-        let rareChance = min(0.6, run.location.rareChance
-                             * (1.0 + avgRarity / 60.0) * effectiveness * perkBonus)
+        let rareChance = min(0.6, run.location.rareChance * (1.0 + rarityPerHead / 60.0))
 
         // Hauls only turn up formats the shop is licensed to sell — the
         // Vinyl/Games/Laserdisc sections have to be unlocked first.
