@@ -29,8 +29,9 @@ struct WatchGameView: View {
                                 cardFaceID: BankrollManager.shared.equippedCardFace,
                                 avatarID: BankrollManager.shared.equippedAvatar,
                                 avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
+            let names = BotNames.uniqueNames(count: botCount)
             let bots = (1...botCount).map { i in
-                Player(id: "watch-bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
+                Player(id: "watch-bot-\(i)", name: names[i - 1], chips: buyIn, isBot: true,
                        cardBackID: BankrollManager.shared.equippedCardBack,
                        cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())

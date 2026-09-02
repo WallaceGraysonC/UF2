@@ -57,8 +57,9 @@ struct LocalGameView: View {
                                 avatarID: BankrollManager.shared.equippedAvatar,
                                 avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
             human.seatIndex = 0
+            let names = BotNames.uniqueNames(count: botCount)
             let bots = (1...botCount).map { i -> Player in
-                var bot = Player(id: "bot-\(i)", name: BotNames.random(), chips: buyIn, isBot: true,
+                var bot = Player(id: "bot-\(i)", name: names[i - 1], chips: buyIn, isBot: true,
                        cardBackID: BankrollManager.shared.equippedCardBack,
                        cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())
@@ -431,8 +432,20 @@ struct LocalGameView: View {
 }
 
 enum BotNames {
-    static let pool = ["Ace", "Riverboat Rae", "Chip", "Duke", "Sable", "Maverick", "Ivy", "Blaze"]
+    /// Kept to four characters or fewer. A seat is only about as wide as its
+    /// two cards, so anything longer either truncates or spills over the
+    /// player next to it.
+    static let pool = ["Ace", "Chip", "Duke", "Ivy", "Rae", "Jack", "Nova", "Rook",
+                       "Slim", "Cash", "Fox", "Kit", "Dice", "Onyx", "Vega", "Zed"]
     private static let avatarPool = ["avatar.shark", "avatar.robot", "avatar.fox", "avatar.wizard", "avatar.astronaut", "avatar.dragon"]
     static func random() -> String { pool.randomElement() ?? "Bot" }
+
+    /// Distinct names for one table. Picking independently meant a full
+    /// table could easily seat two players with the same name.
+    static func uniqueNames(count: Int) -> [String] {
+        var names = pool.shuffled()
+        while names.count < count { names += pool.shuffled() }
+        return Array(names.prefix(count))
+    }
     static func randomAvatar() -> String { avatarPool.randomElement() ?? CosmeticCatalog.defaultAvatar }
 }
