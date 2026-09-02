@@ -29,7 +29,7 @@ struct LocalGameView: View {
     }
 
     init(botCount: Int = 4, buyIn: Int = 500, smallBlind: Int = 10, bigBlind: Int = 20,
-         enableResume: Bool = true, tableTitle: String = "Practice Table",
+         enableResume: Bool = true, tableTitle: String = "",
          usesBankroll: Bool = true, tournament: TournamentConfig? = nil) {
         self.enableResume = enableResume
         self.tableTitle = tableTitle
@@ -170,9 +170,14 @@ struct LocalGameView: View {
                 Image(systemName: "chevron.left").foregroundColor(.white)
             }
             Spacer()
-            Text(tableTitle)
-                .foregroundColor(.white)
-                .font(.headline)
+            // The main vs-bots table needs no label -- it's the default
+            // table, and the header reads cleaner without it. The other
+            // modes pass a title so you can tell which one you're in.
+            if !tableTitle.isEmpty {
+                Text(tableTitle)
+                    .foregroundColor(.white)
+                    .font(.headline)
+            }
             Spacer()
             Button { showHandGuide = true } label: {
                 Label("Hands", systemImage: "questionmark.circle.fill")
@@ -295,11 +300,13 @@ struct LocalGameView: View {
     private func finishTournament(placement: Int) {
         guard !hasSettled else { return }
         hasSettled = true
-        if placement == 1, let human = engine.players.first(where: { $0.id == humanID }) {
-            bankroll.applyDelta(human.chips)
-            bankroll.addXP(300)
-        } else {
-            bankroll.addXP(max(50, 300 / placement))
+        if countsTowardProgress {
+            if placement == 1, let human = engine.players.first(where: { $0.id == humanID }) {
+                bankroll.applyDelta(human.chips)
+                bankroll.addXP(300)
+            } else {
+                bankroll.addXP(max(50, 300 / placement))
+            }
         }
         GamePersistence.clearLocalGame()
     }
@@ -315,13 +322,23 @@ struct LocalGameView: View {
         }
     }
 
+    /// Whether hands played here count toward XP and the Daily Challenges.
+    /// Only the tables that cost chips to sit down at do: Play vs Bots, Sit &
+    /// Go, and VIP High Stakes. The free Custom Table is a sandbox, and
+    /// progress earned somewhere with no buy-in and no limit isn't worth
+    /// anything -- you could grind out every challenge and the VIP unlock
+    /// without ever putting a chip at risk.
+    private var countsTowardProgress: Bool { usesBankroll }
+
     /// Fires once per completed hand: feeds the XP and Daily Challenge
     /// systems, and escalates tournament blinds if applicable.
     private func handleHandEnd() {
         guard engine.handNumber > 0 else { return }
-        DailyChallengeManager.shared.recordHandPlayed()
-        bankroll.addXP(10)
-        if let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
+        if countsTowardProgress {
+            DailyChallengeManager.shared.recordHandPlayed()
+            bankroll.addXP(10)
+        }
+        if countsTowardProgress, let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
             DailyChallengeManager.shared.recordHandWon()
             DailyChallengeManager.shared.recordPotWon(amount: result.amountWon)
             DailyChallengeManager.shared.recordShowdownWin(category: result.hand.category)
