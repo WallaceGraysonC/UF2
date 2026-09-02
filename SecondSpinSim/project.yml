@@ -16,13 +16,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.graysonwallace.secondspinsim
         TARGETED_DEVICE_FAMILY: "1"
-    info:
-      path: Generated-Info.plist
-      properties:
-        CFBundleDisplayName: "Second Spin Sim"
-        UILaunchScreen: {}
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-        UIAppFonts:
-          - Silkscreen-Regular.ttf
-          - Silkscreen-Bold.ttf
+        INFOPLIST_FILE: Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
