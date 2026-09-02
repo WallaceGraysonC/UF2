@@ -33,6 +33,8 @@ struct PlayerSeatView: View {
     let isActive: Bool
     let isDealer: Bool
     let revealCards: Bool
+    /// Took (or split) the pot in the hand just finished.
+    var isWinner: Bool = false
     /// Smaller rendering for crowded tables, so neighbouring seats around a
     /// full oval don't run into each other.
     var compact: Bool = false
@@ -90,9 +92,34 @@ struct PlayerSeatView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 9)
-                    .stroke(isActive ? PATheme.goldBright : Color.white.opacity(0.08), lineWidth: isActive ? 2 : 1)
+                    .stroke(borderStyle, lineWidth: isWinner ? 2.5 : (isActive ? 2 : 1))
             )
+            // Winners get a warm glow, so the pot is obvious at a glance
+            // rather than something you have to read off the action line.
+            .shadow(color: isWinner ? PATheme.goldBright.opacity(0.75) : .clear, radius: 9)
             .materialShadow(radius: 4, y: 2)
         }
+        .animation(.easeOut(duration: 0.28), value: isWinner)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(voiceOverLabel)
+    }
+
+    private var borderStyle: Color {
+        if isWinner { return PATheme.goldBright }
+        return isActive ? PATheme.goldBright : Color.white.opacity(0.08)
+    }
+
+    private var voiceOverLabel: String {
+        var parts = [player.name, "\(player.chips) chips"]
+        if isDealer { parts.append("dealer") }
+        if player.currentBet > 0 { parts.append("bet \(player.currentBet)") }
+        if player.isFolded { parts.append("folded") }
+        else if player.isAllIn { parts.append("all in") }
+        if isActive { parts.append("their turn") }
+        if isWinner { parts.append("won the pot") }
+        if revealCards, !player.holeCards.isEmpty {
+            parts.append("holding " + player.holeCards.map(\.spokenName).joined(separator: " and "))
+        }
+        return parts.joined(separator: ", ")
     }
 }

@@ -6,6 +6,7 @@ struct SettingsView: View {
     @ObservedObject private var audio = AudioManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showResetConfirm = false
+    @State private var hapticsEnabled = Haptics.isEnabled
 
     var body: some View {
         NavigationView {
@@ -47,6 +48,17 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
+                Section("Haptics") {
+                    Toggle("Table Feedback", isOn: $hapticsEnabled)
+                        .onChange(of: hapticsEnabled) { _, on in
+                            Haptics.isEnabled = on
+                            if on { Haptics.tap() }
+                        }
+                    Text("A tap when the action reaches you, when you take a pot, and when you bust out.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+
                 Section("Game Center") {
                     HStack {
                         Text("Status")
@@ -72,6 +84,11 @@ struct SettingsView: View {
                 }
 
                 Section("About") {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text(appVersion).foregroundColor(.secondary)
+                    }
                     Text("This game has no ads, no pop-ups, and no in-app purchases. Chips are a free virtual currency used only to keep score and unlock cosmetics -- they cannot be bought with real money or cashed out.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
@@ -91,6 +108,13 @@ struct SettingsView: View {
                 Text("Brings your balance up to $\(BankrollManager.bankrollTopUpFloor) — one buy-in at the main table. Your owned cosmetics are kept.")
             }
         }
+    }
+
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(short) (\(build))"
     }
 
     private var topUpHint: String {

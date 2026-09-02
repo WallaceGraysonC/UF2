@@ -44,4 +44,17 @@ struct Card: Identifiable, Codable, Hashable {
     var id: String { "\(rank.rawValue)-\(suit.rawValue)" }
     let rank: Rank
     let suit: Suit
+
+    /// Spoken form for VoiceOver -- "♠" and "A" read as nothing useful.
+    var spokenName: String {
+        let rankWord: String
+        switch rank {
+        case .jack: rankWord = "Jack"
+        case .queen: rankWord = "Queen"
+        case .king: rankWord = "King"
+        case .ace: rankWord = "Ace"
+        default: rankWord = rank.label
+        }
+        return "\(rankWord) of \(suit.rawValue)"
+    }
 }

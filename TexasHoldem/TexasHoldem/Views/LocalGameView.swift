@@ -97,6 +97,7 @@ struct LocalGameView: View {
                                 isActive: engine.activePlayerIndex == index,
                                 isDealer: engine.dealerIndex == index,
                                 revealCards: engine.round == .showdown,
+                                isWinner: engine.showdownResults.contains { $0.playerID == player.id },
                                 compact: SeatLayout.usesCompactSeats(count: totalSeats)
                             )
                             .position(
@@ -143,7 +144,8 @@ struct LocalGameView: View {
                         player: human,
                         isActive: engine.activePlayerIndex == humanIndex,
                         isDealer: engine.dealerIndex == humanIndex,
-                        revealCards: true
+                        revealCards: true,
+                        isWinner: engine.showdownResults.contains { $0.playerID == humanID }
                     )
                     .frame(maxHeight: .infinity, alignment: .bottom)
                     .padding(.bottom, 128)
@@ -166,7 +168,10 @@ struct LocalGameView: View {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase != .active { saveProgress() }
         }
-        .onChange(of: engine.activePlayerIndex) { _, _ in runBotTurnIfNeeded() }
+        .onChange(of: engine.activePlayerIndex) { _, _ in
+            runBotTurnIfNeeded()
+            if engine.isHandInProgress, engine.currentPlayer()?.id == humanID { Haptics.yourTurn() }
+        }
         .onChange(of: engine.round) { _, _ in runBotTurnIfNeeded() }
         .onChange(of: engine.isHandInProgress) { _, inProgress in
             if !inProgress { handleHandEnd() }
@@ -367,6 +372,12 @@ struct LocalGameView: View {
         guard engine.handNumber > 0 else { return }
         if countsTowardProgress { bankroll.addXP(10) }
         if challengeTrack == .daily { DailyChallengeManager.shared.recordHandPlayed() }
+
+        if engine.showdownResults.contains(where: { $0.playerID == humanID }) {
+            Haptics.wonPot()
+        } else if engine.players.first(where: { $0.id == humanID })?.chips == 0 {
+            Haptics.bustedOut()
+        }
 
         if let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
             if countsTowardProgress { bankroll.addXP(20) }

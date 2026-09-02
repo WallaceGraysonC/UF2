@@ -46,6 +46,13 @@ struct CardView: View {
                 }
             }
             .materialShadow(radius: max(1.5, width * 0.05), y: max(1, width * 0.035))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        guard let card, !faceDown else { return card == nil ? "Empty card slot" : "Face-down card" }
+        return card.spokenName
     }
 
     private var isCustomFace: Bool {
