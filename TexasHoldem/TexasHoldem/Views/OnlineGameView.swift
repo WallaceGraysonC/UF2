@@ -61,7 +61,8 @@ struct OnlineGameView: View {
                                     player: player,
                                     isActive: state.activePlayerIndex == index,
                                     isDealer: state.dealerIndex == index,
-                                    revealCards: state.round == .showdown
+                                    revealCards: state.round == .showdown,
+                                    compact: SeatLayout.usesCompactSeats(count: totalSeats)
                                 )
                                 .position(
                                     x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,

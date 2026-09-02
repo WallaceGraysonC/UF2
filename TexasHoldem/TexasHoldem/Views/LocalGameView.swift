@@ -84,7 +84,8 @@ struct LocalGameView: View {
                                 player: player,
                                 isActive: engine.activePlayerIndex == index,
                                 isDealer: engine.dealerIndex == index,
-                                revealCards: engine.round == .showdown
+                                revealCards: engine.round == .showdown,
+                                compact: SeatLayout.usesCompactSeats(count: totalSeats)
                             )
                             .position(
                                 x: feltSize.width / 2 + offset.x * feltSize.width * 0.42,

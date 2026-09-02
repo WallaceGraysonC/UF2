@@ -33,12 +33,20 @@ struct PlayerSeatView: View {
     let isActive: Bool
     let isDealer: Bool
     let revealCards: Bool
+    /// Smaller rendering for crowded tables, so neighbouring seats around a
+    /// full oval don't run into each other.
+    var compact: Bool = false
+
+    private var cardWidth: CGFloat { compact ? 34 : 46 }
+    private var avatarSize: CGFloat { compact ? 12 : 15 }
+    private var nameFont: Font { compact ? .caption2.bold() : .caption.bold() }
+    private var detailFont: Font { compact ? .system(size: 9) : .caption2 }
 
     var body: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 4) {
-                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: 46)
-                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: 46)
+        VStack(spacing: compact ? 4 : 6) {
+            HStack(spacing: compact ? 3 : 4) {
+                CardView(card: player.holeCards.first, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: cardWidth)
+                CardView(card: player.holeCards.count > 1 ? player.holeCards[1] : nil, faceDown: !revealCards, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: cardWidth)
             }
             .opacity(player.isFolded ? 0.35 : 1)
 
@@ -46,33 +54,33 @@ struct PlayerSeatView: View {
                 HStack(spacing: 4) {
                     if isDealer {
                         Text("D")
-                            .font(.system(size: 10, weight: .bold, design: .serif))
-                            .padding(4)
+                            .font(.system(size: compact ? 8 : 10, weight: .bold, design: .serif))
+                            .padding(compact ? 3 : 4)
                             .background(Circle().fill(PATheme.goldMaterial))
                             .foregroundColor(PATheme.ink)
                             .materialShadow(radius: 2, y: 1)
                     }
-                    AvatarBadge(avatarID: player.avatarID, size: 15)
+                    AvatarBadge(avatarID: player.avatarID, size: avatarSize)
                         .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: player.avatarFrameID), lineWidth: 1.5))
                     Text(player.name)
-                        .font(.caption.bold())
+                        .font(nameFont)
                         .lineLimit(1)
                 }
                 Text("$\(player.chips)")
-                    .font(.caption2)
+                    .font(detailFont)
                     .foregroundColor(PATheme.goldBright)
                 if player.currentBet > 0 {
                     Text("bet \(player.currentBet)")
-                        .font(.caption2)
+                        .font(detailFont)
                         .foregroundColor(.green)
                 }
                 if player.isFolded {
-                    Text("Folded").font(.caption2).foregroundColor(.gray)
+                    Text("Folded").font(detailFont).foregroundColor(.gray)
                 } else if player.isAllIn {
-                    Text("All In").font(.caption2).foregroundColor(.orange)
+                    Text("All In").font(detailFont).foregroundColor(.orange)
                 }
             }
-            .padding(.horizontal, 8).padding(.vertical, 6)
+            .padding(.horizontal, compact ? 6 : 8).padding(.vertical, compact ? 4 : 6)
             .background(
                 RoundedRectangle(cornerRadius: 9)
                     .fill(
