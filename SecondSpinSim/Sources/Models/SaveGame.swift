@@ -31,6 +31,7 @@ struct SaveGame: Codable {
     var trendingFormat: MediaFormat
     var trendDaysRemaining: Int
 
+    var policy: ShopPolicy
     var activeCampaign: AdCampaign?
     var museum: [MuseumPiece]
     var highestSaleValue: Int

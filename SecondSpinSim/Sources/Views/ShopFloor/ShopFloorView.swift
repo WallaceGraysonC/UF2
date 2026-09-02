@@ -6,6 +6,9 @@ struct ShopFloorView: View {
     @State private var showingReport = false
     @State private var showingUpgrade = false
     @State private var showingAds = false
+    @State private var showingPolicy = false
+    /// Drives the clock while the shop is open.
+    @State private var clockTask: Task<Void, Never>?
 
     /// Day-resolution playback.
     @State private var popups: [DayEvent] = []
@@ -34,9 +37,10 @@ struct ShopFloorView: View {
             selectedTab = .floor
         }
         .onDisappear {
-            // Don't leave a playback task running behind a pushed screen.
+            // Don't leave playback or the clock running behind another screen.
             resolutionTask?.cancel()
             resolutionTask = nil
+            stopClock()
         }
         .sheet(isPresented: $showingReport) {
             DayReportSheet(report: game.lastReport)
@@ -48,6 +52,16 @@ struct ShopFloorView: View {
         .sheet(isPresented: $showingAds) {
             AdvertisingSheet()
                 .environment(game)
+        }
+        .sheet(isPresented: $showingPolicy) {
+            PolicySheet()
+                .environment(game)
+        }
+        .onChange(of: game.policy.isRunning) { _, running in
+            running ? startClock() : stopClock()
+        }
+        .onAppear {
+            if game.policy.isRunning { startClock() }
         }
     }
 
@@ -174,27 +188,89 @@ struct ShopFloorView: View {
         .buttonStyle(.plain)
     }
 
-    @ViewBuilder
+    /// The clock is the main control now: the shop trades on its own and you
+    /// step in when it asks. The manual day is still there for one-at-a-time.
     private var endDayButton: some View {
-        if isResolving {
-            Button { skipResolution() } label: { Text("SKIP") }
-                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
-        } else {
-            HStack(spacing: 8) {
-                Button { showingAds = true } label: {
-                    Text(adLabel)
+        @Bindable var game = game
+
+        return VStack(spacing: 7) {
+            if !game.needsAttention.isEmpty {
+                Button { onNavigate(.source) } label: {
+                    HStack(spacing: 6) {
+                        Circle().fill(Theme.red).frame(width: 6, height: 6)
+                        Text(game.needsAttention[0].uppercased())
+                            .font(Theme.mono(8.5, weight: .bold))
+                            .foregroundStyle(Theme.red)
+                            .lineLimit(1)
+                        Spacer()
+                        if game.needsAttention.count > 1 {
+                            Text("+\(game.needsAttention.count - 1)")
+                                .font(Theme.mono(8, weight: .bold))
+                                .foregroundStyle(Theme.inkSoft)
+                        }
+                    }
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.red, lineWidth: 1))
                 }
-                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
-                .frame(maxWidth: 118)
+                .buttonStyle(.plain)
+            }
+
+            HStack(spacing: 8) {
+                Button { showingPolicy = true } label: { Text("ORDERS") }
+                    .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                    .frame(maxWidth: 96)
+
+                Button { showingAds = true } label: { Text(adLabel) }
+                    .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                    .frame(maxWidth: 96)
 
                 Button {
-                    runDay()
+                    game.policy.isRunning.toggle()
+                    game.save()
                 } label: {
-                    Text("END DAY")
+                    Text(game.policy.isRunning ? "PAUSE" : "OPEN UP")
                 }
                 .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
             }
+
+            HStack(spacing: 6) {
+                ForEach(ClockSpeed.allCases) { speed in
+                    Button {
+                        game.policy.secondsPerDay = speed.secondsPerDay
+                        game.save()
+                    } label: {
+                        Text(speed.label)
+                            .font(Theme.mono(8, weight: .bold))
+                            .foregroundStyle(isSpeed(speed) ? Theme.ink : Theme.inkSoft)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 5)
+                            .background(isSpeed(speed) ? Theme.amber : Color.clear)
+                            .overlay(RoundedRectangle(cornerRadius: 3)
+                                .stroke(isSpeed(speed) ? Theme.amber : Theme.line, lineWidth: 1))
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Button { runDay() } label: {
+                    Text("STEP")
+                        .font(Theme.mono(8, weight: .bold))
+                        .foregroundStyle(Theme.ink)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 5)
+                        .overlay(RoundedRectangle(cornerRadius: 3).stroke(Theme.ink, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(game.policy.isRunning)
+                .opacity(game.policy.isRunning ? 0.35 : 1)
+            }
         }
+    }
+
+    private func isSpeed(_ speed: ClockSpeed) -> Bool {
+        abs(game.policy.secondsPerDay - speed.secondsPerDay) < 0.01
     }
 
     // MARK: Day resolution
@@ -202,6 +278,7 @@ struct ShopFloorView: View {
     /// Advances the simulation, then narrates what it did. The sim is already
     /// final by the time the first popup shows — this is a replay, not the
     /// source of truth, which keeps the animation from ever desyncing.
+    /// One manual day, with the report at the end.
     private func runDay() {
         game.endDay()
         let events = game.lastEvents
@@ -211,29 +288,65 @@ struct ShopFloorView: View {
             return
         }
 
+        resolutionTask = Task { @MainActor in
+            await playEvents(events, showReportWhenDone: true)
+        }
+    }
+
+    /// Narrates a day's events. Shared by the manual step and the clock —
+    /// the difference is only whether the report interrupts at the end.
+    @MainActor
+    private func playEvents(_ events: [DayEvent], showReportWhenDone: Bool) async {
+        guard !events.isEmpty else { return }
+
         isResolving = true
         popups = []
 
-        // Squeeze the gap on a busy day so a big haul doesn't drag.
-        let gap = min(DayPacing.betweenEvents,
-                      DayPacing.maxDuration / Double(events.count))
+        // Squeeze the gap on a busy day so a big haul doesn't drag, and never
+        // let a day outlast the clock tick that started it.
+        var budget = DayPacing.maxDuration
+        if !showReportWhenDone {
+            budget = min(budget, game.policy.secondsPerDay * 0.8)
+        }
+        let gap = min(DayPacing.betweenEvents, budget / Double(events.count))
 
-        resolutionTask = Task { @MainActor in
-            for event in events {
-                if Task.isCancelled { break }
-                popups.append(event)
-                // Retire it once its own animation has finished.
-                Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(DayPacing.popupLifetime))
-                    popups.removeAll { $0.id == event.id }
-                }
-                try? await Task.sleep(for: .seconds(gap))
+        for event in events {
+            if Task.isCancelled { break }
+            popups.append(event)
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(DayPacing.popupLifetime))
+                popups.removeAll { $0.id == event.id }
             }
-            if !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(DayPacing.beforeReport))
-                finishResolution()
+            try? await Task.sleep(for: .seconds(gap))
+        }
+
+        guard !Task.isCancelled else { return }
+
+        if showReportWhenDone {
+            try? await Task.sleep(for: .seconds(DayPacing.beforeReport))
+            finishResolution()
+        } else {
+            isResolving = false
+        }
+    }
+
+    /// Ticks days while the shop is open. Popups still play, but the report
+    /// sheet doesn't interrupt — a running shop shouldn't demand a tap.
+    private func startClock() {
+        stopClock()
+        clockTask = Task { @MainActor in
+            while !Task.isCancelled && game.policy.isRunning {
+                try? await Task.sleep(for: .seconds(game.policy.secondsPerDay))
+                if Task.isCancelled || !game.policy.isRunning { break }
+                game.endDay()
+                await playEvents(game.lastEvents, showReportWhenDone: false)
             }
         }
+    }
+
+    private func stopClock() {
+        clockTask?.cancel()
+        clockTask = nil
     }
 
     private func skipResolution() {

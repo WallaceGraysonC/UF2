@@ -48,6 +48,13 @@ final class GameState {
     var trendingFormat: MediaFormat = .vhs
     private var trendDaysRemaining: Int = 6
 
+    /// Standing orders the shop runs itself against.
+    var policy = ShopPolicy()
+
+    /// Things that fell outside policy and want a human — grails to rule on,
+    /// an upgrade that's affordable, a write-up to read.
+    var needsAttention: [String] = []
+
     /// Paid promotion currently running. At most one at a time.
     var activeCampaign: AdCampaign?
 
@@ -94,6 +101,7 @@ final class GameState {
             dropHistory: dropHistory, discoveredCombos: discoveredCombos,
             reputation: reputation, trendingFormat: trendingFormat,
             trendDaysRemaining: trendDaysRemaining,
+            policy: policy,
             activeCampaign: activeCampaign,
             museum: museum, highestSaleValue: highestSaleValue,
             lifetimeRevenue: lifetimeRevenue, staffTrainedCount: staffTrainedCount,
@@ -119,6 +127,7 @@ final class GameState {
         reputation = snapshot.reputation
         trendingFormat = snapshot.trendingFormat
         trendDaysRemaining = snapshot.trendDaysRemaining
+        policy = snapshot.policy
         activeCampaign = snapshot.activeCampaign
         museum = snapshot.museum
         highestSaleValue = snapshot.highestSaleValue
@@ -213,6 +222,8 @@ final class GameState {
     /// Runs one business day: sales roll against reputation, techs advance
     /// bench work, wages come out, fatigue moves, trends age.
     func endDay() {
+        applyPolicies()
+
         var revenue = 0
         var itemsSold = 0
         var soldIDs: [UUID] = []
@@ -495,6 +506,111 @@ final class GameState {
     /// Dump it — some of what comes back in a storage unit is genuinely junk.
     func discard(_ item: InventoryItem) {
         pendingHaul.removeAll { $0.id == item.id }
+    }
+
+    /// Runs the days that passed while the app was closed, so coming back
+    /// feels like the shop kept trading. Capped so a long absence can't
+    /// fast-forward the whole game or take an age to compute.
+    @discardableResult
+    func catchUp(since lastSeen: Date, now: Date = Date()) -> Int {
+        guard policy.isRunning, policy.secondsPerDay > 0 else { return 0 }
+        let elapsed = now.timeIntervalSince(lastSeen)
+        guard elapsed > 0 else { return 0 }
+
+        let earned = Int(elapsed / policy.secondsPerDay)
+        let days = min(earned, Self.maxOfflineDays)
+        guard days > 0 else { return 0 }
+
+        for _ in 0..<days { endDay() }
+        return days
+    }
+
+    /// A day is a couple of seconds, so this is a generous but bounded cap.
+    static let maxOfflineDays = 120
+
+    // MARK: Standing orders
+
+    /// Executes the policy: staffs the bench, keeps a run going, processes
+    /// the haul, keeps a Drop in prep. Anything the policy can't decide is
+    /// pushed onto `needsAttention` instead of being guessed at.
+    func applyPolicies() {
+        if policy.autoStaffBench { autoStaffBench() }
+        autoGradeHaul()
+        if policy.autoSource { autoStartRun() }
+        if policy.autoDrops { autoStartDrop() }
+        refreshAttention()
+    }
+
+    private func autoStaffBench() {
+        var freeTechs = techs.filter { tech in
+            !benchJobs.contains { $0.assignedTechID == tech.id }
+        }
+        for index in benchJobs.indices where benchJobs[index].assignedTechID == nil {
+            guard !freeTechs.isEmpty else { break }
+            // Give each job the tech who specialises in its format if there
+            // is one, since that's a 1.35x on their output.
+            let pick = freeTechs.firstIndex { $0.specialization == benchJobs[index].format }
+                ?? 0
+            benchJobs[index].assignedTechID = freeTechs[pick].id
+            freeTechs.remove(at: pick)
+        }
+    }
+
+    /// Rules the haul according to policy, holding back anything it shouldn't
+    /// decide on its own.
+    private func autoGradeHaul() {
+        for item in pendingHaul {
+            if item.isRare && policy.alwaysAskOnGrails { continue }
+
+            let price = item.askingPrice(trendModifier: trendModifier(for: item.format))
+            if price < policy.binUnderValue {
+                discard(item)
+            } else if item.grade.rank >= policy.shelveAtOrAbove.rank {
+                shelve(item)
+            } else if policy.benchBelowThreshold && benchHasRoom {
+                sendToBench(item)
+            } else {
+                shelve(item)
+            }
+        }
+    }
+
+    private func autoStartRun() {
+        guard activeRun == nil else { return }
+        let location = policy.sourceLocation
+        guard cash - location.cost >= policy.cashFloor else { return }
+        let crew = buyers.map(\.id)
+        guard !crew.isEmpty else { return }
+        startRun(location: location, buyerIDs: crew)
+    }
+
+    private func autoStartDrop() {
+        guard activeDrop == nil, isUnlocked(policy.dropTheme) else { return }
+        guard cash - policy.dropTheme.cost >= policy.cashFloor else { return }
+        let crew = curators.map(\.id)
+        guard !crew.isEmpty else { return }
+        startDrop(name: policy.dropTheme.rawValue, theme: policy.dropTheme,
+                  angle: policy.dropAngle, curatorIDs: crew)
+    }
+
+    /// What the shop wants a decision on.
+    private func refreshAttention() {
+        var items: [String] = []
+        let heldGrails = pendingHaul.filter { $0.isRare || !policy.alwaysAskOnGrails }.count
+        if !pendingHaul.isEmpty {
+            items.append("\(pendingHaul.count) item\(pendingHaul.count == 1 ? "" : "s") to rule on"
+                         + (heldGrails > 0 ? " — grail found" : ""))
+        }
+        if let next = nextUpgrade, canUpgrade(to: next) {
+            items.append("\(next.title) is affordable")
+        }
+        if cash < 0 {
+            items.append("The till is in the red")
+        }
+        if staff.contains(where: { $0.fatigue >= 80 }) {
+            items.append("Someone is running on empty")
+        }
+        needsAttention = items
     }
 
     // MARK: Advertising

@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var savedGame: SaveGame? = SaveStore.load()
     @State private var legacy: LegacyProfile = LegacyStore.load()
     @State private var showingLegacy = false
+    /// Days traded while the app was closed, shown once on return.
+    @State private var offlineDays = 0
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -30,6 +32,10 @@ struct ContentView: View {
         .environment(game)
         .sheet(isPresented: $showingLegacy) {
             LegacyView(profile: $legacy)
+        }
+        .sheet(isPresented: Binding(get: { offlineDays > 0 },
+                                    set: { if !$0 { offlineDays = 0 } })) {
+            WhileYouWereOutSheet(days: offlineDays, cash: game.cash)
         }
         .onChange(of: scenePhase) { _, phase in
             // Backgrounding is the other moment a run can end abruptly.
@@ -77,6 +83,10 @@ struct ContentView: View {
     private func continueSavedGame() {
         guard let savedGame else { return }
         game = GameState(snapshot: savedGame)
+        // Trade the days that passed while the app was shut, if the shop was
+        // left open. Nothing happens if it was paused.
+        offlineDays = game.catchUp(since: savedGame.savedAt)
+        if offlineDays > 0 { game.save() }
         path.append(Route.shopFloor)
     }
 

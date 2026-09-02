@@ -19,6 +19,19 @@ enum ConditionGrade: String, CaseIterable, Codable {
         }
     }
 
+    /// Position on the scale, so grades can be compared against a policy
+    /// threshold. Raw values are names, not ordered, so this is explicit.
+    var rank: Int {
+        switch self {
+        case .poor: return 0
+        case .fair: return 1
+        case .good: return 2
+        case .veryGood: return 3
+        case .nearMint: return 4
+        case .mint: return 5
+        }
+    }
+
     var label: String {
         switch self {
         case .poor: return "POOR"
