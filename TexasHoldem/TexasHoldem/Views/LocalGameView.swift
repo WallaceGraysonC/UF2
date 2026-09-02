@@ -11,6 +11,11 @@ struct LocalGameView: View {
     private let resumedFromSave: Bool
     private let enableResume: Bool
     private let tableTitle: String
+    /// When false this is a free sandbox table: no buy-in is taken from the
+    /// bankroll to sit down, rebuys are free, and chips won here stay at the
+    /// table rather than banking out (otherwise a free table would be an
+    /// unlimited source of chips).
+    private let usesBankroll: Bool
     /// When set, this is a Sit & Go: no rebuys, blinds escalate over time,
     /// and busting/winning ends the session with a placement screen instead
     /// of returning to the felt.
@@ -25,9 +30,10 @@ struct LocalGameView: View {
 
     init(botCount: Int = 4, buyIn: Int = 500, smallBlind: Int = 10, bigBlind: Int = 20,
          enableResume: Bool = true, tableTitle: String = "Practice Table",
-         tournament: TournamentConfig? = nil) {
+         usesBankroll: Bool = true, tournament: TournamentConfig? = nil) {
         self.enableResume = enableResume
         self.tableTitle = tableTitle
+        self.usesBankroll = usesBankroll
         self.tournament = tournament
         if enableResume, let saved = GamePersistence.loadLocalGame() {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
@@ -137,7 +143,7 @@ struct LocalGameView: View {
         .navigationBarHidden(true)
         .onAppear {
             if !resumedFromSave {
-                bankroll.applyDelta(-buyIn)
+                if usesBankroll { bankroll.applyDelta(-buyIn) }
                 engine.startNextHand()
             } else {
                 runBotTurnIfNeeded()
@@ -206,7 +212,7 @@ struct LocalGameView: View {
                         Button {
                             cashOutAndLeave()
                         } label: {
-                            Text("Cash Out").frame(maxWidth: .infinity)
+                            Text(usesBankroll ? "Cash Out" : "Leave Table").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
                         .tint(.white)
@@ -216,12 +222,12 @@ struct LocalGameView: View {
                     Button {
                         rebuy()
                     } label: {
-                        Text("Rebuy for $\(buyIn)").frame(maxWidth: .infinity)
+                        Text(usesBankroll ? "Rebuy for $\(buyIn)" : "Rebuy").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(bankroll.chips < buyIn)
+                    .disabled(usesBankroll && bankroll.chips < buyIn)
                     .padding(.horizontal, 40)
-                    if bankroll.chips < buyIn {
+                    if usesBankroll, bankroll.chips < buyIn {
                         Text("Not enough chips — reset your bankroll in Settings.")
                             .font(.caption2)
                             .foregroundColor(.white.opacity(0.7))
@@ -326,8 +332,10 @@ struct LocalGameView: View {
     }
 
     private func rebuy() {
-        guard bankroll.chips >= buyIn else { return }
-        bankroll.applyDelta(-buyIn)
+        if usesBankroll {
+            guard bankroll.chips >= buyIn else { return }
+            bankroll.applyDelta(-buyIn)
+        }
         engine.addChips(buyIn, to: humanID)
         engine.startNextHand()
     }
@@ -338,7 +346,7 @@ struct LocalGameView: View {
     private func cashOutAndLeave() {
         guard !hasSettled else { dismiss(); return }
         hasSettled = true
-        if let human = engine.players.first(where: { $0.id == humanID }) {
+        if usesBankroll, let human = engine.players.first(where: { $0.id == humanID }) {
             bankroll.applyDelta(human.chips)
         }
         if enableResume { GamePersistence.clearLocalGame() }

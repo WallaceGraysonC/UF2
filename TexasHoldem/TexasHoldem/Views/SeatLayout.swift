@@ -10,11 +10,18 @@ enum SeatLayout {
         for i in 0..<count {
             let angle = (Double(i) / Double(count)) * 2 * .pi + .pi / 2
             let x = cos(angle)
+            let rawY = sin(angle)
             // Less vertical squash than a true ellipse-from-circle would give,
             // so top/bottom seats sit near the rail instead of crowding the
             // community cards in the middle.
-            let y = sin(angle) * 0.90
-            points.append(CGPoint(x: x, y: y))
+            //
+            // Seats out at the left and right ends of the oval land at the
+            // table's vertical midline, which is exactly where the community
+            // cards are -- their hole cards end up overlapping the board. So
+            // bias those downward, strongest at the midline and tapering to
+            // nothing for the seats already at the top and bottom.
+            let midlineBias = (1 - abs(rawY)) * 0.20
+            points.append(CGPoint(x: x, y: rawY * 0.90 + midlineBias))
         }
         return points
     }

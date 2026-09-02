@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Lets the player configure their own practice table -- bot count, buy-in,
-/// and blinds -- before sitting down. Purely a local/offline table, same as
-/// "Play vs Bots" but with player-chosen stakes instead of the fixed default.
+/// Lets the player configure their own practice table -- bot count, starting
+/// stack, and blinds -- before sitting down. A free sandbox: it costs nothing
+/// from the bankroll to sit down, and chips won here stay at the table, so
+/// the stakes can be set to anything without touching the real economy.
 struct CustomTableSetupView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +21,7 @@ struct CustomTableSetupView: View {
                 Section("Opponents") {
                     Stepper("\(Int(botCount)) Bots", value: $botCount, in: 1...7)
                 }
-                Section("Buy-In") {
+                Section("Starting Stack") {
                     Slider(value: $buyIn, in: 100...2000, step: 50)
                     Text("$\(Int(buyIn)) per player")
                         .foregroundColor(.secondary)
@@ -31,7 +32,8 @@ struct CustomTableSetupView: View {
                         .foregroundColor(.secondary)
                 }
                 Section {
-                    Text("You have $\(bankroll.chips) available.")
+                    Label("Free to play — this table doesn't touch your bankroll, and chips won here stay at the table.",
+                          systemImage: "infinity")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
@@ -51,14 +53,13 @@ struct CustomTableSetupView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(PATheme.gold)
                 .foregroundStyle(PATheme.ink)
-                .disabled(bankroll.chips < Int(buyIn))
                 .padding()
             }
         }
         .tint(PATheme.gold)
         .fullScreenCover(isPresented: $startGame) {
             LocalGameView(botCount: Int(botCount), buyIn: Int(buyIn), smallBlind: smallBlind, bigBlind: Int(bigBlind),
-                          enableResume: false, tableTitle: "Custom Table")
+                          enableResume: false, tableTitle: "Custom Table", usesBankroll: false)
                 .environmentObject(bankroll)
         }
     }
