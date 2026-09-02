@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// Shows today's three challenges and lets the player claim rewards for
-/// completed ones. Challenges reset at midnight local time.
+/// Today's challenges, split into two tracks: Daily goals for the cash
+/// table, and tournament goals for Sit & Go. Both reset at midnight.
 struct DailyChallengeView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @ObservedObject private var challengeManager = DailyChallengeManager.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var track: ChallengeTrack = .daily
 
     var body: some View {
         NavigationView {
@@ -21,20 +22,36 @@ struct DailyChallengeView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                Section("Today's Challenges") {
-                    ForEach(challengeManager.challenges) { challenge in
+
+                Section {
+                    ForEach(challengeManager.challenges(in: track)) { challenge in
                         ChallengeRow(challenge: challenge)
                     }
+                } footer: {
+                    Text(track.scopeNote)
                 }
             }
-            .navigationTitle("Daily Challenges")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") { dismiss() }
                 }
+                ToolbarItem(placement: .principal) {
+                    Picker("Track", selection: $track) {
+                        ForEach(ChallengeTrack.allCases, id: \.self) { option in
+                            Text(label(for: option)).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
         }
         .tint(PATheme.gold)
+    }
+
+    /// Marks a track whose rewards are sitting there waiting to be collected.
+    private func label(for track: ChallengeTrack) -> String {
+        let ready = challengeManager.unclaimedCount(in: track)
+        return ready > 0 ? "\(track.displayName) (\(ready))" : track.displayName
     }
 }
 

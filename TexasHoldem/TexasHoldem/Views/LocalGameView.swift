@@ -7,7 +7,11 @@ struct LocalGameView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var engine: PokerEngine
     private let humanID: String
+    /// The table's nominal stake -- what a full buy-in or rebuy costs.
     private let buyIn: Int
+    /// What was actually taken from the bankroll to sit down, which is less
+    /// than `buyIn` when the player couldn't cover a full stack.
+    private let seatedBuyIn: Int
     private let resumedFromSave: Bool
     private let enableResume: Bool
     private let tableTitle: String
@@ -39,9 +43,15 @@ struct LocalGameView: View {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
             self.humanID = saved.humanID
             self.buyIn = saved.buyIn
+            self.seatedBuyIn = 0 // already paid for when the table was first joined
             self.resumedFromSave = true
         } else {
-            var human = Player(id: "local-human", name: "You", chips: buyIn, isBot: false,
+            // Sit down for what's actually in the bankroll, not the nominal
+            // buy-in. Deducting a full buy-in you can't cover used to clamp
+            // the balance at zero while still seating a full stack, which
+            // conjured chips out of nothing.
+            let seated = usesBankroll ? min(buyIn, BankrollManager.shared.chips) : buyIn
+            var human = Player(id: "local-human", name: "You", chips: seated, isBot: false,
                                 cardBackID: BankrollManager.shared.equippedCardBack,
                                 cardFaceID: BankrollManager.shared.equippedCardFace,
                                 avatarID: BankrollManager.shared.equippedAvatar,
@@ -58,6 +68,7 @@ struct LocalGameView: View {
             _engine = StateObject(wrappedValue: PokerEngine(players: [human] + bots, smallBlind: smallBlind, bigBlind: bigBlind))
             self.humanID = human.id
             self.buyIn = buyIn
+            self.seatedBuyIn = seated
             self.resumedFromSave = false
         }
     }
@@ -144,7 +155,7 @@ struct LocalGameView: View {
         .navigationBarHidden(true)
         .onAppear {
             if !resumedFromSave {
-                if usesBankroll { bankroll.applyDelta(-buyIn) }
+                if usesBankroll { bankroll.applyDelta(-seatedBuyIn) }
                 engine.startNextHand()
             } else {
                 runBotTurnIfNeeded()
@@ -228,15 +239,17 @@ struct LocalGameView: View {
                     Button {
                         rebuy()
                     } label: {
-                        Text(usesBankroll ? "Rebuy for $\(buyIn)" : "Rebuy").frame(maxWidth: .infinity)
+                        Text(rebuyLabel).frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(usesBankroll && bankroll.chips < buyIn)
+                    .disabled(usesBankroll && bankroll.chips == 0)
                     .padding(.horizontal, 40)
-                    if usesBankroll, bankroll.chips < buyIn {
-                        Text("Not enough chips — reset your bankroll in Settings.")
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.7))
+                    if usesBankroll, bankroll.chips == 0 {
+                        Button("Top up to $\(BankrollManager.bankrollTopUpFloor)") {
+                            bankroll.topUpBankroll()
+                        }
+                        .font(.footnote.bold())
+                        .foregroundColor(PATheme.goldBright)
                     }
                 }
             }
@@ -308,6 +321,10 @@ struct LocalGameView: View {
                 bankroll.addXP(max(50, 300 / placement))
             }
         }
+        if challengeTrack == .sitAndGo {
+            DailyChallengeManager.shared.recordTournamentFinish(placement: placement,
+                                                                bigBlindReached: engine.bigBlind)
+        }
         GamePersistence.clearLocalGame()
     }
 
@@ -330,19 +347,33 @@ struct LocalGameView: View {
     /// without ever putting a chip at risk.
     private var countsTowardProgress: Bool { usesBankroll }
 
+    private var rebuyLabel: String {
+        guard usesBankroll else { return "Rebuy" }
+        let amount = min(buyIn, bankroll.chips)
+        return amount > 0 ? "Rebuy for $\(amount)" : "Out of chips"
+    }
+
+    /// Which challenge track this table feeds. The cash table advances the
+    /// Daily challenges; the tournaments advance the Sit & Go ones.
+    private var challengeTrack: ChallengeTrack? {
+        guard countsTowardProgress else { return nil }
+        return tournament == nil ? .daily : .sitAndGo
+    }
+
     /// Fires once per completed hand: feeds the XP and Daily Challenge
     /// systems, and escalates tournament blinds if applicable.
     private func handleHandEnd() {
         guard engine.handNumber > 0 else { return }
-        if countsTowardProgress {
-            DailyChallengeManager.shared.recordHandPlayed()
-            bankroll.addXP(10)
-        }
-        if countsTowardProgress, let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
-            DailyChallengeManager.shared.recordHandWon()
-            DailyChallengeManager.shared.recordPotWon(amount: result.amountWon)
-            DailyChallengeManager.shared.recordShowdownWin(category: result.hand.category)
-            bankroll.addXP(20)
+        if countsTowardProgress { bankroll.addXP(10) }
+        if challengeTrack == .daily { DailyChallengeManager.shared.recordHandPlayed() }
+
+        if let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
+            if countsTowardProgress { bankroll.addXP(20) }
+            if challengeTrack == .daily {
+                DailyChallengeManager.shared.recordHandWon()
+                DailyChallengeManager.shared.recordPotWon(amount: result.amountWon)
+                DailyChallengeManager.shared.recordShowdownWin(category: result.hand.category)
+            }
         }
         if let tournament {
             applyBlindEscalation(tournament)
@@ -350,11 +381,15 @@ struct LocalGameView: View {
     }
 
     private func rebuy() {
+        var amount = buyIn
         if usesBankroll {
-            guard bankroll.chips >= buyIn else { return }
-            bankroll.applyDelta(-buyIn)
+            // Short rebuy rather than nothing, so a thin bankroll still gets
+            // you back in the hand -- but never more than you actually hold.
+            amount = min(buyIn, bankroll.chips)
+            guard amount > 0 else { return }
+            bankroll.applyDelta(-amount)
         }
-        engine.addChips(buyIn, to: humanID)
+        engine.addChips(amount, to: humanID)
         engine.startNextHand()
     }
 

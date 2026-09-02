@@ -14,13 +14,13 @@ final class BankrollManager: ObservableObject {
     static let shared = BankrollManager()
 
     static let startingChips = 1000
-    /// A "top-up" (not a full reset) available only when the player is
-    /// nearly broke, with a cooldown -- deliberately smaller and slower
-    /// than actually winning chips at the table, so it's a safety net
-    /// against busting out rather than a free way to buy every cosmetic.
-    static let bankrollTopUpAmount = 500
-    static let bankrollTopUpThreshold = 200
-    static let bankrollTopUpCooldown: TimeInterval = 60 * 60 * 8 // 8 hours
+    /// The top-up floor: any time the balance is under this, one tap brings
+    /// it back up *to* this -- never any higher. So a player is never stuck
+    /// waiting to play (this is exactly one buy-in at the main table), but
+    /// tapping it repeatedly can't build a balance either, because it tops
+    /// up to a fixed ceiling rather than adding a fixed amount. Anything
+    /// pricier than this has to be won at the table.
+    static let bankrollTopUpFloor = 500
 
     @Published private(set) var chips: Int {
         didSet { write(chips, forKey: Keys.chips) }
@@ -228,26 +228,23 @@ final class BankrollManager: ObservableObject {
         if chips > highestChips { highestChips = chips }
     }
 
-    /// Whether a bankroll top-up can be used right now: the player has to
-    /// actually be low on chips, and enough time has to have passed since
-    /// the last one.
-    var canTopUpBankroll: Bool {
-        chips < Self.bankrollTopUpThreshold && topUpCooldownRemaining <= 0
-    }
+    /// Whether a top-up is available -- true whenever the balance is short of
+    /// one buy-in. There's no cooldown: being unable to play and having to
+    /// wait it out is worse than the small amount of grinding this allows,
+    /// and topping up to a fixed ceiling means the grinding gets you nowhere
+    /// anyway.
+    var canTopUpBankroll: Bool { chips < Self.bankrollTopUpFloor }
 
-    /// Seconds remaining before another top-up is allowed, 0 if available now.
-    var topUpCooldownRemaining: TimeInterval {
-        guard let lastTopUpAt else { return 0 }
-        return max(0, Self.bankrollTopUpCooldown - Date().timeIntervalSince(lastTopUpAt))
-    }
+    /// Chips the next top-up would hand over, for display.
+    var topUpAmount: Int { max(0, Self.bankrollTopUpFloor - chips) }
 
-    /// Adds a small emergency top-up when the player is nearly broke, with
-    /// a cooldown -- deliberately not a full reset, so it can't be spammed
-    /// to fund every cosmetic in the store. Returns whether it was applied.
+    /// Brings a short balance back up to one buy-in so the player can sit
+    /// down again. Tops up *to* the floor rather than adding a flat amount,
+    /// so it can never be tapped repeatedly to fund the store.
     @discardableResult
     func topUpBankroll() -> Bool {
         guard canTopUpBankroll else { return false }
-        chips += Self.bankrollTopUpAmount
+        chips = Self.bankrollTopUpFloor
         trackPeak()
         lastTopUpAt = Date()
         return true

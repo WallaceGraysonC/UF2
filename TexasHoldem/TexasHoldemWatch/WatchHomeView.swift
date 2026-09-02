@@ -36,7 +36,7 @@ struct WatchHomeView: View {
                     .buttonStyle(.borderedProminent)
 
                     if bankroll.canTopUpBankroll {
-                        Button("Get $\(BankrollManager.bankrollTopUpAmount)") { bankroll.topUpBankroll() }
+                        Button("Top up to $\(BankrollManager.bankrollTopUpFloor)") { bankroll.topUpBankroll() }
                             .font(.caption2)
                     }
 

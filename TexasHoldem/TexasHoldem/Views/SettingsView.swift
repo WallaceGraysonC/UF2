@@ -20,7 +20,7 @@ struct SettingsView: View {
                         Spacer()
                         Text("$\(bankroll.highestChips)").foregroundColor(.secondary)
                     }
-                    Button("Get $\(BankrollManager.bankrollTopUpAmount) Top-Up") {
+                    Button("Top Up to $\(BankrollManager.bankrollTopUpFloor)") {
                         showResetConfirm = true
                     }
                     .disabled(!bankroll.canTopUpBankroll)
@@ -67,23 +67,19 @@ struct SettingsView: View {
                     Button("Close") { dismiss() }
                 }
             }
-            .alert("Get a Bankroll Top-Up?", isPresented: $showResetConfirm) {
+            .alert("Top Up Your Bankroll?", isPresented: $showResetConfirm) {
                 Button("Cancel", role: .cancel) {}
-                Button("Top Up", role: .destructive) { bankroll.topUpBankroll() }
+                Button("Top Up") { bankroll.topUpBankroll() }
             } message: {
-                Text("Adds $\(BankrollManager.bankrollTopUpAmount) to your chip balance. Your owned cosmetics are kept.")
+                Text("Brings your balance up to $\(BankrollManager.bankrollTopUpFloor) — one buy-in at the main table. Your owned cosmetics are kept.")
             }
         }
     }
 
     private var topUpHint: String {
         if bankroll.canTopUpBankroll {
-            return "Available now, since you're under $\(BankrollManager.bankrollTopUpThreshold). This is a small emergency top-up, not a full reset -- win chips at the table to afford the pricier cosmetics."
+            return "Available now — this adds $\(bankroll.topUpAmount), bringing you to $\(BankrollManager.bankrollTopUpFloor) so you can always sit down. It tops up to that figure rather than adding to it, so anything pricier has to be won at the table."
         }
-        if bankroll.topUpCooldownRemaining > 0 {
-            let hours = Int(bankroll.topUpCooldownRemaining / 3600) + 1
-            return "Only available when you're under $\(BankrollManager.bankrollTopUpThreshold), and again in about \(hours)h."
-        }
-        return "Only available when you're under $\(BankrollManager.bankrollTopUpThreshold) -- you're not stuck yet."
+        return "Available whenever you drop under $\(BankrollManager.bankrollTopUpFloor) — you're not short yet."
     }
 }

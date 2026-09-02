@@ -113,7 +113,7 @@ struct HomeView: View {
                     Spacer(minLength: 24)
 
                     if bankroll.canTopUpBankroll {
-                        Button("Low on chips? Get $\(BankrollManager.bankrollTopUpAmount)") {
+                        Button("Low on chips? Top up to $\(BankrollManager.bankrollTopUpFloor)") {
                             bankroll.topUpBankroll()
                         }
                         .font(.footnote)

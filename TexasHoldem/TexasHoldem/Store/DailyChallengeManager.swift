@@ -1,10 +1,56 @@
 import Foundation
 
+/// Challenges are split into two tracks, each only advancing at the tables
+/// it belongs to, so a tournament goal can't be knocked out at the cash
+/// table and vice versa.
+enum ChallengeTrack: String, Codable, CaseIterable, Hashable {
+    case daily
+    case sitAndGo
+
+    var displayName: String {
+        switch self {
+        case .daily: return "Daily"
+        case .sitAndGo: return "Sit & Go"
+        }
+    }
+
+    /// Where this track's challenges actually make progress -- shown on the
+    /// screen so it's never a guess.
+    var scopeNote: String {
+        switch self {
+        case .daily: return "Progress counts at the Play vs Bots table."
+        case .sitAndGo: return "Progress counts in Sit & Go and VIP High Stakes."
+        }
+    }
+}
+
 enum ChallengeKind: String, Codable {
+    // Daily track -- the cash table
     case playHands
     case winHands
     case winPot
     case winWithCategory
+    // Sit & Go track -- tournaments
+    case tournamentsPlayed
+    case topThreeFinish
+    case tournamentWin
+    case deepRun
+
+    var track: ChallengeTrack {
+        switch self {
+        case .playHands, .winHands, .winPot, .winWithCategory: return .daily
+        case .tournamentsPlayed, .topThreeFinish, .tournamentWin, .deepRun: return .sitAndGo
+        }
+    }
+
+    /// Threshold challenges are satisfied outright by one qualifying event
+    /// ("win a $500 pot"), rather than counting up to a target.
+    var isThreshold: Bool {
+        switch self {
+        case .winPot, .winWithCategory, .deepRun: return true
+        default: return false
+        }
+    }
 }
 
 struct DailyChallenge: Identifiable, Codable, Hashable {
@@ -15,6 +61,8 @@ struct DailyChallenge: Identifiable, Codable, Hashable {
     let target: Int
     let xpReward: Int
     let chipReward: Int
+
+    var track: ChallengeTrack { kind.track }
 }
 
 /// Deterministic, date-seeded pool: every player sees the same three
@@ -32,12 +80,16 @@ private enum ChallengePool {
         ]
         let category = categoryOptions.randomElement(using: &rng) ?? (.threeOfAKind, "Three of a Kind")
 
+        let tourneyTarget = Int.random(in: 2...3, using: &rng)
+        let blindTarget = [50, 75, 100].randomElement(using: &rng) ?? 75
+
         return [
+            // MARK: Daily track -- the Play vs Bots table
             DailyChallenge(id: "\(dateKey).playHands", title: "Play \(handsTarget) Hands",
-                            detail: "Play \(handsTarget) hands at any table.",
+                            detail: "Play \(handsTarget) hands at the cash table.",
                             kind: .playHands, target: handsTarget, xpReward: 80, chipReward: 100),
             DailyChallenge(id: "\(dateKey).winHands", title: "Win \(winsTarget) Hands",
-                            detail: "Win \(winsTarget) hands at any table.",
+                            detail: "Win \(winsTarget) hands at the cash table.",
                             kind: .winHands, target: winsTarget, xpReward: 120, chipReward: 150),
             DailyChallenge(id: "\(dateKey).winPot", title: "Win a \(potTarget)+ Pot",
                             detail: "Win a single pot worth at least $\(potTarget).",
@@ -45,6 +97,20 @@ private enum ChallengePool {
             DailyChallenge(id: "\(dateKey).category", title: "Win with \(category.1)",
                             detail: "Win a showdown holding \(category.1) or better.",
                             kind: .winWithCategory, target: category.0.rawValue, xpReward: 140, chipReward: 200),
+
+            // MARK: Sit & Go track -- tournaments
+            DailyChallenge(id: "\(dateKey).sng.played", title: "Play \(tourneyTarget) Tournaments",
+                            detail: "Sit down for \(tourneyTarget) Sit & Gos and play them to the end.",
+                            kind: .tournamentsPlayed, target: tourneyTarget, xpReward: 120, chipReward: 200),
+            DailyChallenge(id: "\(dateKey).sng.topThree", title: "Finish in the Money",
+                            detail: "Place in the top 3 of a tournament.",
+                            kind: .topThreeFinish, target: 1, xpReward: 160, chipReward: 250),
+            DailyChallenge(id: "\(dateKey).sng.deepRun", title: "Reach the $\(blindTarget) Blinds",
+                            detail: "Still be at the table when the big blind hits $\(blindTarget).",
+                            kind: .deepRun, target: blindTarget, xpReward: 140, chipReward: 200),
+            DailyChallenge(id: "\(dateKey).sng.win", title: "Take It Down",
+                            detail: "Win a tournament outright.",
+                            kind: .tournamentWin, target: 1, xpReward: 250, chipReward: 400),
         ]
     }
 }
@@ -62,7 +128,7 @@ private struct SeededGenerator: RandomNumberGenerator {
     }
 }
 
-/// Tracks today's three challenges and the player's progress toward each,
+/// Tracks today's challenges and the player's progress toward each,
 /// persisted locally so progress survives app restarts within the same day.
 final class DailyChallengeManager: ObservableObject {
     static let shared = DailyChallengeManager()
@@ -70,6 +136,16 @@ final class DailyChallengeManager: ObservableObject {
     @Published private(set) var challenges: [DailyChallenge] = []
     @Published private(set) var progress: [String: Int] = [:]
     @Published private(set) var claimedIDs: Set<String> = []
+
+    func challenges(in track: ChallengeTrack) -> [DailyChallenge] {
+        challenges.filter { $0.track == track }
+    }
+
+    /// How many of a track's challenges are finished but not yet claimed --
+    /// drives the "ready to collect" badge.
+    func unclaimedCount(in track: ChallengeTrack) -> Int {
+        challenges(in: track).filter { isComplete($0) && !isClaimed($0) }.count
+    }
 
     private let defaults = UserDefaults.standard
     private enum Keys {
@@ -123,27 +199,40 @@ final class DailyChallengeManager: ObservableObject {
         claimedIDs.contains(challenge.id)
     }
 
-    private func increment(_ kind: ChallengeKind, by amount: Int = 1, minimumTarget: Int = 0) {
+    private func increment(_ kind: ChallengeKind, by amount: Int = 1, reached: Int = 0) {
         rolloverIfNeeded()
         for challenge in challenges where challenge.kind == kind {
-            switch kind {
-            case .winPot, .winWithCategory:
-                // "At least" style challenges: only count if this single
-                // event already clears the bar, tracked as a 0/1 flag.
-                if minimumTarget >= challenge.target {
+            if kind.isThreshold {
+                // "At least" style: one event that clears the bar finishes it
+                // outright, so it's tracked as a 0/1 flag rather than a count.
+                if reached >= challenge.target {
                     progress[challenge.id] = challenge.target
                 }
-            default:
+            } else {
                 progress[challenge.id, default: 0] += amount
             }
         }
         persist()
     }
 
+    // MARK: Daily track -- called from the Play vs Bots table only
+
     func recordHandPlayed() { increment(.playHands) }
     func recordHandWon() { increment(.winHands) }
-    func recordPotWon(amount: Int) { increment(.winPot, minimumTarget: amount) }
-    func recordShowdownWin(category: HandCategory) { increment(.winWithCategory, minimumTarget: category.rawValue) }
+    func recordPotWon(amount: Int) { increment(.winPot, reached: amount) }
+    func recordShowdownWin(category: HandCategory) { increment(.winWithCategory, reached: category.rawValue) }
+
+    // MARK: Sit & Go track -- called when a tournament is settled
+
+    /// Records one finished tournament. `placement` is 1 for an outright
+    /// win, and `bigBlindReached` is the blind level the player was still
+    /// alive at, which is what the deep-run challenge measures.
+    func recordTournamentFinish(placement: Int, bigBlindReached: Int) {
+        increment(.tournamentsPlayed)
+        increment(.deepRun, reached: bigBlindReached)
+        if placement <= 3 { increment(.topThreeFinish) }
+        if placement == 1 { increment(.tournamentWin) }
+    }
 
     /// Grants the challenge's reward once, then marks it claimed. Returns
     /// the (xp, chips) awarded, or nil if it wasn't ready to claim.
