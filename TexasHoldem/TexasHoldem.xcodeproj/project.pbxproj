@@ -17,6 +17,8 @@
 		A69E44FF4B374A459611AC3C /* BotAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5C25E286354587A79B935D /* BotAI.swift */; };
 		57F55B9D9FA94AB0B8E1D4E4 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */; };
 		BDF890D5EADB448EA46B9C07 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */; };
+		30B9451D4B6A42D9B7D3FEC8 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */; };
+		CF7DA99E6A8D441987CFA79B /* PocketAcesTheme.wav in Resources */ = {isa = PBXBuildFile; fileRef = 199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */; };
 		F54BB3364F7342FA8128DEBC /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
 		29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */; };
 		54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */; };
@@ -55,6 +57,8 @@
 		9A5C25E286354587A79B935D /* BotAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotAI.swift; sourceTree = "<group>"; };
 		AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMatch.swift; sourceTree = "<group>"; };
+		8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
+		199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = PocketAcesTheme.wav; sourceTree = "<group>"; };
 		CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
 		BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCosmeticStore.swift; sourceTree = "<group>"; };
 		53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
@@ -160,6 +164,7 @@
 				B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */,
 				53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */,
 				BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */,
+				8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -192,6 +197,7 @@
 			children = (
 				A49A1F06E70840ED845BF638 /* Assets.xcassets */,
 				7BB337FDC08C42B3A03B1963 /* Info.plist */,
+				199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -255,6 +261,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				78BB248507E24894BD28E60E /* Assets.xcassets in Resources */,
+				CF7DA99E6A8D441987CFA79B /* PocketAcesTheme.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +305,7 @@
 				6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */,
 				DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */,
 				29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */,
+				30B9451D4B6A42D9B7D3FEC8 /* AudioManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

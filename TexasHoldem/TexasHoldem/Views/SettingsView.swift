@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @EnvironmentObject var gameCenter: GameCenterManager
+    @ObservedObject private var audio = AudioManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showResetConfirm = false
 
@@ -26,6 +27,22 @@ struct SettingsView: View {
                     .disabled(!bankroll.canTopUpBankroll)
                     .foregroundColor(bankroll.canTopUpBankroll ? .red : .secondary)
                     Text(topUpHint)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+
+                Section("Music") {
+                    HStack(spacing: 12) {
+                        Image(systemName: audio.musicVolume == 0 ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                            .foregroundColor(audio.musicVolume == 0 ? .secondary : PATheme.goldBright)
+                            .frame(width: 22)
+                        Slider(value: $audio.musicVolume, in: 0...1)
+                        Text(audio.musicVolume == 0 ? "Off" : "\(Int(audio.musicVolume * 100))%")
+                            .font(.caption.monospacedDigit())
+                            .foregroundColor(.secondary)
+                            .frame(width: 38, alignment: .trailing)
+                    }
+                    Text("Off until you turn it up. Mixes with whatever you're already playing, and stays quiet when your ringer is on silent.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
