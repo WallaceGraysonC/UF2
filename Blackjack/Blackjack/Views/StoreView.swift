@@ -1,0 +1,271 @@
+import SwiftUI
+import PhotosUI
+import UIKit
+
+/// Cosmetics shop. Every item is purchased with the free virtual chip
+/// currency earned at the table -- there is no real-money purchase path
+/// anywhere in this screen. Pricier items also require having reached a
+/// certain lifetime chip peak (won at the table, not just topped up) --
+/// see `BankrollManager.isUnlocked(_:)`. Each category also has a free
+/// "Custom Photo" slot, unlocked the same way at a high lifetime peak, that
+/// lets the player upload their own image instead of a built-in style.
+struct StoreView: View {
+    @EnvironmentObject var bankroll: BankrollManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedKind: CosmeticKind = .cardBack
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(CosmeticKind.allCases, id: \.self) { kind in
+                            Button {
+                                selectedKind = kind
+                            } label: {
+                                Text(kind.displayName)
+                                    .font(.subheadline.bold())
+                                    .padding(.horizontal, 14).padding(.vertical, 8)
+                                    .background(
+                                        Capsule().fill(selectedKind == kind ? AnyShapeStyle(BJTheme.goldMaterial) : AnyShapeStyle(Color.white.opacity(0.08)))
+                                    )
+                                    .foregroundColor(selectedKind == kind ? BJTheme.ink : .white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical, 8)
+
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 16)], spacing: 16) {
+                        ForEach(CosmeticCatalog.items(of: selectedKind)) { item in
+                            CosmeticCard(item: item)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .tint(BJTheme.gold)
+            .navigationTitle("Store")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Close") { dismiss() }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Label("\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
+                        .foregroundColor(BJTheme.goldBright)
+                }
+            }
+        }
+    }
+}
+
+private struct CosmeticCard: View {
+    @EnvironmentObject var bankroll: BankrollManager
+    @ObservedObject private var customStore = CustomCosmeticStore.shared
+    let item: Cosmetic
+    @State private var pickerItem: PhotosPickerItem?
+
+    private var isCustomSlot: Bool { item.id == CustomCosmeticStore.customID(for: item.kind) }
+    private var hasCustomImage: Bool { customStore.hasImage(for: item.kind) }
+
+    var owned: Bool { bankroll.owns(item) }
+    var unlocked: Bool { bankroll.isUnlocked(item) }
+    var equipped: Bool {
+        switch item.kind {
+        case .cardBack: return bankroll.equippedCardBack == item.id
+        case .cardFace: return bankroll.equippedCardFace == item.id
+        case .tableFelt: return bankroll.equippedFelt == item.id
+        case .tableRail: return bankroll.equippedRail == item.id
+        case .tableBackdrop: return bankroll.equippedBackdrop == item.id
+        case .chipSet: return bankroll.equippedChips == item.id
+        case .avatar: return bankroll.equippedAvatar == item.id
+        case .avatarFrame: return bankroll.equippedAvatarFrame == item.id
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 10) {
+            swatch
+                .frame(height: 70)
+                .opacity(unlocked ? 1 : 0.4)
+            Text(item.name).font(.subheadline.bold())
+
+            if isCustomSlot {
+                customSlotAction
+            } else if equipped {
+                Text("Equipped")
+                    .font(.caption).bold()
+                    .foregroundColor(.green)
+            } else if owned {
+                Button("Equip") { bankroll.equip(item) }
+                    .buttonStyle(.bordered)
+                    .tint(BJTheme.goldBright)
+            } else if !unlocked {
+                VStack(spacing: 3) {
+                    Label("\(item.price)", systemImage: "lock.fill")
+                        .font(.footnote.bold())
+                        .foregroundColor(.secondary)
+                    Text("Reach $\(item.unlockRequirement) to unlock")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            } else {
+                Button {
+                    bankroll.purchase(item)
+                } label: {
+                    Label("\(item.price)", systemImage: "dollarsign.circle")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(BJTheme.gold)
+                .foregroundStyle(BJTheme.ink)
+                .disabled(bankroll.chips < item.price)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(colors: [BJTheme.feltGlow.opacity(0.5), BJTheme.feltDeeper],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(equipped ? BJTheme.goldBright.opacity(0.6) : Color.white.opacity(0.08), lineWidth: equipped ? 1.5 : 1)
+        )
+        .materialShadow(radius: 5, y: 3)
+        .onChange(of: pickerItem) { _, newValue in
+            loadPickedPhoto(newValue)
+        }
+    }
+
+    @ViewBuilder
+    private var customSlotAction: some View {
+        if !unlocked {
+            VStack(spacing: 3) {
+                Label("Locked", systemImage: "lock.fill")
+                    .font(.footnote.bold())
+                    .foregroundColor(.secondary)
+                Text("Reach $\(item.unlockRequirement) lifetime to unlock")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        } else if equipped {
+            VStack(spacing: 6) {
+                Text("Equipped").font(.caption).bold().foregroundColor(.green)
+                replacePhotoButton
+            }
+        } else if hasCustomImage {
+            VStack(spacing: 6) {
+                Button("Equip") { bankroll.equip(item) }
+                    .buttonStyle(.bordered)
+                    .tint(BJTheme.goldBright)
+                replacePhotoButton
+            }
+        } else {
+            VStack(spacing: 4) {
+                PhotosPicker(selection: $pickerItem, matching: .images) {
+                    Label("Upload Photo", systemImage: "photo.badge.plus")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(BJTheme.gold)
+                .foregroundStyle(BJTheme.ink)
+                Text("Best at \(item.kind.recommendedImageSize)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private var replacePhotoButton: some View {
+        PhotosPicker(selection: $pickerItem, matching: .images) {
+            Text("Replace Photo").font(.caption2)
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(.secondary)
+    }
+
+    private func loadPickedPhoto(_ selection: PhotosPickerItem?) {
+        guard let selection else { return }
+        Task {
+            if let data = try? await selection.loadTransferable(type: Data.self),
+               let uiImage = UIImage(data: data) {
+                customStore.setImage(uiImage, for: item.kind)
+                bankroll.equip(item)
+            }
+            pickerItem = nil
+        }
+    }
+
+    @ViewBuilder
+    private var swatch: some View {
+        if isCustomSlot {
+            customSwatch
+        } else {
+            switch item.kind {
+            case .cardBack:
+                CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
+            case .cardFace:
+                CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
+            case .tableFelt:
+                RoundedRectangle(cornerRadius: 10).fill(feltColor)
+            case .tableRail:
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(RailPalette.gradient(for: item.id))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
+                            .padding(4)
+                    )
+            case .tableBackdrop:
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(BackdropPalette.gradient(for: item.id))
+            case .chipSet:
+                HStack(spacing: -8) {
+                    Circle().fill(chipColor).frame(width: 30, height: 30)
+                    Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
+                }
+            case .avatar:
+                Image(systemName: AvatarPalette.symbol(for: item.id))
+                    .font(.system(size: 34))
+                    .foregroundColor(.white)
+            case .avatarFrame:
+                ZStack {
+                    Circle().fill(Color.black.opacity(0.35))
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
+                .frame(width: 48, height: 48)
+                .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var customSwatch: some View {
+        if let image = customStore.image(for: item.kind) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 70, height: 70)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        } else {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    Image(systemName: "photo.badge.plus")
+                        .font(.system(size: 26))
+                        .foregroundColor(.secondary)
+                )
+        }
+    }
+
+    private var feltColor: Color { FeltPalette.color(for: item.id) }
+
+    private var chipColor: Color { ChipPalette.color(for: item.id) }
+}

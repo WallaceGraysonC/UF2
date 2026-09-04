@@ -1,0 +1,516 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		13B2E302FF944436D6D12D84 /* BlackjackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7EE050A65B9C32CDB3AB3C4 /* BlackjackApp.swift */; };
+		3DF7DD9C72C6C9BD15F8E4EC /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F338C1CB7D61108413E2EADD /* Card.swift */; };
+		F3F67CEFE9D071732CB93CFC /* Shoe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E008E924B92618FD2BAC22 /* Shoe.swift */; };
+		946AF6CCE0165496C41CE14E /* BlackjackHandEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D06533B317216DCB89729D1 /* BlackjackHandEvaluator.swift */; };
+		295837885C09F2D46027AF63 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77855834E4A12C35E01812D /* Player.swift */; };
+		C6C18B1C9B4FE13D1F82AC76 /* DealerHand.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE31ADC2A0DD964B4CE038D4 /* DealerHand.swift */; };
+		88EE2F500BB3314332CF359B /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3D536800B57D05EEC1420E /* GameState.swift */; };
+		AB1CB38545820A157E446EE4 /* BlackjackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979377EE46DA41E9E92A271C /* BlackjackEngine.swift */; };
+		E9C65415EA6BE800D403B962 /* BlackjackBotAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C12571D4215AF0977F05C9D /* BlackjackBotAI.swift */; };
+		AC6B20AC10400215A024C50F /* EngineSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376F2726ACD067E23606FC94 /* EngineSnapshot.swift */; };
+		5CB446592C492781DB12F023 /* GamePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE919B7BCAD0876E6361B6D /* GamePersistence.swift */; };
+		03B9073426C18033F3D67028 /* BotNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BDFC1C01AE1301AC17D5FE /* BotNames.swift */; };
+		AC346D4D27CD83F06C151CA2 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E048792128A5F44C8F8961 /* GameCenterManager.swift */; };
+		3C8BED62ADB8C41E4E37E2C3 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BCB06E655708D05276BCFF /* MultiplayerMatch.swift */; };
+		CD617A4365C695470E142925 /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8947E5D07D558FC00E9897EB /* Cosmetic.swift */; };
+		113A41568C8E4CAD8F195F9A /* BankrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 855D8369CFDFD3FD7F6E48FF /* BankrollManager.swift */; };
+		6F223676D497334C2497DA7B /* CosmeticPalettes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B39A478FB934E551796784D /* CosmeticPalettes.swift */; };
+		1949032EB4DC212974FF97F8 /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2752D74452CB830FC66F3F /* DailyChallengeManager.swift */; };
+		6A3A81CB6835E3AE1A1CFB56 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BEB3EA972246E269D1123CC /* CustomCosmeticStore.swift */; };
+		06082877AA44BFF80BD02756 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD1899C43AB456F5BCA289D /* AudioManager.swift */; };
+		576C11A39E632338BC661487 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC5E0566FEEC0496B89B44C /* Haptics.swift */; };
+		89B37DBDB42092F351C189FD /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA06CAC10807165398F62710 /* CardView.swift */; };
+		C50DFCFC7B1615B3B71189E3 /* PlayerSeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0523343C310753F28A2E01A /* PlayerSeatView.swift */; };
+		4F7D6A49DAD60DD6C7C59532 /* ActionControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6031867B6032FFE4F5E7070 /* ActionControlsView.swift */; };
+		9D55346AC6FC6B70DDCDA79D /* DealerAreaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF34AF1F89360FF7A7CC06DA /* DealerAreaView.swift */; };
+		125631D7EAAD3EB582ECA2CC /* SeatLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68553887C79F7050A10635E4 /* SeatLayout.swift */; };
+		2131FE830C25B81780289750 /* LocalGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B38ECDE2F3C38F70F5A491 /* LocalGameView.swift */; };
+		023A147A730DC490D1685EBE /* OnlineGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEE149884C7100C3F56AC8A /* OnlineGameView.swift */; };
+		09783220AB2F1EE7F5D1BC12 /* MatchmakingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7A017DD7FEE04A1411224D /* MatchmakingView.swift */; };
+		790394C2881218EF402E1B0C /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75FB7CFB8B4A326EDD0A6F22 /* StoreView.swift */; };
+		9B33B7998F8213F61C58036D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA68FE26EEFEE6E7FF3C1206 /* SettingsView.swift */; };
+		FB2DC08024453059BEAAE825 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D777AD88576277D414638EB4 /* HomeView.swift */; };
+		E50433AF7C9CB78A24FC1B6B /* BlackjackRulesGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE9FF60A2C773EA0DC4C44A /* BlackjackRulesGuideView.swift */; };
+		BD8F99F9D375EE95195F08D4 /* BJTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39173C1E5238F818147D1BF2 /* BJTheme.swift */; };
+		8B92B8901FE93040235A82AA /* HandValueBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CF9A3027EA3A79FABB9058 /* HandValueBadge.swift */; };
+		B41929C174815B974E5070ED /* CustomTableSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90B610CB39B47F1C346B73FD /* CustomTableSetupView.swift */; };
+		D907858868858B902246584F /* DailyChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A345EF94D726948FFBBCEDB1 /* DailyChallengeView.swift */; };
+		4BC1A4C84547B4E7CE36FFFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DC9A9E63964BDC7FF074703 /* Assets.xcassets */; };
+		EAD1C60A5F0F5B3D111AD84E /* BlackjackTheme.wav in Resources */ = {isa = PBXBuildFile; fileRef = CC64BAE298970E63B8959E67 /* BlackjackTheme.wav */; };
+		B91ED56810D28A7EB02079B6 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5A8008D0973560EFFBBC2 /* GameKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C7EE050A65B9C32CDB3AB3C4 /* BlackjackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackjackApp.swift; sourceTree = "<group>"; };
+		F338C1CB7D61108413E2EADD /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		F6E008E924B92618FD2BAC22 /* Shoe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shoe.swift; sourceTree = "<group>"; };
+		1D06533B317216DCB89729D1 /* BlackjackHandEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackjackHandEvaluator.swift; sourceTree = "<group>"; };
+		F77855834E4A12C35E01812D /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		FE31ADC2A0DD964B4CE038D4 /* DealerHand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealerHand.swift; sourceTree = "<group>"; };
+		6C3D536800B57D05EEC1420E /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
+		979377EE46DA41E9E92A271C /* BlackjackEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackjackEngine.swift; sourceTree = "<group>"; };
+		9C12571D4215AF0977F05C9D /* BlackjackBotAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackjackBotAI.swift; sourceTree = "<group>"; };
+		376F2726ACD067E23606FC94 /* EngineSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineSnapshot.swift; sourceTree = "<group>"; };
+		BAE919B7BCAD0876E6361B6D /* GamePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePersistence.swift; sourceTree = "<group>"; };
+		C5BDFC1C01AE1301AC17D5FE /* BotNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotNames.swift; sourceTree = "<group>"; };
+		A8E048792128A5F44C8F8961 /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
+		71BCB06E655708D05276BCFF /* MultiplayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMatch.swift; sourceTree = "<group>"; };
+		8947E5D07D558FC00E9897EB /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
+		855D8369CFDFD3FD7F6E48FF /* BankrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankrollManager.swift; sourceTree = "<group>"; };
+		6B39A478FB934E551796784D /* CosmeticPalettes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmeticPalettes.swift; sourceTree = "<group>"; };
+		FD2752D74452CB830FC66F3F /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
+		2BEB3EA972246E269D1123CC /* CustomCosmeticStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCosmeticStore.swift; sourceTree = "<group>"; };
+		8BD1899C43AB456F5BCA289D /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
+		6CC5E0566FEEC0496B89B44C /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		DA06CAC10807165398F62710 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		F0523343C310753F28A2E01A /* PlayerSeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSeatView.swift; sourceTree = "<group>"; };
+		D6031867B6032FFE4F5E7070 /* ActionControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionControlsView.swift; sourceTree = "<group>"; };
+		EF34AF1F89360FF7A7CC06DA /* DealerAreaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealerAreaView.swift; sourceTree = "<group>"; };
+		68553887C79F7050A10635E4 /* SeatLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatLayout.swift; sourceTree = "<group>"; };
+		B2B38ECDE2F3C38F70F5A491 /* LocalGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalGameView.swift; sourceTree = "<group>"; };
+		9EEE149884C7100C3F56AC8A /* OnlineGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineGameView.swift; sourceTree = "<group>"; };
+		6D7A017DD7FEE04A1411224D /* MatchmakingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchmakingView.swift; sourceTree = "<group>"; };
+		75FB7CFB8B4A326EDD0A6F22 /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
+		CA68FE26EEFEE6E7FF3C1206 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D777AD88576277D414638EB4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		BBE9FF60A2C773EA0DC4C44A /* BlackjackRulesGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackjackRulesGuideView.swift; sourceTree = "<group>"; };
+		39173C1E5238F818147D1BF2 /* BJTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BJTheme.swift; sourceTree = "<group>"; };
+		89CF9A3027EA3A79FABB9058 /* HandValueBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandValueBadge.swift; sourceTree = "<group>"; };
+		90B610CB39B47F1C346B73FD /* CustomTableSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableSetupView.swift; sourceTree = "<group>"; };
+		A345EF94D726948FFBBCEDB1 /* DailyChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeView.swift; sourceTree = "<group>"; };
+		2CC0AE79B3E84BC65B89FE81 /* Blackjack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Blackjack.entitlements; sourceTree = "<group>"; };
+		F32CB2765857E8A16F175E3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DC9A9E63964BDC7FF074703 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CC64BAE298970E63B8959E67 /* BlackjackTheme.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = BlackjackTheme.wav; sourceTree = "<group>"; };
+		7CD5A8008D0973560EFFBBC2 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		7C382610BD5E0A07EAAABE17 /* Blackjack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackjack.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		110E7B81E316E89B5CC3AF94 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B91ED56810D28A7EB02079B6 /* GameKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9BE57E59041A5DEAC4F7D9BE /* main */ = {
+			isa = PBXGroup;
+			children = (
+				170FCB50BFC4A247F801ED2B /* Blackjack */,
+				1358278FDE9C939429292F76 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1358278FDE9C939429292F76 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7C382610BD5E0A07EAAABE17 /* Blackjack.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		170FCB50BFC4A247F801ED2B /* Blackjack */ = {
+			isa = PBXGroup;
+			children = (
+				C7EE050A65B9C32CDB3AB3C4 /* BlackjackApp.swift */,
+				DDA2104D105989C5E4DE474E /* Models */,
+				AC94A2A6D4712B7AEDAD552C /* Multiplayer */,
+				B3613AAFE2A64D31034AD770 /* Store */,
+				573D023514876BBA33A56EF8 /* Views */,
+				979F5DCECA937AEECF8580A7 /* Resources */,
+				2CC0AE79B3E84BC65B89FE81 /* Blackjack.entitlements */,
+			);
+			path = Blackjack;
+			sourceTree = "<group>";
+		};
+		DDA2104D105989C5E4DE474E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F338C1CB7D61108413E2EADD /* Card.swift */,
+				F6E008E924B92618FD2BAC22 /* Shoe.swift */,
+				1D06533B317216DCB89729D1 /* BlackjackHandEvaluator.swift */,
+				F77855834E4A12C35E01812D /* Player.swift */,
+				FE31ADC2A0DD964B4CE038D4 /* DealerHand.swift */,
+				6C3D536800B57D05EEC1420E /* GameState.swift */,
+				979377EE46DA41E9E92A271C /* BlackjackEngine.swift */,
+				9C12571D4215AF0977F05C9D /* BlackjackBotAI.swift */,
+				376F2726ACD067E23606FC94 /* EngineSnapshot.swift */,
+				BAE919B7BCAD0876E6361B6D /* GamePersistence.swift */,
+				C5BDFC1C01AE1301AC17D5FE /* BotNames.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AC94A2A6D4712B7AEDAD552C /* Multiplayer */ = {
+			isa = PBXGroup;
+			children = (
+				A8E048792128A5F44C8F8961 /* GameCenterManager.swift */,
+				71BCB06E655708D05276BCFF /* MultiplayerMatch.swift */,
+			);
+			path = Multiplayer;
+			sourceTree = "<group>";
+		};
+		B3613AAFE2A64D31034AD770 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				8947E5D07D558FC00E9897EB /* Cosmetic.swift */,
+				855D8369CFDFD3FD7F6E48FF /* BankrollManager.swift */,
+				6B39A478FB934E551796784D /* CosmeticPalettes.swift */,
+				FD2752D74452CB830FC66F3F /* DailyChallengeManager.swift */,
+				2BEB3EA972246E269D1123CC /* CustomCosmeticStore.swift */,
+				8BD1899C43AB456F5BCA289D /* AudioManager.swift */,
+				6CC5E0566FEEC0496B89B44C /* Haptics.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		573D023514876BBA33A56EF8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DA06CAC10807165398F62710 /* CardView.swift */,
+				F0523343C310753F28A2E01A /* PlayerSeatView.swift */,
+				D6031867B6032FFE4F5E7070 /* ActionControlsView.swift */,
+				EF34AF1F89360FF7A7CC06DA /* DealerAreaView.swift */,
+				68553887C79F7050A10635E4 /* SeatLayout.swift */,
+				B2B38ECDE2F3C38F70F5A491 /* LocalGameView.swift */,
+				9EEE149884C7100C3F56AC8A /* OnlineGameView.swift */,
+				6D7A017DD7FEE04A1411224D /* MatchmakingView.swift */,
+				75FB7CFB8B4A326EDD0A6F22 /* StoreView.swift */,
+				CA68FE26EEFEE6E7FF3C1206 /* SettingsView.swift */,
+				D777AD88576277D414638EB4 /* HomeView.swift */,
+				BBE9FF60A2C773EA0DC4C44A /* BlackjackRulesGuideView.swift */,
+				39173C1E5238F818147D1BF2 /* BJTheme.swift */,
+				89CF9A3027EA3A79FABB9058 /* HandValueBadge.swift */,
+				90B610CB39B47F1C346B73FD /* CustomTableSetupView.swift */,
+				A345EF94D726948FFBBCEDB1 /* DailyChallengeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		979F5DCECA937AEECF8580A7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4DC9A9E63964BDC7FF074703 /* Assets.xcassets */,
+				F32CB2765857E8A16F175E3B /* Info.plist */,
+				CC64BAE298970E63B8959E67 /* BlackjackTheme.wav */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9F63265DBDF79F06AF673C01 /* Blackjack */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 26A36870ADF872DAFD70240B /* Build configuration list for PBXNativeTarget "Blackjack" */;
+			buildPhases = (
+				C7F070AFF1CB19C9499F121B /* Sources */,
+				110E7B81E316E89B5CC3AF94 /* Frameworks */,
+				C4C0D0A04D690AD4C6FF8E19 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Blackjack;
+			productName = Blackjack;
+			productReference = 7C382610BD5E0A07EAAABE17 /* Blackjack.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2F84A52A5FA614DD8AC204CD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					9F63265DBDF79F06AF673C01 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = D7C93A1AE06BFABEA0361CB5 /* Build configuration list for PBXProject "Blackjack" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9BE57E59041A5DEAC4F7D9BE;
+			productRefGroup = 1358278FDE9C939429292F76 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9F63265DBDF79F06AF673C01 /* Blackjack */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C4C0D0A04D690AD4C6FF8E19 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4BC1A4C84547B4E7CE36FFFF /* Assets.xcassets in Resources */,
+				EAD1C60A5F0F5B3D111AD84E /* BlackjackTheme.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C7F070AFF1CB19C9499F121B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				13B2E302FF944436D6D12D84 /* BlackjackApp.swift in Sources */,
+				3DF7DD9C72C6C9BD15F8E4EC /* Card.swift in Sources */,
+				F3F67CEFE9D071732CB93CFC /* Shoe.swift in Sources */,
+				946AF6CCE0165496C41CE14E /* BlackjackHandEvaluator.swift in Sources */,
+				295837885C09F2D46027AF63 /* Player.swift in Sources */,
+				C6C18B1C9B4FE13D1F82AC76 /* DealerHand.swift in Sources */,
+				88EE2F500BB3314332CF359B /* GameState.swift in Sources */,
+				AB1CB38545820A157E446EE4 /* BlackjackEngine.swift in Sources */,
+				E9C65415EA6BE800D403B962 /* BlackjackBotAI.swift in Sources */,
+				AC6B20AC10400215A024C50F /* EngineSnapshot.swift in Sources */,
+				5CB446592C492781DB12F023 /* GamePersistence.swift in Sources */,
+				03B9073426C18033F3D67028 /* BotNames.swift in Sources */,
+				AC346D4D27CD83F06C151CA2 /* GameCenterManager.swift in Sources */,
+				3C8BED62ADB8C41E4E37E2C3 /* MultiplayerMatch.swift in Sources */,
+				CD617A4365C695470E142925 /* Cosmetic.swift in Sources */,
+				113A41568C8E4CAD8F195F9A /* BankrollManager.swift in Sources */,
+				6F223676D497334C2497DA7B /* CosmeticPalettes.swift in Sources */,
+				1949032EB4DC212974FF97F8 /* DailyChallengeManager.swift in Sources */,
+				6A3A81CB6835E3AE1A1CFB56 /* CustomCosmeticStore.swift in Sources */,
+				06082877AA44BFF80BD02756 /* AudioManager.swift in Sources */,
+				576C11A39E632338BC661487 /* Haptics.swift in Sources */,
+				89B37DBDB42092F351C189FD /* CardView.swift in Sources */,
+				C50DFCFC7B1615B3B71189E3 /* PlayerSeatView.swift in Sources */,
+				4F7D6A49DAD60DD6C7C59532 /* ActionControlsView.swift in Sources */,
+				9D55346AC6FC6B70DDCDA79D /* DealerAreaView.swift in Sources */,
+				125631D7EAAD3EB582ECA2CC /* SeatLayout.swift in Sources */,
+				2131FE830C25B81780289750 /* LocalGameView.swift in Sources */,
+				023A147A730DC490D1685EBE /* OnlineGameView.swift in Sources */,
+				09783220AB2F1EE7F5D1BC12 /* MatchmakingView.swift in Sources */,
+				790394C2881218EF402E1B0C /* StoreView.swift in Sources */,
+				9B33B7998F8213F61C58036D /* SettingsView.swift in Sources */,
+				FB2DC08024453059BEAAE825 /* HomeView.swift in Sources */,
+				E50433AF7C9CB78A24FC1B6B /* BlackjackRulesGuideView.swift in Sources */,
+				BD8F99F9D375EE95195F08D4 /* BJTheme.swift in Sources */,
+				8B92B8901FE93040235A82AA /* HandValueBadge.swift in Sources */,
+				B41929C174815B974E5070ED /* CustomTableSetupView.swift in Sources */,
+				D907858868858B902246584F /* DailyChallengeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F39F457888B79759FC550A99 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		648C14F2DC4B33A08958093D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B832E206B18B1ED2126EF20F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Blackjack/Blackjack.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Blackjack/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.blackjack;
+				PRODUCT_NAME = "Pocket 21";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1B805F767EFD3F5F893F689E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Blackjack/Blackjack.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Blackjack/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.blackjack;
+				PRODUCT_NAME = "Pocket 21";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D7C93A1AE06BFABEA0361CB5 /* Build configuration list for PBXProject "Blackjack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F39F457888B79759FC550A99 /* Debug */,
+				648C14F2DC4B33A08958093D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		26A36870ADF872DAFD70240B /* Build configuration list for PBXNativeTarget "Blackjack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B832E206B18B1ED2126EF20F /* Debug */,
+				1B805F767EFD3F5F893F689E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2F84A52A5FA614DD8AC204CD /* Project object */;
+}
