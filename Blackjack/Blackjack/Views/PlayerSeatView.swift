@@ -100,8 +100,10 @@ struct PlayerSeatView: View {
             HStack(spacing: compact ? 2 : 3) {
                 ForEach(Array(hand.cards.enumerated()), id: \.offset) { _, card in
                     CardView(card: card, cardBackID: player.cardBackID, cardFaceID: player.cardFaceID, width: cardWidth)
+                        .transition(.scale.combined(with: .opacity))
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.75), value: hand.cards.count)
             if !hand.displayTotal.isEmpty {
                 Text(hand.displayTotal)
                     .font(detailFont.bold())

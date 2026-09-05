@@ -40,6 +40,13 @@ struct RoundResult: Identifiable, Codable {
     /// push, `bet * 2` for an even-money win, `bet * 2.5` for a natural.
     var amountReturned: Int
     var handTotal: Int
+
+    /// Compact one-line summary for payout footers and the watch app --
+    /// omits the return clause entirely on a clean loss instead of writing
+    /// out something redundant like "Bust — 24, no return".
+    var summaryText: String {
+        amountReturned > 0 ? "\(outcome.displayText) — \(handTotal) (+$\(amountReturned))" : "\(outcome.displayText) — \(handTotal)"
+    }
 }
 
 /// Snapshot of the table, safe to broadcast to remote players -- the

@@ -18,6 +18,7 @@ struct OnlineGameView: View {
     private let localID: String
     @State private var hasSettled = false
     @State private var showRulesGuide = false
+    @State private var lastBetAmount: Int?
 
     init(match: GKMatch) {
         self.match = match
@@ -170,7 +171,7 @@ struct OnlineGameView: View {
                 VStack(spacing: 10) {
                     let myResults = state.roundResults.filter { $0.playerID == localID }
                     ForEach(myResults) { result in
-                        Text("\(result.outcome.displayText) — \(result.handTotal), \(result.amountReturned > 0 ? "+$\(result.amountReturned)" : "no return")")
+                        Text(result.summaryText)
                             .font(.footnote.bold())
                             .foregroundColor(.yellow)
                     }
@@ -196,7 +197,8 @@ struct OnlineGameView: View {
                 )
                 .padding(.bottom, 12)
             } else if state.phase == .betting, me.hands.isEmpty, me.chips > 0 {
-                BetBuilderView(chips: me.chips, minBet: state.minBet, maxBet: state.maxBet) { amount in
+                BetBuilderView(chips: me.chips, minBet: state.minBet, maxBet: state.maxBet, defaultBet: lastBetAmount) { amount in
+                    lastBetAmount = amount
                     multiplayer.sendAction(.placeBet(amount))
                 }
                 .padding(.bottom, 12)

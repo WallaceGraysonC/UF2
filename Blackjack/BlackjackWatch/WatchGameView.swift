@@ -84,7 +84,7 @@ struct WatchGameView: View {
 
                 if !engine.roundResults.isEmpty {
                     ForEach(engine.roundResults.filter { $0.playerID == humanID }) { result in
-                        Text("\(result.outcome.displayText)\n\(result.amountReturned > 0 ? "+$\(result.amountReturned)" : "no return")")
+                        Text(result.summaryText)
                             .font(.caption2.bold())
                             .foregroundColor(.yellow)
                             .multilineTextAlignment(.center)

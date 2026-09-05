@@ -26,6 +26,10 @@ struct LocalGameView: View {
     private let tournament: TournamentConfig?
     @State private var hasSettled = false
     @State private var showRulesGuide = false
+    /// Remembers what the human bet last round so the bet builder can
+    /// default to "same as last time" -- most players re-bet the same
+    /// amount round after round.
+    @State private var lastBetAmount: Int?
 
     struct TournamentConfig {
         let limitLevels: [(min: Int, max: Int)]
@@ -236,7 +240,8 @@ struct LocalGameView: View {
                 )
                 .padding(.bottom, 12)
             } else if engine.phase == .betting, human.hands.isEmpty, human.chips > 0 {
-                BetBuilderView(chips: human.chips, minBet: engine.minBet, maxBet: engine.maxBet) { amount in
+                BetBuilderView(chips: human.chips, minBet: engine.minBet, maxBet: engine.maxBet, defaultBet: lastBetAmount) { amount in
+                    lastBetAmount = amount
                     engine.placeBet(amount, for: humanID)
                 }
                 .padding(.bottom, 12)
@@ -249,7 +254,7 @@ struct LocalGameView: View {
         VStack(spacing: 10) {
             let humanResults = engine.roundResults.filter { $0.playerID == humanID }
             ForEach(humanResults) { result in
-                Text("\(result.outcome.displayText) — \(result.handTotal), \(result.amountReturned > 0 ? "+$\(result.amountReturned)" : "no return")")
+                Text(result.summaryText)
                     .font(.footnote.bold())
                     .foregroundColor(.yellow)
             }
@@ -291,7 +296,7 @@ struct LocalGameView: View {
         VStack(spacing: 10) {
             let humanResults = engine.roundResults.filter { $0.playerID == humanID }
             ForEach(humanResults) { result in
-                Text("\(result.outcome.displayText) — \(result.handTotal), \(result.amountReturned > 0 ? "+$\(result.amountReturned)" : "no return")")
+                Text(result.summaryText)
                     .font(.footnote.bold())
                     .foregroundColor(.yellow)
             }

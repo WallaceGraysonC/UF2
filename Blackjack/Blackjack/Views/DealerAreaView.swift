@@ -90,6 +90,8 @@ struct DealerAreaView<Content: View>: View {
                         .background(Capsule().fill(BJTheme.goldMaterial))
                         .overlay(Capsule().stroke(BJTheme.goldBright.opacity(0.6), lineWidth: 1))
                         .materialShadow(radius: 6, y: 3)
+                        .transition(.scale.combined(with: .opacity))
+                        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: dealer.displayTotal)
                 }
             }
             // Sit a bit above dead-center -- most seats (including the human's,

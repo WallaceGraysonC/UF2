@@ -8,6 +8,10 @@ struct BetBuilderView: View {
     let chips: Int
     let minBet: Int
     let maxBet: Int
+    /// The last amount this player actually bet at this table, if any --
+    /// pre-fills the builder so repeating a bet is just a tap of Deal
+    /// instead of rebuilding it from chip tokens every round.
+    var defaultBet: Int? = nil
     let onDeal: (Int) -> Void
 
     @State private var betAmount: Double = 0
@@ -45,7 +49,7 @@ struct BetBuilderView: View {
                 .padding(.vertical, 2)
                 .padding(.horizontal, 1)
             }
-            .onAppear { betAmount = Double(min(minBet, clampedMax)) }
+            .onAppear { betAmount = Double(min(defaultBet ?? minBet, clampedMax)) }
 
             Button {
                 onDeal(Int(betAmount))
