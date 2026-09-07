@@ -5,8 +5,16 @@ import SwiftUI
 struct DailyChallengeView: View {
     @EnvironmentObject var bankroll: BankrollManager
     @ObservedObject private var challengeManager = DailyChallengeManager.shared
+    @ObservedObject private var achievementManager = AchievementManager.shared
     @Environment(\.dismiss) private var dismiss
-    @State private var track: ChallengeTrack = .daily
+    @State private var section: SectionMode = .daily
+
+    /// The 3-way tab shown at the top of this screen. `.daily`/`.sitAndGo`
+    /// map onto `ChallengeTrack` (which rotates and resets at midnight);
+    /// `.achievements` is a separate, permanent list that never resets.
+    private enum SectionMode: Hashable {
+        case daily, sitAndGo, achievements
+    }
 
     var body: some View {
         NavigationView {
@@ -23,12 +31,23 @@ struct DailyChallengeView: View {
                     }
                 }
 
-                Section {
-                    ForEach(challengeManager.challenges(in: track)) { challenge in
-                        ChallengeRow(challenge: challenge)
+                if section == .achievements {
+                    Section {
+                        ForEach(AchievementCatalog.all) { achievement in
+                            AchievementRow(achievement: achievement, unlocked: achievementManager.isUnlocked(achievement))
+                        }
+                    } footer: {
+                        Text("Permanent milestones -- unlike the challenges above, these never reset.")
                     }
-                } footer: {
-                    Text(track.scopeNote)
+                } else {
+                    let track: ChallengeTrack = section == .daily ? .daily : .sitAndGo
+                    Section {
+                        ForEach(challengeManager.challenges(in: track)) { challenge in
+                            ChallengeRow(challenge: challenge)
+                        }
+                    } footer: {
+                        Text(track.scopeNote)
+                    }
                 }
             }
             .toolbar {
@@ -36,10 +55,10 @@ struct DailyChallengeView: View {
                     Button("Close") { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
-                    Picker("Track", selection: $track) {
-                        ForEach(ChallengeTrack.allCases, id: \.self) { option in
-                            Text(label(for: option)).tag(option)
-                        }
+                    Picker("Section", selection: $section) {
+                        Text(label(for: .daily)).tag(SectionMode.daily)
+                        Text(label(for: .sitAndGo)).tag(SectionMode.sitAndGo)
+                        Text("Achievements").tag(SectionMode.achievements)
                     }
                     .pickerStyle(.segmented)
                 }
@@ -49,9 +68,37 @@ struct DailyChallengeView: View {
     }
 
     /// Marks a track whose rewards are sitting there waiting to be collected.
-    private func label(for track: ChallengeTrack) -> String {
+    private func label(for section: SectionMode) -> String {
+        let track: ChallengeTrack = section == .daily ? .daily : .sitAndGo
         let ready = challengeManager.unclaimedCount(in: track)
         return ready > 0 ? "\(track.displayName) (\(ready))" : track.displayName
+    }
+}
+
+private struct AchievementRow: View {
+    let achievement: Achievement
+    let unlocked: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(unlocked ? AnyShapeStyle(PATheme.goldMaterial) : AnyShapeStyle(Color.white.opacity(0.08)))
+                Image(systemName: achievement.icon)
+                    .foregroundColor(unlocked ? PATheme.ink : .secondary)
+            }
+            .frame(width: 36, height: 36)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(achievement.title).font(.subheadline.bold())
+                Text(achievement.detail).font(.caption).foregroundColor(.secondary)
+            }
+            Spacer()
+            if unlocked {
+                Image(systemName: "checkmark.seal.fill").foregroundColor(.green)
+            }
+        }
+        .padding(.vertical, 4)
+        .opacity(unlocked ? 1 : 0.6)
     }
 }
 

@@ -6,11 +6,20 @@ struct SettingsView: View {
     @ObservedObject private var audio = AudioManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showResetConfirm = false
+    @State private var showStats = false
     @State private var hapticsEnabled = Haptics.isEnabled
 
     var body: some View {
         NavigationView {
             Form {
+                Section("Stats & History") {
+                    Button {
+                        showStats = true
+                    } label: {
+                        Label("View Stats", systemImage: "chart.bar.fill")
+                    }
+                }
+
                 Section("Bankroll") {
                     HStack {
                         Text("Current Chips")
@@ -107,6 +116,7 @@ struct SettingsView: View {
             } message: {
                 Text("Brings your balance up to $\(BankrollManager.bankrollTopUpFloor) — one buy-in at the main table. Your owned cosmetics are kept.")
             }
+            .sheet(isPresented: $showStats) { StatsView() }
         }
     }
 

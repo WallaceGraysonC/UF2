@@ -4,28 +4,67 @@ import Foundation
 /// Not meant to be unbeatable -- just enough to make solo play possible
 /// with no server and no other humans required.
 enum BotAI {
-    static func decideAction(for player: Player, engine: PokerEngine) -> PlayerAction {
+    /// `difficulty` only changes the thresholds below -- Easy calls too much
+    /// and rarely bluffs (loose-passive, easy to beat), Normal is the
+    /// original single-tier behavior, and Hard folds closer to true pot
+    /// odds, value-bets/raises more often, and occasionally bluffs.
+    static func decideAction(for player: Player, engine: PokerEngine, difficulty: BotDifficulty = .normal) -> PlayerAction {
         let toCall = engine.currentBet - player.currentBet
         let strength = handStrength(player: player, community: engine.communityCards)
         let potOdds = toCall == 0 ? 0 : Double(toCall) / Double(max(engine.potTotal, 1))
 
-        if toCall == 0 {
-            if strength > 0.72, player.chips > 0, Double.random(in: 0...1) < 0.6 {
-                return .bet(min(player.chips, max(engine.bigBlind, Int(Double(engine.potTotal) * 0.6))))
+        switch difficulty {
+        case .easy:
+            if toCall == 0 {
+                if strength > 0.85, player.chips > 0, Double.random(in: 0...1) < 0.3 {
+                    return .bet(min(player.chips, max(engine.bigBlind, Int(Double(engine.potTotal) * 0.5))))
+                }
+                return .check
             }
-            return .check
-        }
+            if strength < 0.15 && potOdds > 0.35 {
+                return .fold
+            }
+            if strength > 0.9 && player.chips > toCall && Double.random(in: 0...1) < 0.3 {
+                return .raise(engine.currentBet + max(engine.minRaise, toCall))
+            }
+            return .call
 
-        if strength < 0.25 && potOdds > 0.15 {
-            return .fold
+        case .normal:
+            if toCall == 0 {
+                if strength > 0.72, player.chips > 0, Double.random(in: 0...1) < 0.6 {
+                    return .bet(min(player.chips, max(engine.bigBlind, Int(Double(engine.potTotal) * 0.6))))
+                }
+                return .check
+            }
+            if strength < 0.25 && potOdds > 0.15 {
+                return .fold
+            }
+            if strength > 0.8 && player.chips > toCall && Double.random(in: 0...1) < 0.5 {
+                return .raise(engine.currentBet + max(engine.minRaise, toCall))
+            }
+            if strength < potOdds {
+                return .fold
+            }
+            return .call
+
+        case .hard:
+            if toCall == 0 {
+                if strength > 0.6, player.chips > 0, Double.random(in: 0...1) < 0.75 {
+                    return .bet(min(player.chips, max(engine.bigBlind, Int(Double(engine.potTotal) * 0.75))))
+                }
+                if strength < 0.35 && Double.random(in: 0...1) < 0.12 {
+                    return .bet(min(player.chips, max(engine.bigBlind, Int(Double(engine.potTotal) * 0.5))))
+                }
+                return .check
+            }
+            if strength < potOdds * 0.9 {
+                return .fold
+            }
+            if strength > 0.7 && player.chips > toCall && Double.random(in: 0...1) < 0.65 {
+                return .raise(engine.currentBet + max(engine.minRaise, toCall))
+            }
+            return .call
         }
-        if strength > 0.8 && player.chips > toCall && Double.random(in: 0...1) < 0.5 {
-            return .raise(engine.currentBet + max(engine.minRaise, toCall))
-        }
-        if strength < potOdds {
-            return .fold
-        }
-        return .call
     }
 
     /// Very rough 0...1 strength estimate: preflop uses hole-card heuristics,

@@ -31,18 +31,20 @@
 	<array>
 		<string>armv7</string>
 	</array>
+	<!-- Every screen in this app is a fixed portrait layout (proportional
+	     math against a tall, narrow felt/table), with no landscape-specific
+	     variant anywhere. Declaring landscape support without a landscape
+	     layout would let the system rotate into a genuinely broken UI, so
+	     both idioms are locked to portrait until a real landscape/iPad pass
+	     exists. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

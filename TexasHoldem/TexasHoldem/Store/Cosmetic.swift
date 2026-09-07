@@ -16,6 +16,21 @@ enum CosmeticKind: String, Codable, CaseIterable {
         }
     }
 
+    /// Whether this category's *equipped* choice is actually visible on the
+    /// watchOS companion. Every category's equipped ID syncs via iCloud (see
+    /// `BankrollManager`), but the watch's minimal table view only ever reads
+    /// `equippedFelt` (its background tint) and `equippedCardFace` (the
+    /// rank/suit ink color) -- it never renders a face-down card back, and
+    /// has no on-screen rail, backdrop, chip stack, or avatar to draw the
+    /// rest of these onto. Used by the Store to badge which categories are
+    /// actually worth equipping for the watch.
+    var crossesOverToWatch: Bool {
+        switch self {
+        case .tableFelt, .cardFace: return true
+        case .cardBack, .tableRail, .tableBackdrop, .chipSet, .avatar, .avatarFrame: return false
+        }
+    }
+
     /// Suggested source-image dimensions for this category's "Custom Photo"
     /// upload, shown to the player before they pick one -- matched to each
     /// shape's on-screen proportions so the photo doesn't look stretched.
@@ -67,12 +82,19 @@ enum CosmeticCatalog {
         Cosmetic(id: "cardback.copper", kind: .cardBack, name: "Copper", price: 1500, unlockRequirement: 1500, assetName: "cardback.copper"),
         Cosmetic(id: "cardback.gold", kind: .cardBack, name: "Gold Foil", price: 2600, unlockRequirement: 3000, assetName: "cardback.gold"),
         Cosmetic(id: "cardback.holographic", kind: .cardBack, name: "Holographic", price: 4500, unlockRequirement: 5000, assetName: "cardback.holographic"),
+        Cosmetic(id: "cardback.ivory", kind: .cardBack, name: "Ivory", price: 600, unlockRequirement: 0, assetName: "cardback.ivory"),
+        Cosmetic(id: "cardback.slate", kind: .cardBack, name: "Slate", price: 900, unlockRequirement: 0, assetName: "cardback.slate"),
+        Cosmetic(id: "cardback.emerald", kind: .cardBack, name: "Emerald", price: 1100, unlockRequirement: 0, assetName: "cardback.emerald"),
+        Cosmetic(id: "cardback.sunburst", kind: .cardBack, name: "Sunburst", price: 3200, unlockRequirement: 3000, assetName: "cardback.sunburst"),
 
         // MARK: Card face (the rank/suit style on the front of every card)
         Cosmetic(id: "face.classic", kind: .cardFace, name: "Classic Serif", price: 0, unlockRequirement: 0, assetName: "face.classic"),
         Cosmetic(id: "face.modern", kind: .cardFace, name: "Modern Sans", price: 700, unlockRequirement: 0, assetName: "face.modern"),
         Cosmetic(id: "face.rounded", kind: .cardFace, name: "Rounded", price: 700, unlockRequirement: 0, assetName: "face.rounded"),
         Cosmetic(id: "face.blockBold", kind: .cardFace, name: "Block Bold", price: 1200, unlockRequirement: 1500, assetName: "face.blockBold"),
+        Cosmetic(id: "face.minimal", kind: .cardFace, name: "Minimal", price: 900, unlockRequirement: 0, assetName: "face.minimal"),
+        Cosmetic(id: "face.elegant", kind: .cardFace, name: "Elegant Script", price: 1400, unlockRequirement: 1500, assetName: "face.elegant"),
+        Cosmetic(id: "face.retro", kind: .cardFace, name: "Retro Diner", price: 1400, unlockRequirement: 1500, assetName: "face.retro"),
 
         // MARK: Table felt
         Cosmetic(id: "felt.classicGreen", kind: .tableFelt, name: "Classic Green", price: 0, unlockRequirement: 0, assetName: "felt.classicGreen"),
@@ -82,6 +104,9 @@ enum CosmeticCatalog {
         Cosmetic(id: "felt.teal", kind: .tableFelt, name: "Teal", price: 1100, unlockRequirement: 0, assetName: "felt.teal"),
         Cosmetic(id: "felt.sunset", kind: .tableFelt, name: "Sunset", price: 1800, unlockRequirement: 1500, assetName: "felt.sunset"),
         Cosmetic(id: "felt.midnightGold", kind: .tableFelt, name: "Midnight Gold", price: 3200, unlockRequirement: 3000, assetName: "felt.midnightGold"),
+        Cosmetic(id: "felt.crimson", kind: .tableFelt, name: "Crimson", price: 1100, unlockRequirement: 0, assetName: "felt.crimson"),
+        Cosmetic(id: "felt.ocean", kind: .tableFelt, name: "Ocean", price: 1400, unlockRequirement: 0, assetName: "felt.ocean"),
+        Cosmetic(id: "felt.plum", kind: .tableFelt, name: "Plum", price: 1800, unlockRequirement: 1500, assetName: "felt.plum"),
 
         // MARK: Table rail (the wood/trim border around the felt)
         Cosmetic(id: "rail.classicOak", kind: .tableRail, name: "Classic Oak", price: 0, unlockRequirement: 0, assetName: "rail.classicOak"),
@@ -91,6 +116,9 @@ enum CosmeticCatalog {
         Cosmetic(id: "rail.roseGold", kind: .tableRail, name: "Rose Gold", price: 2000, unlockRequirement: 1500, assetName: "rail.roseGold"),
         Cosmetic(id: "rail.carbonFiber", kind: .tableRail, name: "Carbon Fiber", price: 2800, unlockRequirement: 3000, assetName: "rail.carbonFiber"),
         Cosmetic(id: "rail.platinum", kind: .tableRail, name: "Platinum", price: 4200, unlockRequirement: 5000, assetName: "rail.platinum"),
+        Cosmetic(id: "rail.mahogany", kind: .tableRail, name: "Mahogany", price: 1100, unlockRequirement: 0, assetName: "rail.mahogany"),
+        Cosmetic(id: "rail.chrome", kind: .tableRail, name: "Chrome", price: 2400, unlockRequirement: 1500, assetName: "rail.chrome"),
+        Cosmetic(id: "rail.emerald", kind: .tableRail, name: "Emerald Trim", price: 3000, unlockRequirement: 3000, assetName: "rail.emerald"),
 
         // MARK: Table backdrop (the room/scene behind the table itself)
         Cosmetic(id: "backdrop.midnight", kind: .tableBackdrop, name: "Midnight", price: 0, unlockRequirement: 0, assetName: "backdrop.midnight"),
@@ -100,6 +128,9 @@ enum CosmeticCatalog {
         Cosmetic(id: "backdrop.emeraldRoom", kind: .tableBackdrop, name: "Emerald Room", price: 1100, unlockRequirement: 0, assetName: "backdrop.emeraldRoom"),
         Cosmetic(id: "backdrop.neonNights", kind: .tableBackdrop, name: "Neon Nights", price: 2000, unlockRequirement: 1500, assetName: "backdrop.neonNights"),
         Cosmetic(id: "backdrop.royalGold", kind: .tableBackdrop, name: "Royal Gold", price: 3000, unlockRequirement: 3000, assetName: "backdrop.royalGold"),
+        Cosmetic(id: "backdrop.desertDusk", kind: .tableBackdrop, name: "Desert Dusk", price: 1400, unlockRequirement: 0, assetName: "backdrop.desertDusk"),
+        Cosmetic(id: "backdrop.icyPeak", kind: .tableBackdrop, name: "Icy Peak", price: 1800, unlockRequirement: 1500, assetName: "backdrop.icyPeak"),
+        Cosmetic(id: "backdrop.speakeasy", kind: .tableBackdrop, name: "Speakeasy", price: 3400, unlockRequirement: 3000, assetName: "backdrop.speakeasy"),
 
         // MARK: Chip sets
         Cosmetic(id: "chips.classic", kind: .chipSet, name: "Classic Chips", price: 0, unlockRequirement: 0, assetName: "chips.classic"),
@@ -108,6 +139,9 @@ enum CosmeticCatalog {
         Cosmetic(id: "chips.jade", kind: .chipSet, name: "Jade", price: 2200, unlockRequirement: 1500, assetName: "chips.jade"),
         Cosmetic(id: "chips.sapphire", kind: .chipSet, name: "Sapphire", price: 2800, unlockRequirement: 3000, assetName: "chips.sapphire"),
         Cosmetic(id: "chips.diamond", kind: .chipSet, name: "Diamond", price: 5000, unlockRequirement: 5000, assetName: "chips.diamond"),
+        Cosmetic(id: "chips.ruby", kind: .chipSet, name: "Ruby", price: 1800, unlockRequirement: 0, assetName: "chips.ruby"),
+        Cosmetic(id: "chips.obsidian", kind: .chipSet, name: "Obsidian", price: 2400, unlockRequirement: 1500, assetName: "chips.obsidian"),
+        Cosmetic(id: "chips.goldStandard", kind: .chipSet, name: "Gold Standard", price: 4200, unlockRequirement: 5000, assetName: "chips.goldStandard"),
 
         // MARK: Avatars
         Cosmetic(id: "avatar.default", kind: .avatar, name: "Default", price: 0, unlockRequirement: 0, assetName: "avatar.default"),
@@ -118,6 +152,10 @@ enum CosmeticCatalog {
         Cosmetic(id: "avatar.astronaut", kind: .avatar, name: "Astronaut", price: 1500, unlockRequirement: 1500, assetName: "avatar.astronaut"),
         Cosmetic(id: "avatar.dragon", kind: .avatar, name: "Dragon", price: 2600, unlockRequirement: 3000, assetName: "avatar.dragon"),
         Cosmetic(id: "avatar.crown", kind: .avatar, name: "High Roller", price: 3600, unlockRequirement: 5000, assetName: "avatar.crown"),
+        Cosmetic(id: "avatar.cat", kind: .avatar, name: "Cat", price: 750, unlockRequirement: 0, assetName: "avatar.cat"),
+        Cosmetic(id: "avatar.hare", kind: .avatar, name: "Hare", price: 900, unlockRequirement: 0, assetName: "avatar.hare"),
+        Cosmetic(id: "avatar.ninja", kind: .avatar, name: "Ninja", price: 1800, unlockRequirement: 1500, assetName: "avatar.ninja"),
+        Cosmetic(id: "avatar.alien", kind: .avatar, name: "Alien", price: 2800, unlockRequirement: 3000, assetName: "avatar.alien"),
 
         // MARK: Avatar frames (the ring around your avatar icon at the table)
         Cosmetic(id: "frame.none", kind: .avatarFrame, name: "No Frame", price: 0, unlockRequirement: 0, assetName: "frame.none"),
@@ -126,6 +164,9 @@ enum CosmeticCatalog {
         Cosmetic(id: "frame.sapphire", kind: .avatarFrame, name: "Sapphire Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.sapphire"),
         Cosmetic(id: "frame.crimson", kind: .avatarFrame, name: "Crimson Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.crimson"),
         Cosmetic(id: "frame.royal", kind: .avatarFrame, name: "Royal Ring", price: 2400, unlockRequirement: 3000, assetName: "frame.royal"),
+        Cosmetic(id: "frame.emerald", kind: .avatarFrame, name: "Emerald Ring", price: 1600, unlockRequirement: 1500, assetName: "frame.emerald"),
+        Cosmetic(id: "frame.obsidian", kind: .avatarFrame, name: "Obsidian Ring", price: 2000, unlockRequirement: 1500, assetName: "frame.obsidian"),
+        Cosmetic(id: "frame.rainbow", kind: .avatarFrame, name: "Rainbow Ring", price: 3200, unlockRequirement: 3000, assetName: "frame.rainbow"),
 
         // MARK: Custom Photo -- one free "upload your own" slot per
         // category, unlocked at a high lifetime chip peak so it's a real

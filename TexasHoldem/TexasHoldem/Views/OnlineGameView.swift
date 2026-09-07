@@ -80,28 +80,34 @@ struct OnlineGameView: View {
                 VStack {
                     header
                     Spacer()
-                    if let state = multiplayer.latestState,
-                       !state.lastActionDescription.isEmpty || state.handDescription(for: localID) != nil {
-                        HStack(alignment: .top) {
-                            if !state.lastActionDescription.isEmpty {
-                                Text(state.lastActionDescription)
-                                    .font(.footnote)
-                                    .foregroundColor(.white.opacity(0.9))
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(2)
-                                    .padding(.horizontal, 12).padding(.vertical, 6)
-                                    .background(Capsule().fill(.ultraThinMaterial))
-                                    .frame(maxWidth: 190, alignment: .leading)
-                            }
-                            Spacer()
-                            if let handText = state.handDescription(for: localID) {
-                                HandTypeBadge(text: handText)
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 4)
-                    }
                     footer
+                }
+
+                // Last-action text and the hand-type badge live in the dead
+                // felt space between the community cards and the hero's own
+                // cards -- see the matching comment in LocalGameView for why
+                // this can't share the footer-adjacent strip with the hero
+                // seat below, or stretch full-width (the bottom-side bots
+                // from `SeatLayout` share this exact height at 4+ seats).
+                if let state = multiplayer.latestState,
+                   !state.lastActionDescription.isEmpty || state.handDescription(for: localID) != nil {
+                    VStack(spacing: 6) {
+                        if !state.lastActionDescription.isEmpty {
+                            Text(state.lastActionDescription)
+                                .font(.footnote)
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(Capsule().fill(.ultraThinMaterial))
+                        }
+                        if let handText = state.handDescription(for: localID) {
+                            HandTypeBadge(text: handText)
+                        }
+                    }
+                    .frame(maxWidth: 170)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.565)
+                    .allowsHitTesting(false)
                 }
 
                 // Hero seat: drawn last so it layers in front of the button

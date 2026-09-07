@@ -10,7 +10,14 @@ struct BettingControlsView: View {
 
     @State private var raiseAmount: Double = 0
 
-    private static let chipDenominations = [5, 10, 25, 100, 500, 1000]
+    /// Scales with the table's big blind so the same six chips stay useful
+    /// whether the blinds are $10/$20 or $400/$800 -- fixed nickel-and-dime
+    /// chips would be nearly unusable for building a bet at VIP stakes or
+    /// a late Turbo Sit & Go level.
+    private var chipDenominations: [Int] {
+        let scale = max(1, bigBlind / 20)
+        return [5, 10, 25, 100, 500, 1000].map { $0 * scale }
+    }
 
     private var toCall: Int { max(0, currentBet - player.currentBet) }
     private var minTarget: Int { currentBet == 0 ? bigBlind : currentBet + minRaise }
@@ -36,7 +43,7 @@ struct BettingControlsView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    ForEach(Self.chipDenominations, id: \.self) { amount in
+                    ForEach(chipDenominations, id: \.self) { amount in
                         ChipTokenButton(amount: amount, chipSetID: bankroll.equippedChips, isMaxedOut: raiseAmount >= Double(maxTarget)) {
                             raiseAmount = min(raiseAmount + Double(amount), Double(maxTarget))
                         }

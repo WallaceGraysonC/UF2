@@ -11,6 +11,7 @@ struct CustomTableSetupView: View {
     @State private var botCount: Double = 4
     @State private var buyIn: Double = 500
     @State private var bigBlind: Double = 20
+    @State private var difficulty: BotDifficulty = .normal
     @State private var startGame = false
 
     private var smallBlind: Int { max(1, Int(bigBlind) / 2) }
@@ -20,6 +21,12 @@ struct CustomTableSetupView: View {
             Form {
                 Section("Opponents") {
                     Stepper("\(Int(botCount)) Bots", value: $botCount, in: 1...7)
+                    Picker("Difficulty", selection: $difficulty) {
+                        ForEach(BotDifficulty.allCases) { level in
+                            Text(level.displayName).tag(level)
+                        }
+                    }
+                    .pickerStyle(.segmented)
                 }
                 Section("Starting Stack") {
                     Slider(value: $buyIn, in: 100...2000, step: 50)
@@ -59,7 +66,8 @@ struct CustomTableSetupView: View {
         .tint(PATheme.gold)
         .fullScreenCover(isPresented: $startGame) {
             LocalGameView(botCount: Int(botCount), buyIn: Int(buyIn), smallBlind: smallBlind, bigBlind: Int(bigBlind),
-                          enableResume: false, tableTitle: "Custom Table", usesBankroll: false)
+                          enableResume: false, tableTitle: "Custom Table", usesBankroll: false,
+                          mode: .customTable, difficulty: difficulty)
                 .environmentObject(bankroll)
         }
     }

@@ -67,6 +67,8 @@ struct PlayerSeatView: View {
                     Text(player.name)
                         .font(nameFont)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .layoutPriority(1)
                 }
                 Text("$\(player.chips)")
                     .font(detailFont)

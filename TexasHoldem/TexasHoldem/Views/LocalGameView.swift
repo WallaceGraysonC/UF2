@@ -24,6 +24,14 @@ struct LocalGameView: View {
     /// and busting/winning ends the session with a placement screen instead
     /// of returning to the felt.
     private let tournament: TournamentConfig?
+    /// Which bucket this table's hands/tournaments are recorded under in
+    /// `StatsManager` -- independent of `usesBankroll`/`challengeTrack`, so
+    /// even the free Custom Table gets its own stats.
+    private let mode: GameModeID
+    /// How the bots at this table play. Only Custom Table Setup and the
+    /// Game Modes screen expose a picker for this; the default Play vs Bots
+    /// quick-start always plays at `.normal`.
+    private let difficulty: BotDifficulty
     @State private var hasSettled = false
     @State private var showHandGuide = false
 
@@ -34,11 +42,14 @@ struct LocalGameView: View {
 
     init(botCount: Int = 4, buyIn: Int = 500, smallBlind: Int = 10, bigBlind: Int = 20,
          enableResume: Bool = true, tableTitle: String = "",
-         usesBankroll: Bool = true, tournament: TournamentConfig? = nil) {
+         usesBankroll: Bool = true, tournament: TournamentConfig? = nil,
+         mode: GameModeID = .playVsBots, difficulty: BotDifficulty = .normal) {
         self.enableResume = enableResume
         self.tableTitle = tableTitle
         self.usesBankroll = usesBankroll
         self.tournament = tournament
+        self.mode = mode
+        self.difficulty = difficulty
         if enableResume, let saved = GamePersistence.loadLocalGame() {
             _engine = StateObject(wrappedValue: PokerEngine(resuming: saved.engine))
             self.humanID = saved.humanID
@@ -57,9 +68,9 @@ struct LocalGameView: View {
                                 avatarID: BankrollManager.shared.equippedAvatar,
                                 avatarFrameID: BankrollManager.shared.equippedAvatarFrame)
             human.seatIndex = 0
-            let names = BotNames.uniqueNames(count: botCount)
+            let botNames = BotNames.randomNames(count: botCount)
             let bots = (1...botCount).map { i -> Player in
-                var bot = Player(id: "bot-\(i)", name: names[i - 1], chips: buyIn, isBot: true,
+                var bot = Player(id: "bot-\(i)", name: botNames[i - 1], chips: buyIn, isBot: true,
                        cardBackID: BankrollManager.shared.equippedCardBack,
                        cardFaceID: BankrollManager.shared.equippedCardFace,
                        avatarID: BotNames.randomAvatar())
@@ -113,27 +124,39 @@ struct LocalGameView: View {
                 VStack {
                     header
                     Spacer()
-                    if !engine.lastActionDescription.isEmpty || engine.handDescription(for: humanID) != nil {
-                        HStack(alignment: .top) {
-                            if !engine.lastActionDescription.isEmpty {
-                                Text(engine.lastActionDescription)
-                                    .font(.footnote)
-                                    .foregroundColor(.white.opacity(0.9))
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(2)
-                                    .padding(.horizontal, 12).padding(.vertical, 6)
-                                    .background(Capsule().fill(.ultraThinMaterial))
-                                    .frame(maxWidth: 190, alignment: .leading)
-                            }
-                            Spacer()
-                            if let handText = engine.handDescription(for: humanID) {
-                                HandTypeBadge(text: handText)
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 4)
-                    }
                     footer
+                }
+
+                // Last-action text and the hand-type badge live in the dead
+                // felt space between the community cards and the hero's own
+                // cards -- NOT stacked against the footer, since the hero's
+                // seat below is independently positioned to overlap the
+                // footer's top edge, and a footer-adjacent row would fight
+                // it for the same strip of screen (as it visibly did when
+                // both lived here). Centered and narrow rather than
+                // full-width: at 4+ seats, `SeatLayout` places the two
+                // bottom-side bots at this same height (just left/right of
+                // center, per its own doc comment), so this has to stay
+                // inside the clear channel between them instead of
+                // stretching edge-to-edge.
+                if !engine.lastActionDescription.isEmpty || engine.handDescription(for: humanID) != nil {
+                    VStack(spacing: 6) {
+                        if !engine.lastActionDescription.isEmpty {
+                            Text(engine.lastActionDescription)
+                                .font(.footnote)
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(Capsule().fill(.ultraThinMaterial))
+                        }
+                        if let handText = engine.handDescription(for: humanID) {
+                            HandTypeBadge(text: handText)
+                        }
+                    }
+                    .frame(maxWidth: 170)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.565)
+                    .allowsHitTesting(false)
                 }
 
                 // Hero seat: drawn last so it layers in front of the button
@@ -159,7 +182,19 @@ struct LocalGameView: View {
         .onAppear {
             if !resumedFromSave {
                 if usesBankroll { bankroll.applyDelta(-seatedBuyIn) }
-                engine.startNextHand()
+                // Sitting down with an empty bankroll seats the human for
+                // $0 (see `seated` above). Starting a hand anyway would
+                // immediately run into `startNextHand()`'s own "remove
+                // anyone who busted last hand" cleanup -- which, applied to
+                // a player who hasn't played a single hand yet, just erases
+                // them from their own table with no feedback: no seat, no
+                // cards, no footer, nothing to tap. Skipping straight to a
+                // hand here instead leaves `isHandInProgress` false, which
+                // is exactly the state the footer already knows how to
+                // render as a Rebuy / Top Up prompt.
+                if seatedBuyIn > 0 {
+                    engine.startNextHand()
+                }
             } else {
                 runBotTurnIfNeeded()
             }
@@ -170,7 +205,7 @@ struct LocalGameView: View {
         }
         .onChange(of: engine.activePlayerIndex) { _, _ in
             runBotTurnIfNeeded()
-            if engine.isHandInProgress, engine.currentPlayer()?.id == humanID { Haptics.yourTurn() }
+            notifyIfHumanTurn()
         }
         .onChange(of: engine.round) { _, _ in runBotTurnIfNeeded() }
         .onChange(of: engine.isHandInProgress) { _, inProgress in
@@ -331,6 +366,13 @@ struct LocalGameView: View {
             DailyChallengeManager.shared.recordTournamentFinish(placement: placement,
                                                                 bigBlindReached: engine.bigBlind)
         }
+        StatsManager.shared.recordTournamentFinish(mode: mode, placement: placement)
+        AchievementManager.shared.checkAll()
+        if placement == 1 {
+            Haptics.wonPot()
+        } else {
+            Haptics.bustedOut()
+        }
         GamePersistence.clearLocalGame()
     }
 
@@ -373,20 +415,25 @@ struct LocalGameView: View {
         if countsTowardProgress { bankroll.addXP(10) }
         if challengeTrack == .daily { DailyChallengeManager.shared.recordHandPlayed() }
 
-        if engine.showdownResults.contains(where: { $0.playerID == humanID }) {
-            Haptics.wonPot()
-        } else if engine.players.first(where: { $0.id == humanID })?.chips == 0 {
-            Haptics.bustedOut()
-        }
-
-        if let result = engine.showdownResults.first(where: { $0.playerID == humanID }) {
+        let won = engine.showdownResults.first(where: { $0.playerID == humanID })
+        if let result = won {
             if countsTowardProgress { bankroll.addXP(20) }
             if challengeTrack == .daily {
                 DailyChallengeManager.shared.recordHandWon()
                 DailyChallengeManager.shared.recordPotWon(amount: result.amountWon)
                 DailyChallengeManager.shared.recordShowdownWin(category: result.hand.category)
             }
+            AchievementManager.shared.recordShowdownWin(category: result.hand.category)
+            if difficulty == .hard { AchievementManager.shared.recordHardBotWin() }
+            Haptics.wonPot()
         }
+
+        StatsManager.shared.recordHand(
+            mode: mode, won: won != nil, amountWon: won?.amountWon ?? 0,
+            summary: won.map { "Won $\($0.amountWon) — \($0.hand.category.displayName)" } ?? "Lost the hand"
+        )
+        AchievementManager.shared.checkAll()
+
         if let tournament {
             applyBlindEscalation(tournament)
         }
@@ -436,27 +483,16 @@ struct LocalGameView: View {
         guard engine.isHandInProgress, let current = engine.currentPlayer(), current.isBot else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
             guard engine.currentPlayer()?.id == current.id else { return }
-            let action = BotAI.decideAction(for: current, engine: engine)
+            let action = BotAI.decideAction(for: current, engine: engine, difficulty: difficulty)
             engine.apply(action, by: current.id)
         }
     }
-}
 
-enum BotNames {
-    /// Kept to four characters or fewer. A seat is only about as wide as its
-    /// two cards, so anything longer either truncates or spills over the
-    /// player next to it.
-    static let pool = ["Ace", "Chip", "Duke", "Ivy", "Rae", "Jack", "Nova", "Rook",
-                       "Slim", "Cash", "Fox", "Kit", "Dice", "Onyx", "Vega", "Zed"]
-    private static let avatarPool = ["avatar.shark", "avatar.robot", "avatar.fox", "avatar.wizard", "avatar.astronaut", "avatar.dragon"]
-    static func random() -> String { pool.randomElement() ?? "Bot" }
-
-    /// Distinct names for one table. Picking independently meant a full
-    /// table could easily seat two players with the same name.
-    static func uniqueNames(count: Int) -> [String] {
-        var names = pool.shuffled()
-        while names.count < count { names += pool.shuffled() }
-        return Array(names.prefix(count))
+    /// A light tap the moment it becomes the player's turn -- there are no
+    /// sound-effect assets in this project, so haptics stand in for the
+    /// "psst, you're up" cue a sound would normally give.
+    private func notifyIfHumanTurn() {
+        guard engine.currentPlayer()?.id == humanID else { return }
+        Haptics.yourTurn()
     }
-    static func randomAvatar() -> String { avatarPool.randomElement() ?? CosmeticCatalog.defaultAvatar }
 }

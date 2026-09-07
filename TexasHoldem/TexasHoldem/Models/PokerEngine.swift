@@ -94,7 +94,7 @@ final class PokerEngine: ObservableObject {
         postBlinds()
         dealHoleCards()
 
-        activePlayerIndex = nextToAct(after: firstToActIndex(for: .preFlop))
+        activePlayerIndex = firstToActIndex(for: .preFlop)
         currentBet = bigBlind
         minRaise = bigBlind
         playersActedThisRound = []

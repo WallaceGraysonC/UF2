@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 
 /// Holds one user-uploaded photo per cosmetic category, used when that
 /// category's equipped cosmetic is its "Custom Photo" slot. Images are

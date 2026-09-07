@@ -5,11 +5,18 @@ import Combine
 /// Chips have no real-world value, cannot be purchased with real money, and
 /// cannot be cashed out -- they only exist to keep score and unlock cosmetics.
 ///
-/// State is written to both `UserDefaults` (instant local read/write) and
-/// `NSUbiquitousKeyValueStore` (Apple's free iCloud key-value sync), so the
-/// same bankroll and cosmetics follow the player to their other devices as
-/// long as they're signed into iCloud and the app's iCloud capability is
-/// enabled in Xcode. This needs no server of our own.
+/// State is written to both `UserDefaults` (instant local read/write) and,
+/// on iOS, `NSUbiquitousKeyValueStore` (Apple's free iCloud key-value sync)
+/// so the same bankroll and cosmetics follow the player to their other iOS
+/// devices as long as they're signed into iCloud and the app's iCloud
+/// capability is enabled in Xcode. This needs no server of our own.
+///
+/// The watchOS build of this same file is intentionally asymmetric: chips,
+/// lifetime peak, and XP never leave the watch (see `write(_:forKey:cloudSynced:)`
+/// and `pullFromCloudIfNewer()`), so the watch has its own small, local-only
+/// "exhibition" stack that can't gain or lose real bankroll and can't be
+/// used to inflate it either. Which cosmetic is *equipped* in each category
+/// still syncs both ways, so the watch always mirrors the phone's look.
 final class BankrollManager: ObservableObject {
     static let shared = BankrollManager()
 
@@ -23,7 +30,7 @@ final class BankrollManager: ObservableObject {
     static let bankrollTopUpFloor = 500
 
     @Published private(set) var chips: Int {
-        didSet { write(chips, forKey: Keys.chips) }
+        didSet { write(chips, forKey: Keys.chips, cloudSynced: false) }
     }
     /// The most chips this player has ever held. Only grows when `chips`
     /// exceeds its previous peak, which -- since the starting balance and
@@ -32,17 +39,17 @@ final class BankrollManager: ObservableObject {
     /// behind money actually won rather than money currently on hand, so
     /// resetting/topping up the bankroll can't be farmed to unlock everything.
     @Published private(set) var highestChips: Int {
-        didSet { write(highestChips, forKey: Keys.highestChips) }
+        didSet { write(highestChips, forKey: Keys.highestChips, cloudSynced: false) }
     }
     @Published private(set) var lastTopUpAt: Date? {
-        didSet { write(lastTopUpAt?.timeIntervalSince1970 ?? -1, forKey: Keys.lastTopUpAt) }
+        didSet { write(lastTopUpAt?.timeIntervalSince1970 ?? -1, forKey: Keys.lastTopUpAt, cloudSynced: false) }
     }
     /// Lifetime experience points, earned by playing hands (not by chip
     /// count) -- used purely to gate game modes like VIP High Stakes behind
     /// time-invested rather than money, so it can't be bought or farmed via
     /// bankroll top-ups.
     @Published private(set) var xp: Int {
-        didSet { write(xp, forKey: Keys.xp) }
+        didSet { write(xp, forKey: Keys.xp, cloudSynced: false) }
     }
     @Published private(set) var ownedCosmeticIDs: Set<String> {
         didSet { write(Array(ownedCosmeticIDs), forKey: Keys.owned) }
@@ -140,20 +147,43 @@ final class BankrollManager: ObservableObject {
         }
     }
 
-    private func write<T>(_ value: T, forKey key: String) where T: Any {
+    /// `cloudSynced` gates whether a field is allowed to leave the device at
+    /// all. It's inert on iOS (every field syncs there, matching the
+    /// existing "same bankroll everywhere" design), but on watchOS it keeps
+    /// money/progression fields (chips, peak, top-up time, XP) strictly
+    /// device-local -- the watch is a separate "exhibition" stack that can't
+    /// export real bankroll and can't import it either. Cosmetic fields are
+    /// always left at the default (`true`) so equipped looks still carry
+    /// over from the phone.
+    private func write<T>(_ value: T, forKey key: String, cloudSynced: Bool = true) where T: Any {
         defaults.set(value, forKey: key)
+        #if os(watchOS)
+        guard cloudSynced else { return }
+        #endif
         cloud.set(value, forKey: key)
     }
 
     /// On launch, if iCloud already has a value (e.g. this bankroll was set
     /// up on another device first), prefer it over a fresh local default.
+    ///
+    /// On watchOS this only ever pulls *cosmetic* fields -- chips, peak,
+    /// top-up time, and XP are read from the watch's own local `UserDefaults`
+    /// in `init` and never overwritten from the cloud, so the watch's
+    /// exhibition stack stays independent of whatever the phone's real
+    /// bankroll is doing.
     private func pullFromCloudIfNewer() {
+        #if os(watchOS)
+        guard cloud.object(forKey: Keys.equippedCardBack) != nil else { return }
+        isCloudAvailable = true
+        #else
         guard cloud.object(forKey: Keys.chips) != nil else { return }
         isCloudAvailable = true
         chips = Int(cloud.longLong(forKey: Keys.chips))
         highestChips = max(highestChips, Int(cloud.longLong(forKey: Keys.highestChips)))
         let cloudTopUp = cloud.double(forKey: Keys.lastTopUpAt)
         if cloudTopUp > 0 { lastTopUpAt = Date(timeIntervalSince1970: cloudTopUp) }
+        xp = max(xp, Int(cloud.longLong(forKey: Keys.xp)))
+        #endif
         ownedCosmeticIDs = Set(cloud.array(forKey: Keys.owned) as? [String] ?? [])
         equippedCardBack = cloud.string(forKey: Keys.equippedCardBack) ?? equippedCardBack
         equippedCardFace = cloud.string(forKey: Keys.equippedCardFace) ?? equippedCardFace
@@ -163,7 +193,6 @@ final class BankrollManager: ObservableObject {
         equippedChips = cloud.string(forKey: Keys.equippedChips) ?? equippedChips
         equippedAvatar = cloud.string(forKey: Keys.equippedAvatar) ?? equippedAvatar
         equippedAvatarFrame = cloud.string(forKey: Keys.equippedAvatarFrame) ?? equippedAvatarFrame
-        xp = max(xp, Int(cloud.longLong(forKey: Keys.xp)))
     }
 
     @objc private func cloudDidChangeExternally(_ notification: Notification) {

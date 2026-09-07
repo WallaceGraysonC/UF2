@@ -26,6 +26,10 @@ enum CardBackPalette {
         case "cardback.copper": return Color(red: 0.6, green: 0.35, blue: 0.15)
         case "cardback.gold": return .yellow
         case "cardback.holographic": return Color(red: 0.55, green: 0.8, blue: 0.95)
+        case "cardback.ivory": return Color(red: 0.93, green: 0.90, blue: 0.80)
+        case "cardback.slate": return Color(red: 0.35, green: 0.42, blue: 0.48)
+        case "cardback.emerald": return Color(red: 0.0, green: 0.55, blue: 0.35)
+        case "cardback.sunburst": return Color(red: 0.85, green: 0.55, blue: 0.10)
         default: return .blue
         }
     }
@@ -40,6 +44,9 @@ enum FeltPalette {
         case "felt.teal": return Color(red: 0.05, green: 0.35, blue: 0.35)
         case "felt.sunset": return Color(red: 0.55, green: 0.22, blue: 0.15)
         case "felt.midnightGold": return Color(red: 0.12, green: 0.1, blue: 0.05)
+        case "felt.crimson": return Color(red: 0.5, green: 0.05, blue: 0.08)
+        case "felt.ocean": return Color(red: 0.04, green: 0.28, blue: 0.45)
+        case "felt.plum": return Color(red: 0.32, green: 0.1, blue: 0.35)
         default: return Color(red: 0.05, green: 0.4, blue: 0.22)
         }
     }
@@ -59,6 +66,8 @@ enum RailPalette {
         case "rail.carbonFiber": return Color(red: 0.55, green: 0.55, blue: 0.6)
         case "rail.platinum": return Color(red: 0.85, green: 0.87, blue: 0.9)
         case "rail.crimsonLeather": return Color(red: 0.75, green: 0.25, blue: 0.3)
+        case "rail.chrome": return Color(red: 0.80, green: 0.83, blue: 0.86)
+        case "rail.emerald": return Color(red: 0.15, green: 0.75, blue: 0.45)
         default: return PATheme.gold
         }
     }
@@ -77,6 +86,12 @@ enum RailPalette {
             return (Color(red: 0.20, green: 0.20, blue: 0.22), Color(red: 0.06, green: 0.06, blue: 0.07))
         case "rail.platinum":
             return (Color(red: 0.75, green: 0.77, blue: 0.80), Color(red: 0.50, green: 0.52, blue: 0.55))
+        case "rail.mahogany":
+            return (Color(red: 0.30, green: 0.10, blue: 0.08), Color(red: 0.16, green: 0.05, blue: 0.04))
+        case "rail.chrome":
+            return (Color(red: 0.88, green: 0.90, blue: 0.92), Color(red: 0.55, green: 0.58, blue: 0.62))
+        case "rail.emerald":
+            return (Color(red: 0.08, green: 0.45, blue: 0.28), Color(red: 0.03, green: 0.20, blue: 0.12))
         default: // rail.classicOak
             return (Color(red: 0.32, green: 0.19, blue: 0.09), Color(red: 0.17, green: 0.10, blue: 0.05))
         }
@@ -107,6 +122,12 @@ enum BackdropPalette {
             return (Color(red: 0.05, green: 0.32, blue: 0.38), Color(red: 0.24, green: 0.05, blue: 0.30))
         case "backdrop.royalGold":
             return (Color(red: 0.38, green: 0.30, blue: 0.09), Color(red: 0.15, green: 0.12, blue: 0.03))
+        case "backdrop.desertDusk":
+            return (Color(red: 0.42, green: 0.24, blue: 0.14), Color(red: 0.16, green: 0.08, blue: 0.05))
+        case "backdrop.icyPeak":
+            return (Color(red: 0.18, green: 0.32, blue: 0.42), Color(red: 0.06, green: 0.12, blue: 0.18))
+        case "backdrop.speakeasy":
+            return (Color(red: 0.20, green: 0.06, blue: 0.10), Color(red: 0.06, green: 0.02, blue: 0.04))
         default: // backdrop.midnight
             return (Color(red: 0.11, green: 0.11, blue: 0.12), Color(red: 0.03, green: 0.03, blue: 0.04))
         }
@@ -141,6 +162,10 @@ enum AvatarPalette {
         case "avatar.astronaut": return "moon.stars.fill"
         case "avatar.dragon": return "flame.fill"
         case "avatar.crown": return "crown.fill"
+        case "avatar.cat": return "cat.fill"
+        case "avatar.hare": return "hare.fill"
+        case "avatar.ninja": return "eye.slash.fill"
+        case "avatar.alien": return "atom"
         default: return "person.circle.fill"
         }
     }
@@ -161,6 +186,11 @@ enum AvatarFramePalette {
         case "frame.sapphire": return AnyShapeStyle(LinearGradient(colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.1, green: 0.2, blue: 0.6)], startPoint: .top, endPoint: .bottom))
         case "frame.crimson": return AnyShapeStyle(LinearGradient(colors: [Color(red: 1.0, green: 0.4, blue: 0.45), Color(red: 0.5, green: 0.05, blue: 0.1)], startPoint: .top, endPoint: .bottom))
         case "frame.royal": return AnyShapeStyle(LinearGradient(colors: [PATheme.goldBright, Color(red: 0.35, green: 0.1, blue: 0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        case "frame.emerald": return AnyShapeStyle(LinearGradient(colors: [Color(red: 0.25, green: 0.85, blue: 0.55), Color(red: 0.05, green: 0.35, blue: 0.2)], startPoint: .top, endPoint: .bottom))
+        case "frame.obsidian": return AnyShapeStyle(LinearGradient(colors: [Color(white: 0.45), Color(white: 0.08)], startPoint: .top, endPoint: .bottom))
+        case "frame.rainbow": return AnyShapeStyle(
+            AngularGradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red], center: .center)
+        )
         default: return AnyShapeStyle(Color.clear) // frame.none
         }
     }
@@ -177,6 +207,9 @@ enum ChipPalette {
         case "chips.jade": return Color(red: 0.0, green: 0.6, blue: 0.4)
         case "chips.sapphire": return Color(red: 0.1, green: 0.3, blue: 0.9)
         case "chips.diamond": return .white
+        case "chips.ruby": return Color(red: 0.75, green: 0.05, blue: 0.20)
+        case "chips.obsidian": return Color(red: 0.10, green: 0.09, blue: 0.11)
+        case "chips.goldStandard": return Color(red: 0.85, green: 0.65, blue: 0.13)
         default: return .red // chips.classic
         }
     }
@@ -192,6 +225,9 @@ enum CardFacePalette {
         case "face.modern": return .default
         case "face.rounded": return .rounded
         case "face.blockBold": return .monospaced
+        case "face.minimal": return .default
+        case "face.elegant": return .serif
+        case "face.retro": return .rounded
         default: return .serif // face.classic
         }
     }
@@ -210,6 +246,12 @@ enum CardFacePalette {
             return isRed ? Color(red: 0.80, green: 0.38, blue: 0.05) : Color(red: 0.06, green: 0.36, blue: 0.20)
         case "face.blockBold":
             return isRed ? Color(red: 0.88, green: 0.10, blue: 0.55) : Color(red: 0.16, green: 0.05, blue: 0.36)
+        case "face.minimal":
+            return isRed ? Color(red: 0.55, green: 0.15, blue: 0.15) : Color(white: 0.12)
+        case "face.elegant":
+            return isRed ? Color(red: 0.45, green: 0.05, blue: 0.12) : Color(red: 0.05, green: 0.10, blue: 0.30)
+        case "face.retro":
+            return isRed ? Color(red: 0.85, green: 0.35, blue: 0.10) : Color(red: 0.0, green: 0.35, blue: 0.38)
         default: // face.classic
             return isRed ? PATheme.crimsonDeep : PATheme.ink
         }

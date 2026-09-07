@@ -3,95 +3,192 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EEACDA4A939F48ED84FFCE64 /* TexasHoldemApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95E38F0B33D44F84B7F4F9A1 /* TexasHoldemApp.swift */; };
-		7BEC0F0443104840B0E3B9F8 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA277FEB5534E5E9796AD8E /* Card.swift */; };
-		BF234745292543728E39B812 /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3C1864659A4978AC63C58A /* Deck.swift */; };
-		51912DB939B141E28C9A5EF6 /* HandEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580716D71A75478695137AB2 /* HandEvaluator.swift */; };
-		8FD9F5E52E3941EDB6E32DE0 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280F2CD09AAC4AC38C092C92 /* Player.swift */; };
-		1791B98328774AE2BC94F0C7 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B25FF5D960A4403A3FE62CC /* GameState.swift */; };
-		83C4981046AF4FBB8322B958 /* PokerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA2AD37D26B4074A2220EFD /* PokerEngine.swift */; };
-		A69E44FF4B374A459611AC3C /* BotAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5C25E286354587A79B935D /* BotAI.swift */; };
-		57F55B9D9FA94AB0B8E1D4E4 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */; };
-		BDF890D5EADB448EA46B9C07 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */; };
-		30B9451D4B6A42D9B7D3FEC8 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */; };
-		CF7DA99E6A8D441987CFA79B /* PocketAcesTheme.wav in Resources */ = {isa = PBXBuildFile; fileRef = 199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */; };
-		7E7CDE2435184FF0A740574D /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18678D05C7E41199833E374 /* Haptics.swift */; };
-		F54BB3364F7342FA8128DEBC /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
-		29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */; };
-		54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */; };
-		6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D970069100F94956BFF5129C /* CustomTableSetupView.swift */; };
-		DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */; };
-		93DF289C11AE4D66A360DBCA /* BankrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878052A3CB984E92943F12F0 /* BankrollManager.swift */; };
-		A6EE0A5C79524B1B955A9630 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D06747AF18A4010A158D74F /* CardView.swift */; };
-		F804B7C2589744859C9C28A6 /* PlayerSeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502F570797864A4EB74F5663 /* PlayerSeatView.swift */; };
-		4C9235E9CE7847149E972128 /* BettingControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB475EA7D6404FBD92A4E43B /* BettingControlsView.swift */; };
-		A286A44F898A4A61B326AE76 /* TableFeltView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2943A85F330426A8B568A79 /* TableFeltView.swift */; };
-		C042871E19DD40DE95F37824 /* SeatLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 585B46C6C9394BFF9EB16344 /* SeatLayout.swift */; };
-		387778D0CDDF4739AFFEBC82 /* LocalGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D56EF32C13E4E42B5239787 /* LocalGameView.swift */; };
-		963E30E74D884225B79ACD8F /* OnlineGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE059AF08C74F02AF63A333 /* OnlineGameView.swift */; };
-		C19A6753030E409A9F6F1001 /* MatchmakingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6BD0061594F1D9F87FDC8 /* MatchmakingView.swift */; };
-		15F789735C7F4A13A0C4C955 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DB85D8C4E8420E974356FE /* StoreView.swift */; };
-		85DB2610179B41648A46F54A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6265606A0F94900A769AAC4 /* SettingsView.swift */; };
-		4A6DC6D37C8744638FFBEF71 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E6F19B5B2D40649A8E6FD9 /* HomeView.swift */; };
-		78BB248507E24894BD28E60E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A49A1F06E70840ED845BF638 /* Assets.xcassets */; };
-		C45B5EF26D8C4DD09A3C0EC6 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B0CA798BFE94EB8B3F6BD63 /* GameKit.framework */; };
-		142CEAE7B38B4F1CAD8BEEAD /* EngineSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */; };
-		6F08DAC2137F4C9FB5518018 /* GamePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FD0EAFAF9941C78114214B /* GamePersistence.swift */; };
 		11018C75B7054CFAB1790A41 /* HandRankingsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */; };
+		142CEAE7B38B4F1CAD8BEEAD /* EngineSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */; };
+		15F789735C7F4A13A0C4C955 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DB85D8C4E8420E974356FE /* StoreView.swift */; };
+		1791B98328774AE2BC94F0C7 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B25FF5D960A4403A3FE62CC /* GameState.swift */; };
 		20BA26A63EA64006AC4F0A75 /* CosmeticPalettes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */; };
-		B465E83382BB4F7DA14720AB /* PATheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F52557ED72347C68000B399 /* PATheme.swift */; };
+		29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */; };
+		30B9451D4B6A42D9B7D3FEC8 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */; };
+		387778D0CDDF4739AFFEBC82 /* LocalGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D56EF32C13E4E42B5239787 /* LocalGameView.swift */; };
+		4A6DC6D37C8744638FFBEF71 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E6F19B5B2D40649A8E6FD9 /* HomeView.swift */; };
+		4C9235E9CE7847149E972128 /* BettingControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB475EA7D6404FBD92A4E43B /* BettingControlsView.swift */; };
+		51912DB939B141E28C9A5EF6 /* HandEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580716D71A75478695137AB2 /* HandEvaluator.swift */; };
+		54F2598A532D499082739FFA /* DailyChallengeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */; };
+		57F55B9D9FA94AB0B8E1D4E4 /* GameCenterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */; };
+		63D6061230493022002C87DB /* PocketAces Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 63D605F230493020002C87DB /* PocketAces Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6D841CE86EA043038C1E9E91 /* CustomTableSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D970069100F94956BFF5129C /* CustomTableSetupView.swift */; };
+		6F08DAC2137F4C9FB5518018 /* GamePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FD0EAFAF9941C78114214B /* GamePersistence.swift */; };
+		78BB248507E24894BD28E60E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A49A1F06E70840ED845BF638 /* Assets.xcassets */; };
+		7BEC0F0443104840B0E3B9F8 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA277FEB5534E5E9796AD8E /* Card.swift */; };
 		8175C0635F6047769968C35B /* HandTypeBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA906DE75764AE59CD2F15C /* HandTypeBadge.swift */; };
+		83C4981046AF4FBB8322B958 /* PokerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA2AD37D26B4074A2220EFD /* PokerEngine.swift */; };
+		85DB2610179B41648A46F54A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6265606A0F94900A769AAC4 /* SettingsView.swift */; };
+		8FD9F5E52E3941EDB6E32DE0 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280F2CD09AAC4AC38C092C92 /* Player.swift */; };
+		93DF289C11AE4D66A360DBCA /* BankrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878052A3CB984E92943F12F0 /* BankrollManager.swift */; };
+		963E30E74D884225B79ACD8F /* OnlineGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE059AF08C74F02AF63A333 /* OnlineGameView.swift */; };
+		A286A44F898A4A61B326AE76 /* TableFeltView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2943A85F330426A8B568A79 /* TableFeltView.swift */; };
+		A69E44FF4B374A459611AC3C /* BotAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5C25E286354587A79B935D /* BotAI.swift */; };
+		A6EE0A5C79524B1B955A9630 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D06747AF18A4010A158D74F /* CardView.swift */; };
+		B465E83382BB4F7DA14720AB /* PATheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F52557ED72347C68000B399 /* PATheme.swift */; };
+		BDF890D5EADB448EA46B9C07 /* MultiplayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */; };
+		BF234745292543728E39B812 /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3C1864659A4978AC63C58A /* Deck.swift */; };
+		C042871E19DD40DE95F37824 /* SeatLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 585B46C6C9394BFF9EB16344 /* SeatLayout.swift */; };
+		C19A6753030E409A9F6F1001 /* MatchmakingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6BD0061594F1D9F87FDC8 /* MatchmakingView.swift */; };
+		C45B5EF26D8C4DD09A3C0EC6 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B0CA798BFE94EB8B3F6BD63 /* GameKit.framework */; };
+		CF7DA99E6A8D441987CFA79B /* PocketAcesTheme.wav in Resources */ = {isa = PBXBuildFile; fileRef = 199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */; };
+		DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */; };
+		EEACDA4A939F48ED84FFCE64 /* TexasHoldemApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95E38F0B33D44F84B7F4F9A1 /* TexasHoldemApp.swift */; };
+		F54BB3364F7342FA8128DEBC /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
+		F804B7C2589744859C9C28A6 /* PlayerSeatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502F570797864A4EB74F5663 /* PlayerSeatView.swift */; };
+		F830B8F3BAAC98C4E749CF59 /* BotNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D50DA5C09224C0CD5B565F /* BotNames.swift */; };
+		23CBC4CF3879600F6BB48B52 /* GameModesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98111989E60BFB782F3E1657 /* GameModesView.swift */; };
+		7BA654EF53FAF8CE803E40EA /* BotDifficulty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FF66042B37A1375FC2957E /* BotDifficulty.swift */; };
+		3772AD6F317CF734E5E776FA /* BotDifficulty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FF66042B37A1375FC2957E /* BotDifficulty.swift */; };
+		765CE8C64771C39327AE05A6 /* StatsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0554C2ACAE49EFADC872427 /* StatsManager.swift */; };
+		8B57328B8AFEEDEE20DFBA1F /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ED737EFD48BBCD9B98B46F /* AchievementManager.swift */; };
+		4E8536743B28673BAC6D712B /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBC40ACA926589EF1CCCCF31 /* StatsView.swift */; };
+		148E1F08A35BEC80AAFA4237 /* BotNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D50DA5C09224C0CD5B565F /* BotNames.swift */; };
+		ADBE084C731E6BFEF25D9107 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA277FEB5534E5E9796AD8E /* Card.swift */; };
+		0CEFC32926089741E13B9FDE /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3C1864659A4978AC63C58A /* Deck.swift */; };
+		C01D4EE14AE722ACDB31646F /* HandEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580716D71A75478695137AB2 /* HandEvaluator.swift */; };
+		E601D15F7B2A62B144C076B2 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280F2CD09AAC4AC38C092C92 /* Player.swift */; };
+		1988C24F4A4D87B22196A868 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B25FF5D960A4403A3FE62CC /* GameState.swift */; };
+		040E7837B4A40D024F69EE51 /* PokerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA2AD37D26B4074A2220EFD /* PokerEngine.swift */; };
+		D0F1F118DD0DDBC2DD90394C /* EngineSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */; };
+		9476B1D6FABC9E4FF02B14DB /* GamePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FD0EAFAF9941C78114214B /* GamePersistence.swift */; };
+		C26E09889AB7FE75AFE8C6CD /* BotAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5C25E286354587A79B935D /* BotAI.swift */; };
+		489527BED4052BC3ACA5A354 /* Cosmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */; };
+		164C5CD09AE42D352B9DBB07 /* CosmeticPalettes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */; };
+		5D973FE3EC9B6F408D34A490 /* CustomCosmeticStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */; };
+		98428B0AD75A741E3990F1D7 /* BankrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878052A3CB984E92943F12F0 /* BankrollManager.swift */; };
+		E9848CBB892FBBE16598E5DC /* PATheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F52557ED72347C68000B399 /* PATheme.swift */; };
+		49ACD6AD22C3BD1B8D7D220C /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA253D7BEEB80CDA4001248B /* Haptics.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		63D605FF30493022002C87DB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97321E64515E419A8657C14E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 63D605F130493020002C87DB;
+			remoteInfo = "PocketAces Watch App";
+		};
+		63D6060930493022002C87DB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97321E64515E419A8657C14E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 63D605F130493020002C87DB;
+			remoteInfo = "PocketAces Watch App";
+		};
+		63D6061030493022002C87DB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97321E64515E419A8657C14E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 63D605F130493020002C87DB;
+			remoteInfo = "PocketAces Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		63D6061330493022002C87DB /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				63D6061230493022002C87DB /* PocketAces Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		95E38F0B33D44F84B7F4F9A1 /* TexasHoldemApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasHoldemApp.swift; sourceTree = "<group>"; };
-		2DA277FEB5534E5E9796AD8E /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
-		CE3C1864659A4978AC63C58A /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
-		580716D71A75478695137AB2 /* HandEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandEvaluator.swift; sourceTree = "<group>"; };
+		07FD0EAFAF9941C78114214B /* GamePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePersistence.swift; sourceTree = "<group>"; };
+		A6D50DA5C09224C0CD5B565F /* BotNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotNames.swift; sourceTree = "<group>"; };
+		98111989E60BFB782F3E1657 /* GameModesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModesView.swift; sourceTree = "<group>"; };
+		80FF66042B37A1375FC2957E /* BotDifficulty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotDifficulty.swift; sourceTree = "<group>"; };
+		F0554C2ACAE49EFADC872427 /* StatsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsManager.swift; sourceTree = "<group>"; };
+		18ED737EFD48BBCD9B98B46F /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
+		FBC40ACA926589EF1CCCCF31 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		0F52557ED72347C68000B399 /* PATheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PATheme.swift; sourceTree = "<group>"; };
+		18E6BD0061594F1D9F87FDC8 /* MatchmakingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchmakingView.swift; sourceTree = "<group>"; };
+		199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = PocketAcesTheme.wav; sourceTree = "<group>"; };
 		280F2CD09AAC4AC38C092C92 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
-		9B25FF5D960A4403A3FE62CC /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
-		DBA2AD37D26B4074A2220EFD /* PokerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokerEngine.swift; sourceTree = "<group>"; };
+		2DA277FEB5534E5E9796AD8E /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandRankingsGuideView.swift; sourceTree = "<group>"; };
+		502F570797864A4EB74F5663 /* PlayerSeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSeatView.swift; sourceTree = "<group>"; };
+		53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
+		580716D71A75478695137AB2 /* HandEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandEvaluator.swift; sourceTree = "<group>"; };
+		585B46C6C9394BFF9EB16344 /* SeatLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatLayout.swift; sourceTree = "<group>"; };
+		5B0CA798BFE94EB8B3F6BD63 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		63D605F230493020002C87DB /* PocketAces Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PocketAces Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		63D605FE30493022002C87DB /* PocketAces Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PocketAces Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		63D6060830493022002C87DB /* PocketAces Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PocketAces Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FE059AF08C74F02AF63A333 /* OnlineGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineGameView.swift; sourceTree = "<group>"; };
+		7BB337FDC08C42B3A03B1963 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7DA906DE75764AE59CD2F15C /* HandTypeBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTypeBadge.swift; sourceTree = "<group>"; };
+		878052A3CB984E92943F12F0 /* BankrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankrollManager.swift; sourceTree = "<group>"; };
+		CA253D7BEEB80CDA4001248B /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		8D06747AF18A4010A158D74F /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		8D56EF32C13E4E42B5239787 /* LocalGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalGameView.swift; sourceTree = "<group>"; };
+		8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
+		92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeView.swift; sourceTree = "<group>"; };
+		95E38F0B33D44F84B7F4F9A1 /* TexasHoldemApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TexasHoldemApp.swift; sourceTree = "<group>"; };
 		9A5C25E286354587A79B935D /* BotAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotAI.swift; sourceTree = "<group>"; };
+		9B25FF5D960A4403A3FE62CC /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
+		A49A1F06E70840ED845BF638 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AAACF9AE513C4E61B04C3283 /* TexasHoldem.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasHoldem.entitlements; sourceTree = "<group>"; };
+		AB475EA7D6404FBD92A4E43B /* BettingControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BettingControlsView.swift; sourceTree = "<group>"; };
 		AC7FC6281E224306BF0544C6 /* GameCenterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenterManager.swift; sourceTree = "<group>"; };
 		ACB39F40A32A47129079C0CB /* MultiplayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiplayerMatch.swift; sourceTree = "<group>"; };
-		8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
-		199D69CB666D48B690E85E94 /* PocketAcesTheme.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = PocketAcesTheme.wav; sourceTree = "<group>"; };
-		D18678D05C7E41199833E374 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
-		CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
-		BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCosmeticStore.swift; sourceTree = "<group>"; };
-		53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeManager.swift; sourceTree = "<group>"; };
-		D970069100F94956BFF5129C /* CustomTableSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableSetupView.swift; sourceTree = "<group>"; };
-		92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyChallengeView.swift; sourceTree = "<group>"; };
-		878052A3CB984E92943F12F0 /* BankrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankrollManager.swift; sourceTree = "<group>"; };
-		8D06747AF18A4010A158D74F /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
-		502F570797864A4EB74F5663 /* PlayerSeatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSeatView.swift; sourceTree = "<group>"; };
-		AB475EA7D6404FBD92A4E43B /* BettingControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BettingControlsView.swift; sourceTree = "<group>"; };
-		C2943A85F330426A8B568A79 /* TableFeltView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableFeltView.swift; sourceTree = "<group>"; };
-		585B46C6C9394BFF9EB16344 /* SeatLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeatLayout.swift; sourceTree = "<group>"; };
-		8D56EF32C13E4E42B5239787 /* LocalGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalGameView.swift; sourceTree = "<group>"; };
-		6FE059AF08C74F02AF63A333 /* OnlineGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineGameView.swift; sourceTree = "<group>"; };
-		18E6BD0061594F1D9F87FDC8 /* MatchmakingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchmakingView.swift; sourceTree = "<group>"; };
-		F5DB85D8C4E8420E974356FE /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
-		D6265606A0F94900A769AAC4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		C4E6F19B5B2D40649A8E6FD9 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		AAACF9AE513C4E61B04C3283 /* TexasHoldem.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TexasHoldem.entitlements; sourceTree = "<group>"; };
-		7BB337FDC08C42B3A03B1963 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A49A1F06E70840ED845BF638 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		5B0CA798BFE94EB8B3F6BD63 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
-		F0733EDF6609423DA62D34EE /* TexasHoldem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TexasHoldem.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineSnapshot.swift; sourceTree = "<group>"; };
-		07FD0EAFAF9941C78114214B /* GamePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePersistence.swift; sourceTree = "<group>"; };
-		4ACC8320C8684549899A6844 /* HandRankingsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandRankingsGuideView.swift; sourceTree = "<group>"; };
 		B471940696FF478A8FEB77A3 /* CosmeticPalettes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmeticPalettes.swift; sourceTree = "<group>"; };
-		0F52557ED72347C68000B399 /* PATheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PATheme.swift; sourceTree = "<group>"; };
-		7DA906DE75764AE59CD2F15C /* HandTypeBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTypeBadge.swift; sourceTree = "<group>"; };
+		BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCosmeticStore.swift; sourceTree = "<group>"; };
+		C2943A85F330426A8B568A79 /* TableFeltView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableFeltView.swift; sourceTree = "<group>"; };
+		C4E6F19B5B2D40649A8E6FD9 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		CB13FBC82E1F44EB881008B8 /* Cosmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cosmetic.swift; sourceTree = "<group>"; };
+		CE3C1864659A4978AC63C58A /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		D6265606A0F94900A769AAC4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D970069100F94956BFF5129C /* CustomTableSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableSetupView.swift; sourceTree = "<group>"; };
+		DBA2AD37D26B4074A2220EFD /* PokerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokerEngine.swift; sourceTree = "<group>"; };
+		DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineSnapshot.swift; sourceTree = "<group>"; };
+		F0733EDF6609423DA62D34EE /* Pocket Aces.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pocket Aces.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5DB85D8C4E8420E974356FE /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		63D605F330493020002C87DB /* PocketAces Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "PocketAces Watch App"; sourceTree = "<group>"; };
+		63D6060130493022002C87DB /* PocketAces Watch AppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "PocketAces Watch AppTests"; sourceTree = "<group>"; };
+		63D6060B30493022002C87DB /* PocketAces Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "PocketAces Watch AppUITests"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		63D605EF30493020002C87DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D605FB30493022002C87DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D6060530493022002C87DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		63FDAE76B0284DD480D25CA4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -103,22 +200,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		27BE86AB473F43A7835D0592 = {
-			isa = PBXGroup;
-			children = (
-				1265F756CDFE4DC69FBEB518 /* TexasHoldem */,
-				96F121C2D5E341D582D27F35 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		96F121C2D5E341D582D27F35 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F0733EDF6609423DA62D34EE /* TexasHoldem.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		1265F756CDFE4DC69FBEB518 /* TexasHoldem */ = {
 			isa = PBXGroup;
 			children = (
@@ -133,6 +214,37 @@
 			path = TexasHoldem;
 			sourceTree = "<group>";
 		};
+		27BE86AB473F43A7835D0592 = {
+			isa = PBXGroup;
+			children = (
+				1265F756CDFE4DC69FBEB518 /* TexasHoldem */,
+				63D605F330493020002C87DB /* PocketAces Watch App */,
+				63D6060130493022002C87DB /* PocketAces Watch AppTests */,
+				63D6060B30493022002C87DB /* PocketAces Watch AppUITests */,
+				96F121C2D5E341D582D27F35 /* Products */,
+				63D605ED3047EC0F002C87DB /* Recovered References */,
+			);
+			sourceTree = "<group>";
+		};
+		63D605ED3047EC0F002C87DB /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				5B0CA798BFE94EB8B3F6BD63 /* GameKit.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		96F121C2D5E341D582D27F35 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F0733EDF6609423DA62D34EE /* Pocket Aces.app */,
+				63D605F230493020002C87DB /* PocketAces Watch App.app */,
+				63D605FE30493022002C87DB /* PocketAces Watch AppTests.xctest */,
+				63D6060830493022002C87DB /* PocketAces Watch AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		AEFD5B2B8C0244859272F62F /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,6 +257,8 @@
 				9A5C25E286354587A79B935D /* BotAI.swift */,
 				DBD0E64316C64C629A2788DB /* EngineSnapshot.swift */,
 				07FD0EAFAF9941C78114214B /* GamePersistence.swift */,
+				A6D50DA5C09224C0CD5B565F /* BotNames.swift */,
+				80FF66042B37A1375FC2957E /* BotDifficulty.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -167,7 +281,9 @@
 				53F7F6FCC0C04E399470E2D1 /* DailyChallengeManager.swift */,
 				BE752BF2C7574708ADE58DAC /* CustomCosmeticStore.swift */,
 				8F94A90CFB4B4DD19D45A100 /* AudioManager.swift */,
-				D18678D05C7E41199833E374 /* Haptics.swift */,
+				F0554C2ACAE49EFADC872427 /* StatsManager.swift */,
+				18ED737EFD48BBCD9B98B46F /* AchievementManager.swift */,
+				CA253D7BEEB80CDA4001248B /* Haptics.swift */,
 			);
 			path = Store;
 			sourceTree = "<group>";
@@ -191,6 +307,8 @@
 				7DA906DE75764AE59CD2F15C /* HandTypeBadge.swift */,
 				D970069100F94956BFF5129C /* CustomTableSetupView.swift */,
 				92132BE0C5C041A1967D4DC1 /* DailyChallengeView.swift */,
+				98111989E60BFB782F3E1657 /* GameModesView.swift */,
+				FBC40ACA926589EF1CCCCF31 /* StatsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -208,6 +326,74 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		63D605F130493020002C87DB /* PocketAces Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 63D6061A30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch App" */;
+			buildPhases = (
+				63D605EE30493020002C87DB /* Sources */,
+				63D605EF30493020002C87DB /* Frameworks */,
+				63D605F030493020002C87DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				63D605F330493020002C87DB /* PocketAces Watch App */,
+			);
+			name = "PocketAces Watch App";
+			packageProductDependencies = (
+			);
+			productName = "PocketAces Watch App";
+			productReference = 63D605F230493020002C87DB /* PocketAces Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		63D605FD30493022002C87DB /* PocketAces Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 63D6061B30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch AppTests" */;
+			buildPhases = (
+				63D605FA30493022002C87DB /* Sources */,
+				63D605FB30493022002C87DB /* Frameworks */,
+				63D605FC30493022002C87DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				63D6060030493022002C87DB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				63D6060130493022002C87DB /* PocketAces Watch AppTests */,
+			);
+			name = "PocketAces Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "PocketAces Watch AppTests";
+			productReference = 63D605FE30493022002C87DB /* PocketAces Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		63D6060730493022002C87DB /* PocketAces Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 63D6061C30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch AppUITests" */;
+			buildPhases = (
+				63D6060430493022002C87DB /* Sources */,
+				63D6060530493022002C87DB /* Frameworks */,
+				63D6060630493022002C87DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				63D6060A30493022002C87DB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				63D6060B30493022002C87DB /* PocketAces Watch AppUITests */,
+			);
+			name = "PocketAces Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "PocketAces Watch AppUITests";
+			productReference = 63D6060830493022002C87DB /* PocketAces Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		EBBCE79C507C4252A03E9EE7 /* TexasHoldem */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7D615D92878D42719027A5CA /* Build configuration list for PBXNativeTarget "TexasHoldem" */;
@@ -215,14 +401,16 @@
 				ABCFD54CB0D641F6AD2EE4A9 /* Sources */,
 				63FDAE76B0284DD480D25CA4 /* Frameworks */,
 				A6A20F15770746BFBE1F16DE /* Resources */,
+				63D6061330493022002C87DB /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				63D6061130493022002C87DB /* PBXTargetDependency */,
 			);
 			name = TexasHoldem;
 			productName = TexasHoldem;
-			productReference = F0733EDF6609423DA62D34EE /* TexasHoldem.app */;
+			productReference = F0733EDF6609423DA62D34EE /* Pocket Aces.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -232,9 +420,20 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1520;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 1520;
 				TargetAttributes = {
+					63D605F130493020002C87DB = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					63D605FD30493022002C87DB = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 63D605F130493020002C87DB;
+					};
+					63D6060730493022002C87DB = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 63D605F130493020002C87DB;
+					};
 					EBBCE79C507C4252A03E9EE7 = {
 						CreatedOnToolsVersion = 15.2;
 					};
@@ -254,11 +453,35 @@
 			projectRoot = "";
 			targets = (
 				EBBCE79C507C4252A03E9EE7 /* TexasHoldem */,
+				63D605F130493020002C87DB /* PocketAces Watch App */,
+				63D605FD30493022002C87DB /* PocketAces Watch AppTests */,
+				63D6060730493022002C87DB /* PocketAces Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		63D605F030493020002C87DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D605FC30493022002C87DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D6060630493022002C87DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A6A20F15770746BFBE1F16DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -271,6 +494,43 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		63D605EE30493020002C87DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADBE084C731E6BFEF25D9107 /* Card.swift in Sources */,
+				0CEFC32926089741E13B9FDE /* Deck.swift in Sources */,
+				C01D4EE14AE722ACDB31646F /* HandEvaluator.swift in Sources */,
+				E601D15F7B2A62B144C076B2 /* Player.swift in Sources */,
+				1988C24F4A4D87B22196A868 /* GameState.swift in Sources */,
+				040E7837B4A40D024F69EE51 /* PokerEngine.swift in Sources */,
+				D0F1F118DD0DDBC2DD90394C /* EngineSnapshot.swift in Sources */,
+				9476B1D6FABC9E4FF02B14DB /* GamePersistence.swift in Sources */,
+				C26E09889AB7FE75AFE8C6CD /* BotAI.swift in Sources */,
+				148E1F08A35BEC80AAFA4237 /* BotNames.swift in Sources */,
+				3772AD6F317CF734E5E776FA /* BotDifficulty.swift in Sources */,
+				489527BED4052BC3ACA5A354 /* Cosmetic.swift in Sources */,
+				164C5CD09AE42D352B9DBB07 /* CosmeticPalettes.swift in Sources */,
+				5D973FE3EC9B6F408D34A490 /* CustomCosmeticStore.swift in Sources */,
+				98428B0AD75A741E3990F1D7 /* BankrollManager.swift in Sources */,
+				E9848CBB892FBBE16598E5DC /* PATheme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D605FA30493022002C87DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63D6060430493022002C87DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ABCFD54CB0D641F6AD2EE4A9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -309,13 +569,313 @@
 				DB1BC58297E543F4823A5351 /* DailyChallengeView.swift in Sources */,
 				29A52FCD1EDE4E7B85D25044 /* CustomCosmeticStore.swift in Sources */,
 				30B9451D4B6A42D9B7D3FEC8 /* AudioManager.swift in Sources */,
-				7E7CDE2435184FF0A740574D /* Haptics.swift in Sources */,
+				F830B8F3BAAC98C4E749CF59 /* BotNames.swift in Sources */,
+				23CBC4CF3879600F6BB48B52 /* GameModesView.swift in Sources */,
+				7BA654EF53FAF8CE803E40EA /* BotDifficulty.swift in Sources */,
+				765CE8C64771C39327AE05A6 /* StatsManager.swift in Sources */,
+				8B57328B8AFEEDEE20DFBA1F /* AchievementManager.swift in Sources */,
+				4E8536743B28673BAC6D712B /* StatsView.swift in Sources */,
+				49ACD6AD22C3BD1B8D7D220C /* Haptics.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		63D6060030493022002C87DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 63D605F130493020002C87DB /* PocketAces Watch App */;
+			targetProxy = 63D605FF30493022002C87DB /* PBXContainerItemProxy */;
+		};
+		63D6060A30493022002C87DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 63D605F130493020002C87DB /* PocketAces Watch App */;
+			targetProxy = 63D6060930493022002C87DB /* PBXContainerItemProxy */;
+		};
+		63D6061130493022002C87DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 63D605F130493020002C87DB /* PocketAces Watch App */;
+			targetProxy = 63D6061030493022002C87DB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		2879CE13577C41B5973A1BD1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TexasHoldem/TexasHoldem.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TexasHoldem/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem;
+				PRODUCT_NAME = "Pocket Aces";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2C7BE4AD813B4BF5BCB8B8C9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		63D6061430493022002C87DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pocket Aces";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.wallacegrayson.texasholdem;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		63D6061530493022002C87DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pocket Aces";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.wallacegrayson.texasholdem;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		63D6061630493022002C87DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "GW.PocketAces---Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PocketAces Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PocketAces Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		63D6061730493022002C87DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "GW.PocketAces---Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PocketAces Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PocketAces Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		63D6061830493022002C87DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "GW.PocketAces---Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "PocketAces Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		63D6061930493022002C87DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "GW.PocketAces---Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "PocketAces Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		98F3A64DDFC74C1CA8D8D00D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TexasHoldem/TexasHoldem.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TexasHoldem/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem;
+				PRODUCT_NAME = "Pocket Aces";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		FA71A1018CDE440C9AC46423 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -376,119 +936,32 @@
 			};
 			name = Debug;
 		};
-		2C7BE4AD813B4BF5BCB8B8C9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		2879CE13577C41B5973A1BD1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = TexasHoldem/TexasHoldem.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = TexasHoldem/Resources/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem;
-				PRODUCT_NAME = "Pocket Aces";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		98F3A64DDFC74C1CA8D8D00D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = TexasHoldem/TexasHoldem.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = TexasHoldem/Resources/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.wallacegrayson.texasholdem;
-				PRODUCT_NAME = "Pocket Aces";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A05D2F9CE59740D8A488CAEB /* Build configuration list for PBXProject "TexasHoldem" */ = {
+		63D6061A30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FA71A1018CDE440C9AC46423 /* Debug */,
-				2C7BE4AD813B4BF5BCB8B8C9 /* Release */,
+				63D6061430493022002C87DB /* Debug */,
+				63D6061530493022002C87DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		63D6061B30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				63D6061630493022002C87DB /* Debug */,
+				63D6061730493022002C87DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		63D6061C30493022002C87DB /* Build configuration list for PBXNativeTarget "PocketAces Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				63D6061830493022002C87DB /* Debug */,
+				63D6061930493022002C87DB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -498,6 +971,15 @@
 			buildConfigurations = (
 				2879CE13577C41B5973A1BD1 /* Debug */,
 				98F3A64DDFC74C1CA8D8D00D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A05D2F9CE59740D8A488CAEB /* Build configuration list for PBXProject "TexasHoldem" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA71A1018CDE440C9AC46423 /* Debug */,
+				2C7BE4AD813B4BF5BCB8B8C9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

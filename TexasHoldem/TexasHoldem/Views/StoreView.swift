@@ -16,26 +16,53 @@ struct StoreView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                ScrollView(.horizontal, showsIndicators: false) {
+            VStack(spacing: 0) {
+                VStack(spacing: 10) {
                     HStack(spacing: 8) {
-                        ForEach(CosmeticKind.allCases, id: \.self) { kind in
-                            Button {
-                                selectedKind = kind
-                            } label: {
-                                Text(kind.displayName)
-                                    .font(.subheadline.bold())
-                                    .padding(.horizontal, 14).padding(.vertical, 8)
-                                    .background(
-                                        Capsule().fill(selectedKind == kind ? AnyShapeStyle(PATheme.goldMaterial) : AnyShapeStyle(Color.white.opacity(0.08)))
-                                    )
-                                    .foregroundColor(selectedKind == kind ? PATheme.ink : .white)
-                            }
+                        ZStack {
+                            Circle().fill(PATheme.goldMaterial.opacity(0.22))
+                            Image(systemName: "cart.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(PATheme.goldBright)
                         }
+                        .frame(width: 34, height: 34)
+
+                        Text("Store")
+                            .font(.system(size: 30, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
                     }
-                    .padding(.horizontal)
+                    .padding(.bottom, 2)
+
+                    Label("$\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
+                        .font(.title3.bold())
+                        .foregroundColor(PATheme.goldBright)
+                        .padding(.horizontal, 18).padding(.vertical, 8)
+                        .background(Capsule().fill(Color.white.opacity(0.06)))
+                        .overlay(Capsule().stroke(PATheme.gold.opacity(0.35), lineWidth: 1))
+
+                    VStack(spacing: 2) {
+                        Text("Spends your main game chips only — the Apple Watch app keeps its own separate practice chips, untouched by the store.")
+                        (Text(Image(systemName: "applewatch")) + Text(" marks looks that also show up on the watch. Custom Photo uploads never cross over."))
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+
+                    categoryPicker
+
+                    if selectedKind.crossesOverToWatch {
+                        Label("Also appears on the Apple Watch app", systemImage: "applewatch")
+                            .font(.caption2.bold())
+                            .foregroundColor(PATheme.goldBright)
+                            .padding(.horizontal, 12).padding(.vertical, 5)
+                            .background(Capsule().fill(Color.white.opacity(0.08)))
+                    }
                 }
-                .padding(.vertical, 8)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.black.opacity(0.15))
 
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 16)], spacing: 16) {
@@ -47,16 +74,46 @@ struct StoreView: View {
                 }
             }
             .tint(PATheme.gold)
-            .navigationTitle("Store")
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") { dismiss() }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Label("\(bankroll.chips)", systemImage: "dollarsign.circle.fill")
-                        .foregroundColor(PATheme.goldBright)
+            }
+        }
+    }
+
+    /// A dropdown in place of a horizontally-scrolling row of pills, so all
+    /// 8 categories are reachable in one tap instead of a horizontal swipe.
+    private var categoryPicker: some View {
+        Menu {
+            ForEach(CosmeticKind.allCases, id: \.self) { kind in
+                Button {
+                    selectedKind = kind
+                } label: {
+                    if kind.crossesOverToWatch {
+                        Label(kind.displayName, systemImage: "applewatch")
+                    } else {
+                        Text(kind.displayName)
+                    }
                 }
             }
+        } label: {
+            HStack(spacing: 8) {
+                if selectedKind.crossesOverToWatch {
+                    Image(systemName: "applewatch")
+                        .font(.caption)
+                }
+                Text(selectedKind.displayName)
+                    .font(.headline.bold())
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 18).padding(.vertical, 10)
+            .background(Capsule().fill(PATheme.goldMaterial.opacity(0.22)))
+            .overlay(Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1))
         }
     }
 }
@@ -88,7 +145,6 @@ private struct CosmeticCard: View {
     var body: some View {
         VStack(spacing: 10) {
             swatch
-                .frame(height: 70)
                 .opacity(unlocked ? 1 : 0.4)
             Text(item.name).font(.subheadline.bold())
 
@@ -201,49 +257,58 @@ private struct CosmeticCard: View {
         }
     }
 
-    @ViewBuilder
+    /// Every category renders inside this same 70×70 box -- cards, chips,
+    /// and avatars are naturally smaller than that and center within it,
+    /// while felt/rail/backdrop (which have no intrinsic size of their own)
+    /// used to just stretch to fill the grid cell's full width instead of
+    /// matching everything else. Custom Photo already happened to use 70×70
+    /// on its own; this just makes that the one shared rule instead of a
+    /// coincidence.
     private var swatch: some View {
-        if isCustomSlot {
-            customSwatch
-        } else {
-            switch item.kind {
-            case .cardBack:
-                CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
-            case .cardFace:
-                CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
-            case .tableFelt:
-                RoundedRectangle(cornerRadius: 10).fill(feltColor)
-            case .tableRail:
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(RailPalette.gradient(for: item.id))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
-                            .padding(4)
-                    )
-            case .tableBackdrop:
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(BackdropPalette.gradient(for: item.id))
-            case .chipSet:
-                HStack(spacing: -8) {
-                    Circle().fill(chipColor).frame(width: 30, height: 30)
-                    Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
-                }
-            case .avatar:
-                Image(systemName: AvatarPalette.symbol(for: item.id))
-                    .font(.system(size: 34))
-                    .foregroundColor(.white)
-            case .avatarFrame:
-                ZStack {
-                    Circle().fill(Color.black.opacity(0.35))
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 20))
+        Group {
+            if isCustomSlot {
+                customSwatch
+            } else {
+                switch item.kind {
+                case .cardBack:
+                    CardView(card: nil, faceDown: true, cardBackID: item.id, width: 44)
+                case .cardFace:
+                    CardView(card: Card(rank: .ace, suit: .spades), cardFaceID: item.id, width: 44)
+                case .tableFelt:
+                    RoundedRectangle(cornerRadius: 10).fill(feltColor)
+                case .tableRail:
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(RailPalette.gradient(for: item.id))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(RailPalette.seamColor(for: item.id), lineWidth: 2)
+                                .padding(4)
+                        )
+                case .tableBackdrop:
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(BackdropPalette.gradient(for: item.id))
+                case .chipSet:
+                    HStack(spacing: -8) {
+                        Circle().fill(chipColor).frame(width: 30, height: 30)
+                        Circle().fill(chipColor.opacity(0.7)).frame(width: 30, height: 30)
+                    }
+                case .avatar:
+                    Image(systemName: AvatarPalette.symbol(for: item.id))
+                        .font(.system(size: 34))
                         .foregroundColor(.white)
+                case .avatarFrame:
+                    ZStack {
+                        Circle().fill(Color.black.opacity(0.35))
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                    }
+                    .frame(width: 48, height: 48)
+                    .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
                 }
-                .frame(width: 48, height: 48)
-                .overlay(Circle().strokeBorder(AvatarFramePalette.stroke(for: item.id), lineWidth: 3))
             }
         }
+        .frame(width: 70, height: 70)
     }
 
     @ViewBuilder
