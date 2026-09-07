@@ -1,0 +1,138 @@
+# Pocket Aces
+
+A SwiftUI Texas Hold'em poker game for iOS.
+
+- **No ads, no pop-ups, no in-app purchases.** There is no ad SDK, no
+  StoreKit purchase flow, and nothing in this project talks to a store.
+- **Play with friends** using Apple's built-in Game Center (GameKit)
+  matchmaker — invite friends or auto-match, no server to run or pay for.
+- **Play solo** any time against a handful of simple bot opponents.
+- **Virtual currency only.** Chips ("$") have no real-world value, can't be
+  bought with real money, and can't be cashed out. You start with $1,000,
+  and if you ever drop under $200 you can claim a $500 top-up from Settings
+  (or the home screen prompt) once every 8 hours — a safety net against
+  busting out, not a free reset, so it can't be farmed to unlock the store.
+- **Cosmetics store.** Spend chips on card backs, table felt, table rails,
+  chip designs, and avatars — 8 card backs, 7 felts, 7 rails, 6 chip sets,
+  8 avatars. Pricier items also require having reached a lifetime chip peak
+  (`BankrollManager.highestChips`) at $1,500/$3,000/$5,000 tiers — money
+  actually won at the table, since the starting balance and every top-up
+  are capped low and can't push that peak up on their own. Everything ever
+  purchased stays owned even after a top-up.
+- **Hand-type coaching.** As community cards come out, a badge at the top of
+  the table shows the best hand you currently have (e.g. "Two Pair"). Tap the
+  **?** button any time for a reference card of every hand ranking, best to
+  worst, with an example.
+- **iCloud sync.** Chip balance and owned/equipped cosmetics sync across your
+  devices via `NSUbiquitousKeyValueStore` (see setup step 3 below).
+- **Resume where you left off.** Leaving the practice table (back button,
+  backgrounding, or the app getting killed) saves the exact hand in progress
+  — cards dealt, deck order, pot, everything — and picks it back up next
+  time you tap Play vs Bots. "Cash Out" between hands is the deliberate way
+  to end a session and settle your stack back into your bankroll.
+
+## Project layout
+
+```
+TexasHoldem.xcodeproj/         Xcode project
+TexasHoldem/
+  TexasHoldemApp.swift         App entry point
+  Models/
+    Card.swift, Deck.swift     Card primitives + 52-card deck
+    HandEvaluator.swift        Best-5-of-7 hand ranking (straights, flushes, etc.)
+    Player.swift                Per-player table state
+    GameState.swift             Network-safe snapshot of the table
+    PokerEngine.swift           Betting rounds, blinds, side pots, showdown
+    BotAI.swift                  Simple heuristic opponent for solo play
+    EngineSnapshot.swift          Full save/restore state for a table
+    GamePersistence.swift         Reads/writes a saved local game
+  Multiplayer/
+    GameCenterManager.swift     Game Center auth + matchmaking
+    MultiplayerMatch.swift      Host-authoritative sync over GKMatch
+  Store/
+    Cosmetic.swift               Cosmetics catalog
+    CosmeticPalettes.swift       Shared card back / felt color lookups
+    BankrollManager.swift        iCloud+local chip balance & owned/equipped cosmetics
+  Views/                         SwiftUI screens (home, table, store, settings, matchmaking,
+                                  hand rankings guide)
+  Resources/                     Info.plist, Assets.xcassets
+PocketAces Watch App/            watchOS companion app -- see below
+```
+
+## How multiplayer works
+
+There's no backend server. When you tap **Play with Friends**, Apple's
+`GKMatchmakerViewController` is presented so you can invite people from your
+Game Center friends list (or auto-match with strangers). Once a match is
+formed, the participant with the lexicographically-smallest player ID is
+elected host: only that device runs the real `PokerEngine`. It broadcasts a
+`GameState` snapshot to everyone else after each action, and every other
+device sends its actions to the host over the same GameKit connection. This
+keeps the game fully peer-to-peer with no server costs.
+
+## Opening the project
+
+This was authored without access to Xcode/macOS, so it has **not** been
+compiled. Open `TexasHoldem.xcodeproj` in Xcode 15+ on macOS, and:
+
+1. Set your own development team under the target's **Signing & Capabilities**.
+2. Make sure the **Game Center** capability (already added via
+   `TexasHoldem.entitlements`) is enabled for your App ID in the Apple
+   Developer portal if you want to test multiplayer on real devices.
+3. To turn on iCloud sync: in **Signing & Capabilities**, click **+ Capability**
+   → **iCloud** → check **Key-value storage**. Xcode will add the right
+   ubiquity container identifier to `TexasHoldem.entitlements` for you --
+   don't type one in by hand. Without this step the app still works fine,
+   it just stays local-only (`BankrollManager.isCloudAvailable` will read false).
+4. Build and run on iOS 17+.
+
+If Xcode reports any small project-file issues on first open (this file was
+hand-written rather than generated by Xcode), the fix is usually just
+re-adding the flagged file to the target in the File Inspector — the Swift
+source itself doesn't depend on the project file being perfect.
+
+## watchOS companion app
+
+The **PocketAces Watch App** target is a real, working companion, not a
+placeholder: your two hole cards, the five community cards, a live
+hand-type badge, your chip stack, and Fold / Check-or-Call / Bet-or-Raise /
+All In buttons against bot opponents. It's already wired up as a companion
+to the `TexasHoldem` iOS target (matching `WKCompanionAppBundleIdentifier`,
+embedded via the iOS target's "Embed Watch Content" build phase) with its
+own app icon.
+
+It reuses the same domain layer as the phone -- `Card`, `Deck`,
+`HandEvaluator`, `Player`, `GameState`, `PokerEngine`, `EngineSnapshot`,
+`GamePersistence`, `BotAI`, `BotNames`, `Cosmetic`, `CosmeticPalettes`,
+`CustomCosmeticStore`, `BankrollManager`, `PATheme` -- via target
+membership on the existing files under `TexasHoldem/Models/` and
+`TexasHoldem/Store/` (visible in Xcode's File Inspector under **Target
+Membership**). None of those files depend on GameKit or anything else
+iOS-only, so they build for watchOS as-is.
+
+**Money is deliberately *not* shared between phone and watch.** The watch
+has its own small, local-only "exhibition" chip stack (starts at the same
+$1,000, has its own top-up floor, its own XP) that never syncs to iCloud
+and can't be inflated or drained by -- or bleed into -- the phone's real
+bankroll. **Cosmetics still do carry over**, one-way in effect: whichever
+card back, card face, felt, rail, avatar, etc. is *equipped* on the phone
+syncs to the watch through the same `NSUbiquitousKeyValueStore` used for
+everything else, so the watch always looks like the phone even though its
+money doesn't follow. This split lives in `BankrollManager.swift`'s
+`write(_:forKey:cloudSynced:)` and `pullFromCloudIfNewer()`, gated by
+`#if os(watchOS)` -- the iOS build of that same file is untouched and still
+syncs everything between a player's iOS devices as before.
+
+The four watch-specific view files (`TexasHoldemWatchApp.swift`,
+`WatchHomeView.swift`, `WatchGameView.swift`, `WatchHandRankingsView.swift`)
+live only under `PocketAces Watch App/`, since that target's group is a
+file-system-synchronized folder tied to its own directory -- edit them
+there directly.
+
+To run it: pick the **PocketAces Watch App** scheme in Xcode and launch on
+a Watch simulator, or run the **TexasHoldem** scheme on a phone paired with
+a physical Apple Watch to install both at once. If you enabled iCloud sync
+for the phone target (step 3 above) and want bankroll/cosmetics to follow
+the player to the watch too, give the watch target the same **iCloud >
+Key-value storage** capability with the *same* container identifier as the
+iOS target.
