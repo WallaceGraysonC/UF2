@@ -1,0 +1,141 @@
+import SwiftUI
+
+struct MainMenuView: View {
+    @State private var showNewGameConfirm = false
+
+    /// Whether a save file exists — governs Continue and the New Game warning.
+    var hasSave: Bool = false
+    /// "DAY 14 · LV. 3 · $1,240" — what Continue would return you to.
+    var savedSummary: String?
+
+    var onNewGame: () -> Void = {}
+    var onContinue: () -> Void = {}
+
+    var body: some View {
+        ZStack {
+            background
+
+            VStack(spacing: 0) {
+                Spacer(minLength: 40)
+                title
+                Spacer(minLength: 28)
+                menu
+                Spacer(minLength: 20)
+                footer
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 24)
+        }
+        .confirmationDialog(
+            "Starting a new studio overwrites your current save.",
+            isPresented: $showNewGameConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Start New Studio", role: .destructive) {
+                onNewGame()
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    // MARK: Background
+
+    private var background: some View {
+        ZStack {
+            Theme.stageBackground.ignoresSafeArea()
+
+            VStack {
+                Spacer()
+                deskStrip
+                    .frame(height: 64)
+                    .opacity(0.55)
+            }
+            .ignoresSafeArea()
+        }
+    }
+
+    private var deskStrip: some View {
+        GeometryReader { geo in
+            HStack(spacing: 6) {
+                ForEach(0..<10, id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(deskColor(for: i))
+                        .frame(width: (geo.size.width - 9 * 6) / 10)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func deskColor(for index: Int) -> Color {
+        let palette: [Color] = [Theme.plum, Theme.steel, Theme.amberDeep, Theme.teal]
+        return palette[index % palette.count]
+    }
+
+    // MARK: Title
+
+    private var title: some View {
+        VStack(spacing: 10) {
+            LogoBadgeView()
+                .frame(width: 92, height: 92)
+                .padding(.bottom, 4)
+
+            Text("LAUNCH DAY")
+                .font(Theme.display(30))
+                .foregroundStyle(Theme.cream)
+                .kerning(1)
+
+            Text("a two-person studio")
+                .font(Theme.mono(11))
+                .foregroundStyle(Theme.inkSoft.opacity(0.9))
+                .padding(.top, 2)
+        }
+    }
+
+    // MARK: Menu
+
+    private var menu: some View {
+        VStack(spacing: 12) {
+            Button {
+                if hasSave {
+                    showNewGameConfirm = true
+                } else {
+                    onNewGame()
+                }
+            } label: {
+                Text("NEW GAME")
+            }
+            .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
+
+            VStack(spacing: 4) {
+                Button {
+                    onContinue()
+                } label: {
+                    Text("CONTINUE")
+                }
+                .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
+                .disabled(!hasSave)
+                .opacity(hasSave ? 1 : 0.4)
+
+                if let savedSummary {
+                    Text(savedSummary)
+                        .font(Theme.mono(9, weight: .semibold))
+                        .foregroundStyle(Theme.amber)
+                }
+            }
+        }
+        .frame(maxWidth: 380)
+    }
+
+    // MARK: Footer
+
+    private var footer: some View {
+        Text("v0.1 — Launch Day")
+            .font(Theme.mono(10))
+            .foregroundStyle(Theme.inkSoft.opacity(0.6))
+    }
+}
+
+#Preview {
+    MainMenuView()
+}
