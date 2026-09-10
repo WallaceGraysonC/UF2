@@ -7,6 +7,7 @@ struct StudioFloorView: View {
     @State private var showingNewProject = false
     @State private var showingShipReport = false
     @State private var showingOffice = false
+    @State private var showingMilestone = false
 
     @State private var popups: [DayEvent] = []
     @State private var isResolving = false
@@ -37,8 +38,15 @@ struct StudioFloorView: View {
         .sheet(isPresented: $showingNewProject) {
             NewProjectSheet().environment(studio)
         }
-        .sheet(isPresented: $showingShipReport) {
+        .sheet(isPresented: $showingShipReport, onDismiss: {
+            if studio.lastMilestone != nil { showingMilestone = true }
+        }) {
             ShipReportSheet(result: studio.lastShipResult)
+        }
+        .sheet(isPresented: $showingMilestone, onDismiss: {
+            studio.lastMilestone = nil
+        }) {
+            MilestoneSheet(milestone: studio.lastMilestone)
         }
         .sheet(isPresented: $showingOffice) {
             OfficeSheet().environment(studio)

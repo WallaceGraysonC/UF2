@@ -8,9 +8,12 @@ struct NewProjectSheet: View {
     @State private var genre: Genre = .action
     @State private var topic: Topic = .fantasy
     @State private var size: ProjectSize = .small
+    @State private var platform: Platform = .computer
 
     private var affinity: ComboAffinity { GenreTopicCombo.affinity(genre: genre, topic: topic) }
     private var known: Bool { studio.hasDiscovered(genre: genre, topic: topic) }
+    private var totalCost: Int { studio.totalCost(size: size, platform: platform) }
+    private var affordable: Bool { studio.canAfford(size: size, platform: platform) }
 
     var body: some View {
         ScrollView {
@@ -37,6 +40,15 @@ struct NewProjectSheet: View {
                 comboReadout
 
                 VStack(alignment: .leading, spacing: 6) {
+                    Text("PLATFORM")
+                        .font(Theme.mono(9, weight: .bold))
+                        .foregroundStyle(Theme.inkSoft)
+                    ForEach(Platform.allCases) { option in
+                        platformRow(option)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
                     Text("SIZE")
                         .font(Theme.mono(9, weight: .bold))
                         .foregroundStyle(Theme.inkSoft)
@@ -46,14 +58,14 @@ struct NewProjectSheet: View {
                 }
 
                 Button {
-                    studio.startProject(name: name, genre: genre, topic: topic, size: size)
+                    studio.startProject(name: name, genre: genre, topic: topic, size: size, platform: platform)
                     dismiss()
                 } label: {
-                    Text(studio.canAfford(size) ? "START — $\(size.cost)" : "NOT ENOUGH CASH")
+                    Text(affordable ? "START — $\(totalCost)" : "NOT ENOUGH CASH")
                 }
                 .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
-                .disabled(!studio.canAfford(size))
-                .opacity(studio.canAfford(size) ? 1 : 0.4)
+                .disabled(!affordable)
+                .opacity(affordable ? 1 : 0.4)
 
                 Button { dismiss() } label: { Text("CANCEL") }
                     .buttonStyle(KairosoftButtonStyle(emphasis: .secondary))
@@ -118,6 +130,49 @@ struct NewProjectSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
+    private func platformRow(_ option: Platform) -> some View {
+        let isSelected = platform == option
+        return Button { platform = option } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(option.rawValue.uppercased())
+                        .font(Theme.display(12))
+                        .foregroundStyle(Theme.ink)
+                    Spacer()
+                    Text(option.fitLabel(for: genre))
+                        .font(Theme.mono(7.5, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(fitColor(option.fit(for: genre)))
+                        .clipShape(RoundedRectangle(cornerRadius: 2))
+                    Text("+$\(option.entryFee)")
+                        .font(Theme.mono(8, weight: .bold))
+                        .foregroundStyle(Theme.inkSoft)
+                }
+                Text(option.blurb)
+                    .font(.system(size: 10))
+                    .foregroundStyle(Theme.inkSoft)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(10)
+            .background(Theme.cream)
+            .overlay(RoundedRectangle(cornerRadius: 5)
+                .stroke(isSelected ? Theme.amberDeep : Theme.line, lineWidth: isSelected ? 2 : 1))
+            .clipShape(RoundedRectangle(cornerRadius: 5))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func fitColor(_ fit: Double) -> Color {
+        switch fit {
+        case 1.4...: return Theme.teal
+        case 1.15..<1.4: return Theme.green
+        case ..<0.85: return Theme.red
+        default: return Theme.inkSoft
+        }
+    }
+
     private func sizeRow(_ option: ProjectSize) -> some View {
         let isSelected = size == option
         return Button { size = option } label: {
@@ -128,7 +183,7 @@ struct NewProjectSheet: View {
                 Spacer()
                 Text("\(option.devDays)D · $\(option.cost)")
                     .font(Theme.mono(8, weight: .bold))
-                    .foregroundStyle(studio.canAfford(option) ? Theme.green : Theme.red)
+                    .foregroundStyle(studio.cash >= option.cost ? Theme.green : Theme.red)
             }
             .padding(10)
             .background(Theme.cream)

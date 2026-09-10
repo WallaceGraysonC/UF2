@@ -31,7 +31,7 @@ struct ProjectPanel: View {
                         .foregroundStyle(Theme.plum)
                 }
 
-                Text("\(project.genre.rawValue) · \(project.topic.rawValue) · \(project.size.rawValue)")
+                Text("\(project.genre.rawValue) · \(project.topic.rawValue) · \(project.size.rawValue) · \(project.platform.rawValue)")
                     .font(Theme.mono(7))
                     .foregroundStyle(Theme.inkSoft)
 

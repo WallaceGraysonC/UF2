@@ -6,6 +6,7 @@ struct GameProject: Codable {
     var genre: Genre
     var topic: Topic
     var size: ProjectSize
+    var platform: Platform
 
     var daysElapsed: Int = 0
     var designPoints: Double = 0
@@ -18,11 +19,12 @@ struct GameProject: Codable {
     var bugs: [Bug] = []
     var bugsFixed: Int = 0
 
-    init(name: String, genre: Genre, topic: Topic, size: ProjectSize) {
+    init(name: String, genre: Genre, topic: Topic, size: ProjectSize, platform: Platform) {
         self.name = name
         self.genre = genre
         self.topic = topic
         self.size = size
+        self.platform = platform
         self.focusBias = genre.designWeight
     }
 
@@ -47,6 +49,7 @@ struct ShippedGame: Identifiable, Codable {
     var genre: Genre
     var topic: Topic
     var size: ProjectSize
+    var platform: Platform
     var shipDay: Int
     var stars: Int
     var reviewLine: String

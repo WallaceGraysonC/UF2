@@ -23,6 +23,16 @@ final class Studio {
     /// Genre×topic pairings actually tried — ratings stay hidden until then.
     var discoveredCombos: Set<String> = []
 
+    /// Fan-count thresholds already celebrated, so each only fires once.
+    var milestonesReached: Set<Int> = []
+    /// Transient — the most recent milestone, for a one-time celebration.
+    var lastMilestone: FanMilestone?
+
+    struct FanMilestone: Equatable {
+        var fans: Int
+        var cashBonus: Int
+    }
+
     /// Real-time clock. Live only — no offline catch-up, same as the game
     /// this is modelled on: you watch it happen.
     var isRunning: Bool = false
@@ -46,7 +56,8 @@ final class Studio {
         SaveFile(day: day, cash: cash, fans: fans, studioLevel: studioLevel,
                 employees: employees, hiringBoard: hiringBoard,
                 currentProject: currentProject, needsShipDecision: needsShipDecision,
-                shippedGames: shippedGames, discoveredCombos: discoveredCombos)
+                shippedGames: shippedGames, discoveredCombos: discoveredCombos,
+                milestonesReached: milestonesReached)
     }
 
     init(snapshot: SaveFile) {
@@ -60,6 +71,7 @@ final class Studio {
         needsShipDecision = snapshot.needsShipDecision
         shippedGames = snapshot.shippedGames
         discoveredCombos = snapshot.discoveredCombos
+        milestonesReached = snapshot.milestonesReached
     }
 
     func save() { SaveStore.save(snapshot()) }
@@ -158,24 +170,32 @@ final class Studio {
     }
 
     /// The daily sales a shipped game is capable of at its peak, before decay —
-    /// scaled by its score and size.
+    /// scaled by its score, size, and how well the genre fit the platform.
     private func salesBudget(for game: ShippedGame) -> Int {
         let starRatio = Double(game.stars) / 5.0
-        return Int(Double(game.size.salesCeiling) * starRatio * starRatio * 0.14)
+        let marketReach = game.platform.salesMultiplier * game.platform.fit(for: game.genre)
+        return Int(Double(game.size.salesCeiling) * starRatio * starRatio * 0.14 * marketReach)
     }
 
     // MARK: Starting a project
 
     var canStartProject: Bool { currentProject == nil }
 
-    func canAfford(_ size: ProjectSize) -> Bool { cash >= size.cost }
+    /// The licence fee stacks on top of the project's own development cost.
+    func totalCost(size: ProjectSize, platform: Platform) -> Int {
+        size.cost + platform.entryFee
+    }
 
-    func startProject(name: String, genre: Genre, topic: Topic, size: ProjectSize) {
-        guard canStartProject, canAfford(size) else { return }
-        cash -= size.cost
+    func canAfford(size: ProjectSize, platform: Platform) -> Bool {
+        cash >= totalCost(size: size, platform: platform)
+    }
+
+    func startProject(name: String, genre: Genre, topic: Topic, size: ProjectSize, platform: Platform) {
+        guard canStartProject, canAfford(size: size, platform: platform) else { return }
+        cash -= totalCost(size: size, platform: platform)
         discoveredCombos.insert(GenreTopicCombo.key(genre: genre, topic: topic))
         currentProject = GameProject(name: name.isEmpty ? "Untitled" : name,
-                                     genre: genre, topic: topic, size: size)
+                                     genre: genre, topic: topic, size: size, platform: platform)
         needsShipDecision = false
         save()
     }
@@ -221,24 +241,55 @@ final class Studio {
         }
 
         var shipped = ShippedGame(name: project.name, genre: project.genre, topic: project.topic,
-                                  size: project.size, shipDay: day, stars: stars,
-                                  reviewLine: Self.reviewLine(stars: stars, name: project.name))
+                                  size: project.size, platform: project.platform, shipDay: day,
+                                  stars: stars, reviewLine: Self.reviewLine(stars: stars, name: project.name))
 
-        // Launch week burst, then the game joins the regular sales tail.
-        let burst = Int(Double(project.size.salesCeiling) * (Double(stars) / 5.0) * 0.22)
+        // Launch week burst, scaled by the platform's market fit, then the
+        // game joins the regular sales tail.
+        let marketReach = project.platform.salesMultiplier * project.platform.fit(for: project.genre)
+        let burst = Int(Double(project.size.salesCeiling) * (Double(stars) / 5.0) * 0.22 * marketReach)
         cash += burst
         shipped.lifetimeSales = burst
         fans += stars * 40
 
         shippedGames.append(shipped)
+        growTeam(from: project, stars: stars)
         currentProject = nil
         needsShipDecision = false
         project.bugs = []
 
         let result = ShipResult(game: shipped, pointsRatio: ratio, bugPenaltyApplied: project.unfixedBugCount > 0)
         lastShipResult = result
+        checkFanMilestones()
         save()
         return result
+    }
+
+    /// The whole team worked the one project, so the whole team learns from
+    /// it — a better game teaches more. Growth leans toward whichever point
+    /// type the project actually emphasised.
+    private func growTeam(from project: GameProject, stars: Int) {
+        let gain = max(1, stars - 1)
+        for index in employees.indices {
+            if project.focusBias >= 0.5 {
+                employees[index].design = min(99, employees[index].design + gain)
+            } else {
+                employees[index].tech = min(99, employees[index].tech + gain)
+            }
+        }
+    }
+
+    /// One-time celebratory bumps as the studio's fan count crosses round
+    /// numbers — a bit of texture between ships rather than a silent counter.
+    private static let fanMilestones = [250, 750, 1_500, 3_000, 6_000, 12_000]
+
+    private func checkFanMilestones() {
+        for milestone in Self.fanMilestones where fans >= milestone && !milestonesReached.contains(milestone) {
+            milestonesReached.insert(milestone)
+            let bonus = milestone / 2
+            cash += bonus
+            lastMilestone = FanMilestone(fans: milestone, cashBonus: bonus)
+        }
     }
 
     private static func reviewLine(stars: Int, name: String) -> String {

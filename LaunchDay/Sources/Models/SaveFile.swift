@@ -16,6 +16,7 @@ struct SaveFile: Codable {
     var needsShipDecision: Bool
     var shippedGames: [ShippedGame]
     var discoveredCombos: Set<String>
+    var milestonesReached: Set<Int>
 
     var savedAt: Date = Date()
 }

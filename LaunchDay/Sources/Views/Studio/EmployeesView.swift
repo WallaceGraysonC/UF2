@@ -100,7 +100,7 @@ struct EmployeesView: View {
                         Text(game.name)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Theme.ink)
-                        Text("\(game.genre.rawValue) · \(game.topic.rawValue)")
+                        Text("\(game.genre.rawValue) · \(game.topic.rawValue) · \(game.platform.rawValue)")
                             .font(Theme.mono(8))
                             .foregroundStyle(Theme.inkSoft)
                     }
