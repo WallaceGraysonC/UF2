@@ -25,6 +25,8 @@ struct ShipReportSheet: View {
                     .padding(.horizontal, 10)
 
                 VStack(spacing: 8) {
+                    reportRow("HIT OF TARGET", "\(Int(result.pointsRatio * 100))%",
+                             result.pointsRatio >= 1 ? Theme.green : Theme.amberDeep)
                     reportRow("LAUNCH SALES", "+$\(result.game.lifetimeSales)", Theme.green)
                     reportRow("FANS GAINED", "+\(result.game.stars * 40)", Theme.plum)
                     if result.bugPenaltyApplied {

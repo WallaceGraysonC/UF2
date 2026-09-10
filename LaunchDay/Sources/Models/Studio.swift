@@ -135,6 +135,9 @@ final class Studio {
 
             if project.isReadyToShip {
                 needsShipDecision = true
+                // Nothing productive happens until it's shipped — stop
+                // burning wages on a clock nobody's watching for a reason.
+                isRunning = false
                 lastEvents.append(DayEvent(headline: "DONE",
                                            detail: "\(project.name) is ready",
                                            tint: Theme.amberDeep, lane: nextLane()))
@@ -265,6 +268,8 @@ final class Studio {
         growTeam(from: project, stars: stars)
         currentProject = nil
         needsShipDecision = false
+        // Same reasoning — the clock shouldn't idle-run against an empty desk.
+        isRunning = false
         project.bugs = []
 
         let result = ShipResult(game: shipped, pointsRatio: ratio, bugPenaltyApplied: project.unfixedBugCount > 0)

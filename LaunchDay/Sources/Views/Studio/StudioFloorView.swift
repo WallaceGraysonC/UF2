@@ -112,6 +112,12 @@ struct StudioFloorView: View {
 
     // MARK: Clock
 
+    /// Nothing happens on a tick without a project actually in development —
+    /// gate the clock on that so a tap can't just burn wages for nothing.
+    private var canWork: Bool {
+        studio.currentProject != nil && !studio.needsShipDecision
+    }
+
     private var clockControls: some View {
         @Bindable var studio = studio
 
@@ -124,6 +130,8 @@ struct StudioFloorView: View {
                     Text(studio.isRunning ? "PAUSE" : "WORK")
                 }
                 .buttonStyle(KairosoftButtonStyle(emphasis: .primary))
+                .disabled(!canWork)
+                .opacity(canWork ? 1 : 0.4)
 
                 Button { runDay() } label: {
                     Text("STEP")
@@ -134,8 +142,8 @@ struct StudioFloorView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.ink, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .disabled(studio.isRunning)
-                .opacity(studio.isRunning ? 0.35 : 1)
+                .disabled(studio.isRunning || !canWork)
+                .opacity(studio.isRunning || !canWork ? 0.35 : 1)
             }
 
             HStack(spacing: 6) {
