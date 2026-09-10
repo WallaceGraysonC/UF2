@@ -24,4 +24,13 @@ enum Genre: String, CaseIterable, Identifiable, Codable {
         case .puzzle: return 0.6
         }
     }
+
+    /// Office level required before this genre is available to pick — a
+    /// starter set of four, two more once the studio's proven itself.
+    var unlockLevel: Int {
+        switch self {
+        case .action, .rpg, .adventure, .puzzle: return 1
+        case .strategy, .simulation: return 2
+        }
+    }
 }

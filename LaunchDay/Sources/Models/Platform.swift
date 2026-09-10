@@ -28,6 +28,15 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// Office level required before this platform can be targeted — the
+    /// console licence is the one gated behind actually being established.
+    var unlockLevel: Int {
+        switch self {
+        case .handheld, .computer: return 1
+        case .homeConsole: return 2
+        }
+    }
+
     var blurb: String {
         switch self {
         case .handheld: return "Small screen, always in someone's pocket. Cheap to enter."

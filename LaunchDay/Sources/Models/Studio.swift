@@ -121,8 +121,11 @@ final class Studio {
 
             project.daysElapsed += 1
 
-            // Bugs start turning up once the project is mostly built.
-            if project.isInPolishWindow && Double.random(in: 0...1) < 0.35 {
+            // Bugs start turning up once the project is mostly built. Leaning
+            // the focus dial hard toward Design (at the expense of Tech)
+            // makes them more likely — the real cost of that choice.
+            let bugChance = 0.18 + project.focusBias * 0.32
+            if project.isInPolishWindow && Double.random(in: 0...1) < bugChance {
                 let lane = employees.indices.randomElement() ?? 0
                 project.bugs.append(Bug(deskLane: lane, spawnedDay: day))
                 lastEvents.append(DayEvent(headline: "BUG",
@@ -177,6 +180,11 @@ final class Studio {
         return Int(Double(game.size.salesCeiling) * starRatio * starRatio * 0.14 * marketReach)
     }
 
+    // MARK: Unlocks
+
+    func isUnlocked(_ genre: Genre) -> Bool { studioLevel >= genre.unlockLevel }
+    func isUnlocked(_ platform: Platform) -> Bool { studioLevel >= platform.unlockLevel }
+
     // MARK: Starting a project
 
     var canStartProject: Bool { currentProject == nil }
@@ -191,7 +199,8 @@ final class Studio {
     }
 
     func startProject(name: String, genre: Genre, topic: Topic, size: ProjectSize, platform: Platform) {
-        guard canStartProject, canAfford(size: size, platform: platform) else { return }
+        guard canStartProject, canAfford(size: size, platform: platform),
+              isUnlocked(genre), isUnlocked(platform) else { return }
         cash -= totalCost(size: size, platform: platform)
         discoveredCombos.insert(GenreTopicCombo.key(genre: genre, topic: topic))
         currentProject = GameProject(name: name.isEmpty ? "Untitled" : name,

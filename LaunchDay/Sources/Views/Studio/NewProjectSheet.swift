@@ -34,7 +34,7 @@ struct NewProjectSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
 
-                grid(title: "GENRE", items: Genre.allCases, selection: $genre) { $0.rawValue }
+                genreGrid
                 grid(title: "TOPIC", items: Topic.allCases, selection: $topic) { $0.rawValue }
 
                 comboReadout
@@ -104,6 +104,45 @@ struct NewProjectSheet: View {
         }
     }
 
+    /// Bespoke rather than the shared grid — locked genres stay visible with
+    /// their level requirement instead of disappearing outright.
+    private var genreGrid: some View {
+        let columns = [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6),
+                      GridItem(.flexible(), spacing: 6)]
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("GENRE")
+                .font(Theme.mono(9, weight: .bold))
+                .foregroundStyle(Theme.inkSoft)
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(Genre.allCases) { item in
+                    let isSelected = genre == item
+                    let unlocked = studio.isUnlocked(item)
+                    Button { if unlocked { genre = item } } label: {
+                        VStack(spacing: 2) {
+                            Text(item.rawValue.uppercased())
+                                .font(Theme.mono(8.5, weight: .bold))
+                                .foregroundStyle(unlocked ? (isSelected ? .white : Theme.ink) : Theme.inkSoft)
+                            if !unlocked {
+                                Text("LV.\(item.unlockLevel)")
+                                    .font(Theme.mono(6.5, weight: .semibold))
+                                    .foregroundStyle(Theme.inkSoft)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(isSelected && unlocked ? Theme.amberDeep : Theme.cream)
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                            .stroke(isSelected && unlocked ? Theme.amberDeep : Theme.line, lineWidth: 1))
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .opacity(unlocked ? 1 : 0.55)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!unlocked)
+                }
+            }
+        }
+    }
+
     private var comboReadout: some View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
@@ -132,23 +171,30 @@ struct NewProjectSheet: View {
 
     private func platformRow(_ option: Platform) -> some View {
         let isSelected = platform == option
-        return Button { platform = option } label: {
+        let unlocked = studio.isUnlocked(option)
+        return Button { if unlocked { platform = option } } label: {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(option.rawValue.uppercased())
                         .font(Theme.display(12))
                         .foregroundStyle(Theme.ink)
                     Spacer()
-                    Text(option.fitLabel(for: genre))
-                        .font(Theme.mono(7.5, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(fitColor(option.fit(for: genre)))
-                        .clipShape(RoundedRectangle(cornerRadius: 2))
-                    Text("+$\(option.entryFee)")
-                        .font(Theme.mono(8, weight: .bold))
-                        .foregroundStyle(Theme.inkSoft)
+                    if unlocked {
+                        Text(option.fitLabel(for: genre))
+                            .font(Theme.mono(7.5, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(fitColor(option.fit(for: genre)))
+                            .clipShape(RoundedRectangle(cornerRadius: 2))
+                        Text("+$\(option.entryFee)")
+                            .font(Theme.mono(8, weight: .bold))
+                            .foregroundStyle(Theme.inkSoft)
+                    } else {
+                        Text("OFFICE LV.\(option.unlockLevel)")
+                            .font(Theme.mono(7.5, weight: .bold))
+                            .foregroundStyle(Theme.inkSoft)
+                    }
                 }
                 Text(option.blurb)
                     .font(.system(size: 10))
@@ -158,10 +204,13 @@ struct NewProjectSheet: View {
             .padding(10)
             .background(Theme.cream)
             .overlay(RoundedRectangle(cornerRadius: 5)
-                .stroke(isSelected ? Theme.amberDeep : Theme.line, lineWidth: isSelected ? 2 : 1))
+                .stroke(isSelected && unlocked ? Theme.amberDeep : Theme.line,
+                        lineWidth: isSelected && unlocked ? 2 : 1))
             .clipShape(RoundedRectangle(cornerRadius: 5))
+            .opacity(unlocked ? 1 : 0.55)
         }
         .buttonStyle(.plain)
+        .disabled(!unlocked)
     }
 
     private func fitColor(_ fit: Double) -> Color {
